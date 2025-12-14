@@ -10,27 +10,32 @@ deptrac:
     - name: PsrLogger
       collectors:
         - type: classLike
-          value: Psr\\Log\\.*
+          value: ^Psr\\Log\\.*
 
     - name: RamseyUuid
       collectors:
         - type: classLike
-          value: Ramsey\\Uuid\\.*
+          value: ^Ramsey\\Uuid\\.*
 
     - name: Domain
       collectors:
         - type: classLike
-          value: Fundrik\\Core\\.*\\Domain\\.*
+          value: ^Fundrik\\Core\\Components\\[^\\]+\\Domain\\.+
 
     - name: Application
       collectors:
         - type: classLike
-          value: Fundrik\\Core\\.*\\Application\\.*
+          value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\(?!Ports\\).+
+
+    - name: ApplicationPorts
+      collectors:
+        - type: classLike
+          value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\Ports\\.+
 
     - name: Support
       collectors:
         - type: classLike
-          value: Fundrik\\Core\\Support\\.*
+          value: ^Fundrik\\Core\\Support\\.+
 
   ruleset:
     Domain:
@@ -39,5 +44,8 @@ deptrac:
 
     Application:
       - PsrLogger
+      - ApplicationPorts
       - Domain
-      - Support
+
+    ApplicationPorts:
+      - Domain
