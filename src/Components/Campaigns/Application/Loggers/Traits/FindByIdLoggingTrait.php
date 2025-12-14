@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\Loggers\Traits;
 
-use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignAssemblerExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\Out\CampaignRepositoryExceptionInterface;
 
 /**
@@ -78,29 +77,6 @@ trait FindByIdLoggingTrait {
 				[
 					'operation' => self::OPERATION_FIND_BY_ID,
 					'id' => $id,
-				],
-			),
-		);
-	}
-
-	/**
-	 * Logs assembler failure during a find-by-ID operation (error).
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param int|string $id The campaign ID being processed.
-	 * @param CampaignAssemblerExceptionInterface $e The assembler exception that occurred.
-	 */
-	public function log_find_by_id_failed_assembler( int|string $id, CampaignAssemblerExceptionInterface $e ): void {
-
-		$this->logger->error(
-			'Finding campaign by ID failed (assembler error).',
-			$this->logger_context(
-				[
-					'operation' => self::OPERATION_FIND_BY_ID,
-					'id' => $id,
-					'exception' => $e,
-					'exception_class' => $e::class,
 				],
 			),
 		);

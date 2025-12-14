@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\Loggers;
 
-use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignAssemblerException;
 use Fundrik\Core\Components\Campaigns\Application\Loggers\CampaignQueryServiceLogger;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
@@ -53,29 +52,6 @@ final class CampaignQueryServiceLoggerTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function log_find_by_id_failed_assembler_writes_error_with_exception_and_id(): void {
-
-		$e = new CampaignAssemblerException();
-
-		$this->psr_logger
-			->shouldReceive( 'error' )
-			->once()
-			->with(
-				'Finding campaign by ID failed (assembler error).',
-				$this->log_context(
-					[
-						'operation' => 'find_campaign_by_id',
-						'id' => 7,
-						'exception' => $e,
-						'exception_class' => $e::class,
-					],
-				),
-			);
-
-		$this->logger->log_find_by_id_failed_assembler( id: 7, e: $e );
-	}
-
-	#[Test]
 	public function log_find_all_failed_repository_writes_error_with_exception(): void {
 
 		$e = new FakeCampaignRepositoryException();
@@ -95,28 +71,6 @@ final class CampaignQueryServiceLoggerTest extends MockeryTestCase {
 			);
 
 		$this->logger->log_find_all_failed_repository( $e );
-	}
-
-	#[Test]
-	public function log_find_all_failed_assembler_writes_error_with_exception(): void {
-
-		$e = new CampaignAssemblerException();
-
-		$this->psr_logger
-			->shouldReceive( 'error' )
-			->once()
-			->with(
-				'Finding campaigns failed (assembler error).',
-				$this->log_context(
-					[
-						'operation' => 'find_all_campaigns',
-						'exception' => $e,
-						'exception_class' => $e::class,
-					],
-				),
-			);
-
-		$this->logger->log_find_all_failed_assembler( $e );
 	}
 
 	private function log_context( array $expected ): \Mockery\Matcher\Closure {

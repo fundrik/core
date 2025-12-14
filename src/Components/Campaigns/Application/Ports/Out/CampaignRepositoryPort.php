@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\Ports\Out;
 
-use Fundrik\Core\Components\Campaigns\Application\CampaignDto;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -27,18 +26,20 @@ interface CampaignRepositoryPort {
 	 *
 	 * @param EntityId $id The ID of the campaign to retrieve.
 	 *
-	 * @return CampaignDto|null The campaign data if found, null otherwise.
+	 * @return Campaign|null The campaign if found, null otherwise.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the lookup fails.
 	 */
-	public function find_by_id( EntityId $id ): ?CampaignDto;
+	public function find_by_id( EntityId $id ): ?Campaign;
 
 	/**
-	 * Fetches all available campaign DTOs.
+	 * Fetches all campaigns.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return array<CampaignDto> The list of campaign data objects.
+	 * @return array<Campaign> The list of campaign entities.
+	 *
+	 * @phpstan-return list<Campaign>
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the lookup fails.
 	 */

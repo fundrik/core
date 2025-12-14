@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\Services;
 
-use Fundrik\Core\Components\Campaigns\Application\CampaignAssembler;
-use Fundrik\Core\Components\Campaigns\Application\CampaignDto;
-use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignAssemblerExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Loggers\AbstractCampaignServiceLogger;
 use Fundrik\Core\Components\Campaigns\Application\Loggers\CampaignQueryServiceLogger;
 use Fundrik\Core\Components\Campaigns\Application\Ports\Out\CampaignRepositoryExceptionInterface;
@@ -27,8 +24,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use Psr\Log\LoggerInterface;
 
 #[CoversClass( CampaignQueryService::class )]
-#[UsesClass( CampaignAssembler::class )]
-#[UsesClass( CampaignDto::class )]
 #[UsesClass( AbstractCampaignServiceLogger::class )]
 #[UsesClass( CampaignQueryServiceLogger::class )]
 #[UsesClass( Campaign::class )]
@@ -51,7 +46,6 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 		$this->psr_logger = Mockery::mock( LoggerInterface::class )->shouldIgnoreMissing();
 
 		$this->service = new CampaignQueryService(
-			new CampaignAssembler(),
 			$this->repository,
 			new CampaignQueryServiceLogger( $this->psr_logger ),
 		);
@@ -63,16 +57,17 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 	public function find_campaign_by_id_returns_campaign(): void {
 
 		$campaign_id = EntityId::create( 1 );
+		$campaign = $this->make_campaign( id: 1 );
 
 		$this->repository
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
-			->andReturn( $this->make_campaign_dto() );
+			->andReturn( $campaign );
 
 		$result = $this->service->find_campaign_by_id( $campaign_id );
 
-		$this->assertInstanceOf( Campaign::class, $result );
+		$this->assertSame( $campaign, $result );
 	}
 
 	#[Test]
@@ -122,54 +117,24 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 		$this->service->find_campaign_by_id( $campaign_id );
 	}
 
-	#[Test]
-	public function find_campaign_by_id_propagates_assembler_exception_with_invalid_dto(): void {
-
-		$campaign_id = EntityId::create( 1 );
-
-		$this->repository
-			->shouldReceive( 'find_by_id' )
-			->once()
-			->with( $this->identicalTo( $campaign_id ) )
-			->andReturn( $this->make_invalid_campaign_dto() );
-
-		$this->psr_logger
-			->shouldReceive( 'error' )
-			->once()
-			->with(
-				'Finding campaign by ID failed (assembler error).',
-				$this->array_has(
-					[
-						'operation' => 'find_campaign_by_id',
-						'id' => -1,
-						'exception' => Mockery::type( CampaignAssemblerExceptionInterface::class ),
-					],
-				),
-			);
-
-		$this->expectException( CampaignAssemblerExceptionInterface::class );
-
-		$this->service->find_campaign_by_id( $campaign_id );
-	}
-
 	// Find all campaigns.
 
 	#[Test]
-	public function find_all_campaigns_campaigns_returns_list_of_campaigns(): void {
+	public function find_all_campaigns_returns_list_of_campaigns(): void {
 
-		$dto1 = $this->make_campaign_dto();
-		$dto2 = $this->make_campaign_dto( id: 2 );
+		$campaign1 = $this->make_campaign( id: 1 );
+		$campaign2 = $this->make_campaign( id: 2 );
 
 		$this->repository
 			->shouldReceive( 'find_all' )
 			->once()
-			->andReturn( [ $dto1, $dto2 ] );
+			->andReturn( [ $campaign1, $campaign2 ] );
 
 		$result = $this->service->find_all_campaigns();
 
 		$this->assertCount( 2, $result );
-		$this->assertInstanceOf( Campaign::class, $result[0] );
-		$this->assertInstanceOf( Campaign::class, $result[1] );
+		$this->assertSame( $campaign1, $result[0] );
+		$this->assertSame( $campaign2, $result[1] );
 	}
 
 	#[Test]
@@ -210,32 +175,6 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 			);
 
 		$this->expectException( CampaignRepositoryExceptionInterface::class );
-
-		$this->service->find_all_campaigns();
-	}
-
-	#[Test]
-	public function find_all_campaigns_propagates_assembler_exception(): void {
-
-		$this->repository
-			->shouldReceive( 'find_all' )
-			->once()
-			->andReturn( [ $this->make_invalid_campaign_dto() ] );
-
-		$this->psr_logger
-			->shouldReceive( 'error' )
-			->once()
-			->with(
-				'Finding campaigns failed (assembler error).',
-				$this->array_has(
-					[
-						'operation' => 'find_all_campaigns',
-						'exception' => Mockery::type( CampaignAssemblerExceptionInterface::class ),
-					],
-				),
-			);
-
-		$this->expectException( CampaignAssemblerExceptionInterface::class );
 
 		$this->service->find_all_campaigns();
 	}

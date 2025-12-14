@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\Loggers\Traits;
 
-use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignAssemblerExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\Out\CampaignRepositoryExceptionInterface;
 
 /**
@@ -46,27 +45,6 @@ trait FindAllLoggingTrait {
 
 		$this->logger->error(
 			'Finding campaigns failed (repository error).',
-			$this->logger_context(
-				[
-					'operation' => self::OPERATION_FIND_ALL,
-					'exception' => $e,
-					'exception_class' => $e::class,
-				],
-			),
-		);
-	}
-
-	/**
-	 * Logs assembler failure during a find-all operation (error).
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param CampaignAssemblerExceptionInterface $e The assembler exception that occurred.
-	 */
-	public function log_find_all_failed_assembler( CampaignAssemblerExceptionInterface $e ): void {
-
-		$this->logger->error(
-			'Finding campaigns failed (assembler error).',
 			$this->logger_context(
 				[
 					'operation' => self::OPERATION_FIND_ALL,
