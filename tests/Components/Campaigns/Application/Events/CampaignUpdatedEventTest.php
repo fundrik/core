@@ -6,7 +6,6 @@ namespace Fundrik\Core\Tests\Components\Campaigns\Application\Events;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Support\TypeCaster;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -14,7 +13,6 @@ use PHPUnit\Framework\TestCase;
 
 #[CoversClass( CampaignUpdatedEvent::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( TypeCaster::class )]
 final class CampaignUpdatedEventTest extends TestCase {
 
 	#[Test]

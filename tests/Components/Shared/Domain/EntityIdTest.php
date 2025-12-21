@@ -6,14 +6,11 @@ namespace Fundrik\Core\Tests\Components\Shared\Domain;
 
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
-use Fundrik\Core\Support\TypeCaster;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
-use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( EntityId::class )]
-#[UsesClass( TypeCaster::class )]
 final class EntityIdTest extends FundrikTestCase {
 
 	#[Test]

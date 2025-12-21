@@ -13,7 +13,6 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Support\TypeCaster;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -30,7 +29,6 @@ use Psr\Log\LoggerInterface;
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( TypeCaster::class )]
 final class CampaignQueryServiceTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $repository;
