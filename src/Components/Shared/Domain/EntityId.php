@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Shared\Domain;
 
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
-use Fundrik\Core\Support\TypeCaster;
-use InvalidArgumentException;
 use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 
@@ -45,14 +43,11 @@ final readonly class EntityId {
 	 */
 	public static function create( int|string $value ): self {
 
-		try {
-			$int_value = TypeCaster::to_int( $value );
-			return self::from_int( $int_value );
-		} catch ( InvalidArgumentException ) {
-
-			$string_value = TypeCaster::to_string( $value );
-			return self::from_uuid( $string_value );
+		if ( is_int( $value ) ) {
+			return self::from_int( $value );
 		}
+
+		return self::from_uuid( $value );
 	}
 
 	/**
@@ -163,7 +158,7 @@ final readonly class EntityId {
 	private static function from_uuid( string $uuid ): self {
 
 		try {
-			return new self( TypeCaster::to_string( Uuid::fromString( $uuid ) ) );
+			return new self( Uuid::fromString( $uuid )->toString() );
 		} catch ( InvalidUuidStringException $e ) {
 
 			throw new InvalidEntityIdException(

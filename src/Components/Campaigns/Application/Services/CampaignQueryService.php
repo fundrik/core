@@ -55,14 +55,14 @@ final readonly class CampaignQueryService implements CampaignQueryServicePort {
 			throw $e;
 		}
 
+		// @infection-ignore-all
 		if ( $campaign === null ) {
 			// @infection-ignore-all
 			$this->logger->log_find_by_id_not_found( $id->get_value() );
-			return null;
+		} else {
+			// @infection-ignore-all
+			$this->logger->log_find_by_id_succeeded( $id->get_value() );
 		}
-
-		// @infection-ignore-all
-		$this->logger->log_find_by_id_succeeded( $id->get_value() );
 
 		return $campaign;
 	}

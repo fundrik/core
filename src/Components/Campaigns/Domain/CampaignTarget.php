@@ -45,6 +45,8 @@ final readonly class CampaignTarget {
 	 * @param int $amount The fundraising target amount.
 	 *
 	 * @return self The campaign target value object.
+	 *
+	 * @throws InvalidCampaignTargetException When the target amount violates the enablement rules.
 	 */
 	public static function create( bool $is_enabled, int $amount ): self {
 

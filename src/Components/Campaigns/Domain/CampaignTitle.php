@@ -29,19 +29,17 @@ final readonly class CampaignTitle {
 	/**
 	 * Creates a validated title value object.
 	 *
-	 * Trims the input and throws if it is empty or only whitespace.
-	 *
 	 * @since 0.1.0
 	 *
 	 * @param string $value The raw input title.
 	 *
 	 * @return self The campaign title value object.
+	 *
+	 * @throws InvalidCampaignTitleException When the title is empty or consists only of whitespace.
 	 */
 	public static function create( string $value ): self {
 
-		$value = trim( $value );
-
-		if ( $value === '' ) {
+		if ( trim( $value ) === '' ) {
 			throw new InvalidCampaignTitleException( 'Campaign title must not be empty or whitespace.' );
 		}
 

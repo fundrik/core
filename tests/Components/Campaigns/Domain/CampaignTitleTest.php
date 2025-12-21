@@ -22,14 +22,6 @@ final class CampaignTitleTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function trims_title_before_storing(): void {
-
-		$title = CampaignTitle::create( "\n\t  Help Kids \t\n" );
-
-		$this->assertSame( 'Help Kids', $title->get_value() );
-	}
-
-	#[Test]
 	public function throws_when_title_is_empty(): void {
 
 		$this->expectException( InvalidCampaignTitleException::class );
