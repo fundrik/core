@@ -1,11 +1,7 @@
 deptrac:
-  skip_violations:
-    Fundrik\Core\Support\TypeCaster:
-      # @todo Temporary skip until ID logic is moved to Domain normalizer
-      - Fundrik\Core\Components\Shared\Domain\EntityId
-      - Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException
   paths:
     - ./src
+
   layers:
     - name: PsrLogger
       collectors:
@@ -32,15 +28,9 @@ deptrac:
         - type: classLike
           value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\Ports\\.+
 
-    - name: Support
-      collectors:
-        - type: classLike
-          value: ^Fundrik\\Core\\Support\\.+
-
   ruleset:
     Domain:
       - RamseyUuid
-      - Support
 
     Application:
       - PsrLogger
