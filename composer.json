@@ -8,7 +8,8 @@
 		"donations",
 		"nonprofit",
 		"charity",
-		"payment"
+		"payment",
+		"fundrik"
 	],
 	"homepage": "https://fundrik.ru",
 	"type": "library",
@@ -32,10 +33,10 @@
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
 		"fundrik/coding-standard": "^0.1.0",
-		"wp-coding-standards/wpcs": "^3.1",
-		"phpcompatibility/php-compatibility": "dev-develop as 9.4.0",
+		"wp-coding-standards/wpcs": "^3.3",
+		"phpcompatibility/php-compatibility": "10.0.0-alpha2 as 9.4.0",
 		"phpcompatibility/phpcompatibility-wp": "^2.1",
-		"slevomat/coding-standard": "^8.19",
+		"slevomat/coding-standard": "^8.22",
 		"phpunit/phpunit": "^11.5",
 		"mockery/mockery": "^1.6",
 		"phpstan/phpstan": "^2.1",
@@ -43,7 +44,7 @@
 		"phpstan/phpstan-strict-rules": "^2.0",
 		"phpstan/phpstan-deprecation-rules": "^2.0",
 		"deptrac/deptrac": "^3.0",
-		"infection/infection": "^0.31.1"
+		"infection/infection": "^0.31.9"
 	},
 	"autoload": {
 		"psr-4": {
