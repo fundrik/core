@@ -2,25 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Campaigns\Application\Ports\Out;
+namespace Fundrik\Core\Components\Campaigns\Application\Ports;
 
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Defines the outbound port for accessing campaign persistence.
- *
- * This interface represents the storage contract required by the application layer.
- * It allows the service layer to remain decoupled from specific infrastructure details.
+ * Defines the port for persisting and retrieving campaigns.
  *
  * @since 0.1.0
  */
 interface CampaignRepositoryPort {
 
 	/**
-	 * Fetches the DTO of a campaign by its ID.
+	 * Retrieves a campaign by its ID.
 	 *
 	 * @since 0.1.0
 	 *
@@ -33,7 +28,7 @@ interface CampaignRepositoryPort {
 	public function find_by_id( EntityId $id ): ?Campaign;
 
 	/**
-	 * Fetches all campaigns.
+	 * Retrieves all campaigns.
 	 *
 	 * @since 0.1.0
 	 *
@@ -46,17 +41,17 @@ interface CampaignRepositoryPort {
 	public function find_all(): array;
 
 	/**
-	 * Returns whether the campaign exists in storage.
+	 * Returns whether a campaign exists in storage by its ID.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Campaign $campaign The campaign entity to check.
+	 * @param EntityId $id The ID of the campaign to check.
 	 *
 	 * @return bool True if the campaign exists.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the existence check fails.
 	 */
-	public function exists( Campaign $campaign ): bool;
+	public function exists_by_id( EntityId $id ): bool;
 
 	/**
 	 * Inserts a new campaign into storage.
@@ -68,30 +63,6 @@ interface CampaignRepositoryPort {
 	 * @throws CampaignRepositoryExceptionInterface When the insert fails.
 	 */
 	public function insert( Campaign $campaign ): void;
-
-	/**
-	 * Inserts a new campaign into storage without a predefined ID.
-	 *
-	 * This method should be used when the underlying persistence mechanism
-	 * generates the campaign ID automatically (for example, auto-increment column).
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param CampaignTitle $title The campaign title.
-	 * @param bool $is_active Whether the campaign is active.
-	 * @param bool $is_open Whether the campaign is open for donations.
-	 * @param CampaignTarget $target The campaign target.
-	 *
-	 * @return EntityId The newly assigned campaign ID.
-	 *
-	 * @throws CampaignRepositoryExceptionInterface When the insert fails.
-	 */
-	public function insert_without_id(
-		CampaignTitle $title,
-		bool $is_active,
-		bool $is_open,
-		CampaignTarget $target,
-	): EntityId;
 
 	/**
 	 * Updates an existing campaign in storage.
