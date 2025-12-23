@@ -9,7 +9,7 @@ use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTitleExce
 /**
  * Represents the title of a fundraising campaign.
  *
- * Validates that the title is non-empty and trimmed.
+ * Validates that the title is non-empty.
  *
  * @since 0.1.0
  */

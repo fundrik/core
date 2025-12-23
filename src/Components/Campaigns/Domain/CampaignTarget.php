@@ -10,10 +10,8 @@ use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTargetExc
  * Represents the fundraising target of a campaign.
  *
  * Enforces the following invariants:
- * - If targeting is enabled (`$is_enabled === true`), the target amount must be a positive integer.
- * - If targeting is disabled (`$is_enabled === false`), the target amount must be exactly zero.
- *
- * This ensures internal consistency between the intent to fundraise and the specified target amount.
+ * - If targeting is enabled, the target amount must be a positive integer.
+ * - If targeting is disabled, the target amount must be exactly zero.
  *
  * @since 0.1.0
  */
