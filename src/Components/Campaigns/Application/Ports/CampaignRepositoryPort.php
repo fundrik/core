@@ -8,7 +8,7 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Defines the port for persisting and retrieving campaigns.
+ * Defines the outbound port for persisting and retrieving campaigns.
  *
  * @since 0.1.0
  */
