@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Domain;
 
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignChangeException;
-// phpcs:disable SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTitleException;
-// phpcs:enable
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**

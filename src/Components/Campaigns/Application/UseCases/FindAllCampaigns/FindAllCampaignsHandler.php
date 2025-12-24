@@ -6,7 +6,6 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\FindAllCampaign
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryPort;
-// phpcs:ignore SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 
 /**

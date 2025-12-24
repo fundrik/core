@@ -9,7 +9,4 @@ namespace Fundrik\Core\Components\Shared\Application\Events;
  *
  * @since 0.1.0
  */
-interface ApplicationEventInterface {
-
-// phpcs:ignore SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.IncorrectEmptyLinesBeforeClosingBrace
-}
+interface ApplicationEventInterface {}

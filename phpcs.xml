@@ -55,11 +55,13 @@
 	<rule ref="SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.MultipleEmptyLinesAfterOpeningBrace">
 		<exclude-pattern>*Exception.php</exclude-pattern>
 		<exclude-pattern>*ExceptionInterface.php</exclude-pattern>
+		<exclude-pattern>*Interface.php</exclude-pattern>
 	</rule>
 
 	<rule ref="SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.IncorrectEmptyLinesBeforeClosingBrace">
 		<exclude-pattern>*Exception.php</exclude-pattern>
 		<exclude-pattern>*ExceptionInterface.php</exclude-pattern>
+		<exclude-pattern>*Interface.php</exclude-pattern>
 	</rule>
 
 	<rule ref="FundrikStandard.Classes.AbstractClassMustBeReadonly">

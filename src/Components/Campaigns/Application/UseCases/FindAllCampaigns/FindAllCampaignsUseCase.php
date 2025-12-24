@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\FindAllCampaigns;
 
-// phpcs:disable SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-// phpcs:enable
 
 /**
  * Provides methods for retrieving all campaigns.

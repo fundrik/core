@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign;
 
-// phpcs:ignore SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 
