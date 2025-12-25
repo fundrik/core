@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Campaigns\Application\Ports;
+namespace Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository;
 
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -60,9 +60,11 @@ interface CampaignRepositoryPort {
 	 *
 	 * @param Campaign $campaign The campaign to insert.
 	 *
+	 * @return Campaign The persisted campaign snapshot.
+	 *
 	 * @throws CampaignRepositoryExceptionInterface When the insert fails.
 	 */
-	public function insert( Campaign $campaign ): void;
+	public function insert( Campaign $campaign ): Campaign;
 
 	/**
 	 * Updates an existing campaign in storage.
@@ -71,9 +73,11 @@ interface CampaignRepositoryPort {
 	 *
 	 * @param Campaign $campaign The campaign to update.
 	 *
+	 * @return Campaign The persisted campaign snapshot.
+	 *
 	 * @throws CampaignRepositoryExceptionInterface When the update fails.
 	 */
-	public function update( Campaign $campaign ): void;
+	public function update( Campaign $campaign ): Campaign;
 
 	/**
 	 * Saves the given campaign by inserting or updating it.
@@ -82,11 +86,11 @@ interface CampaignRepositoryPort {
 	 *
 	 * @param Campaign $campaign The campaign to save.
 	 *
-	 * @return CampaignRepositorySaveResult Indicates whether the campaign was inserted or updated.
+	 * @return CampaignRepositorySaveOutcome Contains the result and the persisted campaign snapshot.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the save fails.
 	 */
-	public function save( Campaign $campaign ): CampaignRepositorySaveResult;
+	public function save( Campaign $campaign ): CampaignRepositorySaveOutcome;
 
 	/**
 	 * Removes a campaign from storage by its ID.

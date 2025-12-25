@@ -19,7 +19,7 @@ final readonly class CampaignUpdatedEvent implements ApplicationEventInterface {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $campaign_id The ID of the updated campaign.
+	 * @param EntityId $campaign_id The campaign ID.
 	 */
 	public function __construct(
 		public EntityId $campaign_id,

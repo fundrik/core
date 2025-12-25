@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign;
 
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 
 /**
@@ -23,5 +23,5 @@ interface CreateCampaignUseCase {
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the repository insert fails.
 	 */
-	public function handle( Campaign $campaign ): void;
+	public function handle( Campaign $campaign ): Campaign;
 }

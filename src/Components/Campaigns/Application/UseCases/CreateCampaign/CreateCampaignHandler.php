@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -41,21 +41,22 @@ final readonly class CreateCampaignHandler implements CreateCampaignUseCase {
 	 *
 	 * @param Campaign $campaign The campaign to create.
 	 *
+	 * @return Campaign The persisted campaign snapshot.
+	 *
 	 * @throws CampaignRepositoryExceptionInterface When the repository insert fails.
 	 */
-	public function handle( Campaign $campaign ): void {
-
-		$campaign_id = $campaign->get_id();
-		$campaign_entity_id = $campaign->get_entity_id();
+	public function handle( Campaign $campaign ): Campaign {
 
 		// @infection-ignore-all
-		$this->logger->log_create_started( $campaign_id );
+		$this->logger->log_create_started( $campaign->get_id() );
 
-		$this->insert_or_fail( $campaign );
-		$this->publish_created_event_or_log( $campaign_entity_id );
+		$inserted = $this->insert_or_fail( $campaign );
+		$this->publish_created_event_or_log( $inserted->get_entity_id() );
 
 		// @infection-ignore-all
-		$this->logger->log_create_succeeded( $campaign_id );
+		$this->logger->log_create_succeeded( $inserted->get_id() );
+
+		return $inserted;
 	}
 
 	/**
@@ -64,11 +65,13 @@ final readonly class CreateCampaignHandler implements CreateCampaignUseCase {
 	 * @since 0.1.0
 	 *
 	 * @param Campaign $campaign The campaign to insert.
+	 *
+	 * @return Campaign The persisted campaign snapshot.
 	 */
-	private function insert_or_fail( Campaign $campaign ): void {
+	private function insert_or_fail( Campaign $campaign ): Campaign {
 
 		try {
-			$this->repository->insert( $campaign );
+			return $this->repository->insert( $campaign );
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
 
 			$this->logger->log_create_failed_repository( $campaign->get_id(), $e );

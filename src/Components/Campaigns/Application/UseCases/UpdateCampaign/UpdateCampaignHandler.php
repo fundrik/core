@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -43,19 +43,18 @@ final readonly class UpdateCampaignHandler implements UpdateCampaignUseCase {
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the repository update fails.
 	 */
-	public function handle( Campaign $campaign ): void {
-
-		$campaign_id = $campaign->get_id();
-		$campaign_entity_id = $campaign->get_entity_id();
+	public function handle( Campaign $campaign ): Campaign {
 
 		// @infection-ignore-all
-		$this->logger->log_update_started( $campaign_id );
+		$this->logger->log_update_started( $campaign->get_id() );
 
-		$this->update_or_fail( $campaign );
-		$this->publish_updated_event_or_log( $campaign_entity_id );
+		$updated = $this->update_or_fail( $campaign );
+		$this->publish_updated_event_or_log( $updated->get_entity_id() );
 
 		// @infection-ignore-all
-		$this->logger->log_update_succeeded( $campaign_id );
+		$this->logger->log_update_succeeded( $updated->get_id() );
+
+		return $updated;
 	}
 
 	/**
@@ -64,11 +63,13 @@ final readonly class UpdateCampaignHandler implements UpdateCampaignUseCase {
 	 * @since 0.1.0
 	 *
 	 * @param Campaign $campaign The campaign to update.
+	 *
+	 * @return Campaign The persisted campaign snapshot.
 	 */
-	private function update_or_fail( Campaign $campaign ): void {
+	private function update_or_fail( Campaign $campaign ): Campaign {
 
 		try {
-			$this->repository->update( $campaign );
+			return $this->repository->update( $campaign );
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
 
 			$this->logger->log_update_failed_repository( $campaign->get_id(), $e );

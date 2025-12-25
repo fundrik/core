@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\AbstractCampaignApplicationLogger;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Throwable;
 
 /**
@@ -61,7 +61,6 @@ final readonly class CreateCampaignLogger extends AbstractCampaignApplicationLog
 		);
 	}
 
-	// phpcs:disable SlevomatCodingStandard.Files.LineLength.LineTooLong
 	/**
 	 * Logs a warning when publishing CampaignCreatedEvent fails (warning).
 	 *
@@ -83,7 +82,6 @@ final readonly class CreateCampaignLogger extends AbstractCampaignApplicationLog
 			),
 		);
 	}
-	// phpcs:enable
 
 	/**
 	 * Logs the successful completion of a create operation (info).

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Throwable;

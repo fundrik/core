@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\FindAllCampaigns;
 
 use Fundrik\Core\Components\Campaigns\Application\AbstractCampaignApplicationLogger;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 
 /**
  * Logs the FindAllCampaigns use case execution.

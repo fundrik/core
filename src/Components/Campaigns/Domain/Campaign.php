@@ -22,6 +22,7 @@ final readonly class Campaign {
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $id The campaign ID.
+	 * @param CampaignVersion $version The campaign version.
 	 * @param CampaignTitle $title The campaign title.
 	 * @param bool $is_active Whether the campaign is active.
 	 * @param bool $is_open Whether the campaign is open for donations.
@@ -29,6 +30,7 @@ final readonly class Campaign {
 	 */
 	public function __construct(
 		private EntityId $id,
+		private CampaignVersion $version,
 		private CampaignTitle $title,
 		private bool $is_active,
 		private bool $is_open,
@@ -57,6 +59,18 @@ final readonly class Campaign {
 	public function get_entity_id(): EntityId {
 
 		return $this->id;
+	}
+
+	/**
+	 * Returns the campaign value object.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return int The campaign version value object.
+	 */
+	public function get_version(): CampaignVersion {
+
+		return $this->version;
 	}
 
 	/**
@@ -149,7 +163,7 @@ final readonly class Campaign {
 			);
 		}
 
-		return new self( $this->id, $new_title, $this->is_active, $this->is_open, $this->target );
+		return new self( $this->id, $this->version, $new_title, $this->is_active, $this->is_open, $this->target );
 	}
 
 	/**
@@ -167,7 +181,7 @@ final readonly class Campaign {
 			throw new CampaignChangeException( 'Cannot activate campaign: already active.' );
 		}
 
-		return new self( $this->id, $this->title, true, $this->is_open, $this->target );
+		return new self( $this->id, $this->version, $this->title, true, $this->is_open, $this->target );
 	}
 
 	/**
@@ -185,7 +199,7 @@ final readonly class Campaign {
 			throw new CampaignChangeException( 'Cannot deactivate campaign: already inactive.' );
 		}
 
-		return new self( $this->id, $this->title, false, $this->is_open, $this->target );
+		return new self( $this->id, $this->version, $this->title, false, $this->is_open, $this->target );
 	}
 
 	/**
@@ -203,7 +217,7 @@ final readonly class Campaign {
 			throw new CampaignChangeException( 'Cannot open campaign: already open.' );
 		}
 
-		return new self( $this->id, $this->title, $this->is_active, true, $this->target );
+		return new self( $this->id, $this->version, $this->title, $this->is_active, true, $this->target );
 	}
 
 	/**
@@ -221,7 +235,7 @@ final readonly class Campaign {
 			throw new CampaignChangeException( 'Cannot close campaign: already closed.' );
 		}
 
-		return new self( $this->id, $this->title, $this->is_active, false, $this->target );
+		return new self( $this->id, $this->version, $this->title, $this->is_active, false, $this->target );
 	}
 
 	/**
@@ -247,7 +261,7 @@ final readonly class Campaign {
 			);
 		}
 
-		return new self( $this->id, $this->title, $this->is_active, $this->is_open, $new );
+		return new self( $this->id, $this->version, $this->title, $this->is_active, $this->is_open, $new );
 	}
 
 	/**
@@ -267,7 +281,7 @@ final readonly class Campaign {
 
 		$new = CampaignTarget::create( false, 0 );
 
-		return new self( $this->id, $this->title, $this->is_active, $this->is_open, $new );
+		return new self( $this->id, $this->version, $this->title, $this->is_active, $this->is_open, $new );
 	}
 
 	/**

@@ -9,7 +9,7 @@ use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 
 /**
- * Represents a strongly typed identifier for a domain entity.
+ * Represents a identifier for a domain entity.
  *
  * Accepts either a positive integer or a valid UUID.
  *
@@ -31,8 +31,6 @@ final readonly class EntityId {
 	/**
 	 * Creates an EntityId from a raw ID.
 	 *
-	 * Throws if the value cannot be validated.
-	 *
 	 * @since 0.1.0
 	 *
 	 * @param int|string $value The ID to validate.
@@ -51,7 +49,7 @@ final readonly class EntityId {
 	}
 
 	/**
-	 * Returns the underlying value of this EntityId without conversion.
+	 * Returns the value of this EntityId.
 	 *
 	 * Can be either a positive integer or a UUID string, depending on how the ID was created.
 	 *
@@ -65,9 +63,7 @@ final readonly class EntityId {
 	}
 
 	/**
-	 * Returns the underlying value as an integer.
-	 *
-	 * Throws if the EntityId does not hold an integer.
+	 * Returns the value as an integer.
 	 *
 	 * @since 0.1.0
 	 *
@@ -85,9 +81,7 @@ final readonly class EntityId {
 	}
 
 	/**
-	 * Returns the underlying value as a UUID string.
-	 *
-	 * Throws if the EntityId does not hold a UUID.
+	 * Returns the value as a UUID string.
 	 *
 	 * @since 0.1.0
 	 *
@@ -121,8 +115,6 @@ final readonly class EntityId {
 	/**
 	 * Creates an EntityId from a positive integer.
 	 *
-	 * Throws if the integer is non-positive.
-	 *
 	 * @since 0.1.0
 	 *
 	 * @param int $value The positive integer ID.
@@ -144,8 +136,6 @@ final readonly class EntityId {
 
 	/**
 	 * Creates an EntityId from a UUID.
-	 *
-	 * Throws if the UUID is not valid.
 	 *
 	 * @since 0.1.0
 	 *

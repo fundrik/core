@@ -27,8 +27,6 @@ abstract readonly class AbstractCampaignApplicationLogger {
 	/**
 	 * Builds the structured logger context for this service.
 	 *
-	 * Combines base service context with platform-specific context and extra entries.
-	 *
 	 * @since 0.1.0
 	 *
 	 * @param array<string, mixed> $extra Additional context entries to merge.

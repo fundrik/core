@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Campaigns\Application\Ports;
+namespace Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository;
 
 use Throwable;
 

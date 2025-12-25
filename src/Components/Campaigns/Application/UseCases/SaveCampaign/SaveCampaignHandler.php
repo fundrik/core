@@ -6,9 +6,10 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositorySaveResult;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveOutcome;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveResult;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -45,21 +46,22 @@ final readonly class SaveCampaignHandler implements SaveCampaignUseCase {
 	 *
 	 * @param Campaign $campaign The campaign to save.
 	 *
+	 * @return CampaignRepositorySaveOutcome The repository save outcome.
+	 *
 	 * @throws CampaignRepositoryExceptionInterface When the repository save fails.
 	 */
-	public function handle( Campaign $campaign ): void {
-
-		$campaign_id = $campaign->get_id();
-		$campaign_entity_id = $campaign->get_entity_id();
+	public function handle( Campaign $campaign ): CampaignRepositorySaveOutcome {
 
 		// @infection-ignore-all
-		$this->logger->log_save_started( $campaign_id );
+		$this->logger->log_save_started( $campaign->get_id() );
 
-		$result = $this->save_or_fail( $campaign );
-		$this->publish_saved_event_or_log( $campaign_entity_id, $result );
+		$outcome = $this->save_or_fail( $campaign );
+		$this->publish_saved_event_or_log( $outcome->campaign->get_entity_id(), $outcome->result );
 
 		// @infection-ignore-all
-		$this->logger->log_save_succeeded( $campaign_id, $result );
+		$this->logger->log_save_succeeded( $outcome->campaign->get_id(), $outcome->result );
+
+		return $outcome;
 	}
 
 	/**
@@ -69,9 +71,9 @@ final readonly class SaveCampaignHandler implements SaveCampaignUseCase {
 	 *
 	 * @param Campaign $campaign The campaign to save.
 	 *
-	 * @return CampaignRepositorySaveResult The repository outcome (Inserted or Updated).
+	 * @return CampaignRepositorySaveOutcome The repository save outcome.
 	 */
-	private function save_or_fail( Campaign $campaign ): CampaignRepositorySaveResult {
+	private function save_or_fail( Campaign $campaign ): CampaignRepositorySaveOutcome {
 
 		try {
 			return $this->repository->save( $campaign );

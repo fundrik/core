@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign;
 
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveOutcome;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 
 /**
@@ -23,5 +24,5 @@ interface SaveCampaignUseCase {
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the repository save fails.
 	 */
-	public function handle( Campaign $campaign ): void;
+	public function handle( Campaign $campaign ): CampaignRepositorySaveOutcome;
 }
