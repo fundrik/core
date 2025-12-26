@@ -19,7 +19,7 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The ID of the campaign to retrieve.
+	 * @param EntityId $id The campaign ID to retrieve.
 	 *
 	 * @return Campaign|null The campaign if found, null otherwise.
 	 *
@@ -45,7 +45,7 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The ID of the campaign to check.
+	 * @param EntityId $id The campaign ID to check.
 	 *
 	 * @return bool True if the campaign exists.
 	 *
@@ -97,7 +97,7 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The ID of the campaign to delete.
+	 * @param EntityId $id The campaign ID to delete.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the delete fails.
 	 */
