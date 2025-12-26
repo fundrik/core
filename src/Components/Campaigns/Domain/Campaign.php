@@ -66,7 +66,7 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int The campaign version value object.
+	 * @return CampaignVersion The campaign version value object.
 	 */
 	public function get_version(): CampaignVersion {
 

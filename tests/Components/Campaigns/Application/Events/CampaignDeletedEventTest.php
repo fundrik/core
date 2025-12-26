@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\Events;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
+use Fundrik\Core\Components\Shared\Application\Events\ApplicationEventInterface;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -21,7 +22,7 @@ final class CampaignDeletedEventTest extends TestCase {
 		$id = EntityId::create( 42 );
 		$event = new CampaignDeletedEvent( $id );
 
-		$this->assertSame( $id, $event->campaign_id );
+		$this->assertInstanceOf( ApplicationEventInterface::class, $event );
 		$this->assertTrue( $event->campaign_id->equals( $id ) );
 	}
 
@@ -32,7 +33,7 @@ final class CampaignDeletedEventTest extends TestCase {
 		$id = EntityId::create( $uuid );
 		$event = new CampaignDeletedEvent( $id );
 
-		$this->assertSame( $id, $event->campaign_id );
+		$this->assertInstanceOf( ApplicationEventInterface::class, $event );
 		$this->assertTrue( $event->campaign_id->equals( $id ) );
 	}
 }

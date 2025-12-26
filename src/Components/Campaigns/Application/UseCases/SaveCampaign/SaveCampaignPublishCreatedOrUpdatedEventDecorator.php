@@ -6,6 +6,7 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveOutcome;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveResult;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;

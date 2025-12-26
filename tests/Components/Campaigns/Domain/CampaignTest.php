@@ -7,6 +7,7 @@ namespace Fundrik\Core\Tests\Components\Campaigns\Domain;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
+use Fundrik\Core\Components\Campaigns\Domain\CampaignVersion;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignChangeException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Tests\FundrikTestCase;
@@ -17,6 +18,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[CoversClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
+#[UsesClass( CampaignVersion::class )]
 #[UsesClass( EntityId::class )]
 final class CampaignTest extends FundrikTestCase {
 
@@ -27,6 +29,7 @@ final class CampaignTest extends FundrikTestCase {
 		$entity_id = EntityId::create( 1 );
 
 		$this->assertSame( 1, $campaign->get_id() );
+		$this->assertSame( 1, $campaign->get_version()->get_value() );
 		$this->assertSame( 'Test Campaign', $campaign->get_title() );
 		$this->assertTrue( $entity_id->equals( $campaign->get_entity_id() ) );
 		$this->assertTrue( $campaign->is_active() );
@@ -51,8 +54,8 @@ final class CampaignTest extends FundrikTestCase {
 		$campaign = $this->make_campaign( has_target: false, target_amount: 0 );
 
 		$this->assertFalse( $campaign->has_target() );
-		$this->assertEquals( 0, $campaign->get_target_amount() );
-		$this->assertEquals( 1, $campaign->get_id() );
+		$this->assertSame( 0, $campaign->get_target_amount() );
+		$this->assertSame( 1, $campaign->get_id() );
 	}
 
 	#[Test]
@@ -72,7 +75,7 @@ final class CampaignTest extends FundrikTestCase {
 		$campaign = $this->make_campaign( title: 'Same' );
 
 		$this->expectException( CampaignChangeException::class );
-		$this->expectExceptionMessageMatches( '/^Campaign title must be different from the current one./' );
+		$this->expectExceptionMessage( 'Campaign title must be different from the current one. Given: "Same".' );
 
 		$campaign->rename( 'Same' );
 	}
@@ -181,6 +184,7 @@ final class CampaignTest extends FundrikTestCase {
 		$campaign = $this->make_campaign( has_target: true, target_amount: 100 );
 
 		$this->expectException( CampaignChangeException::class );
+		$this->expectExceptionMessage( 'Target amount must be different from the current one. Given: 100.' );
 
 		$campaign->enable_target( 100 );
 	}
@@ -191,6 +195,7 @@ final class CampaignTest extends FundrikTestCase {
 		$campaign = $this->make_campaign( has_target: false, target_amount: 0 );
 
 		$this->expectException( CampaignChangeException::class );
+		$this->expectExceptionMessage( 'Cannot disable target: already disabled.' );
 
 		$campaign->disable_target();
 	}

@@ -21,7 +21,7 @@ interface UpdateCampaignUseCase {
 	 * @since 0.1.0
 	 *
 	 * @param Campaign $campaign The campaign to update.
-	 * 
+	 *
 	 * @return Campaign The persisted campaign snapshot.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When updating the campaign fails.

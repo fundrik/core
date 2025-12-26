@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusPort;
