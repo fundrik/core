@@ -19,11 +19,11 @@ interface FindAllCampaignsUseCase {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return array<Campaign> The list of campaign entities.
+	 * @return array<Campaign> The list of campaigns.
 	 *
 	 * @phpstan-return list<Campaign>
 	 *
-	 * @throws CampaignRepositoryExceptionInterface Thrown when the repository lookup fails.
+	 * @throws CampaignRepositoryExceptionInterface When retrieving campaigns fails.
 	 */
 	public function handle(): array;
 }

@@ -20,12 +20,10 @@ final readonly class FindAllCampaignsHandler implements FindAllCampaignsUseCase 
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param CampaignRepositoryPort $repository Retrieves campaign entities from storage.
-	 * @param FindAllCampaignsLogger $logger Logs the lookup operation and outcomes.
+	 * @param CampaignRepositoryPort $repository Retrieves campaigns from storage.
 	 */
 	public function __construct(
 		private CampaignRepositoryPort $repository,
-		private FindAllCampaignsLogger $logger,
 	) {}
 
 	/**
@@ -33,28 +31,14 @@ final readonly class FindAllCampaignsHandler implements FindAllCampaignsUseCase 
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return array<Campaign> The list of campaign entities.
+	 * @return array<Campaign> The list of campaigns.
 	 *
 	 * @phpstan-return list<Campaign>
 	 *
-	 * @throws CampaignRepositoryExceptionInterface Thrown when the repository lookup fails.
+	 * @throws CampaignRepositoryExceptionInterface When retrieving campaigns fails.
 	 */
 	public function handle(): array {
 
-		// @infection-ignore-all
-		$this->logger->log_find_all_started();
-
-		try {
-			$campaigns = $this->repository->find_all();
-		} catch ( CampaignRepositoryExceptionInterface $e ) {
-
-			$this->logger->log_find_all_failed_repository( $e );
-			throw $e;
-		}
-
-		// @infection-ignore-all
-		$this->logger->log_find_all_succeeded( count( $campaigns ) );
-
-		return $campaigns;
+		return $this->repository->find_all();
 	}
 }

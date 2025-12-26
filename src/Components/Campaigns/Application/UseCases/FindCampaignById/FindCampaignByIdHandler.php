@@ -21,12 +21,10 @@ final readonly class FindCampaignByIdHandler implements FindCampaignByIdUseCase 
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param CampaignRepositoryPort $repository Retrieves campaign entities from storage.
-	 * @param FindCampaignByIdLogger $logger Logs the lookup operation and outcomes.
+	 * @param CampaignRepositoryPort $repository Retrieves campaigns from storage.
 	 */
 	public function __construct(
 		private CampaignRepositoryPort $repository,
-		private FindCampaignByIdLogger $logger,
 	) {}
 
 	/**
@@ -34,32 +32,14 @@ final readonly class FindCampaignByIdHandler implements FindCampaignByIdUseCase 
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The ID of the campaign to retrieve.
+	 * @param EntityId $campaign_id The campaign ID to retrieve.
 	 *
 	 * @return Campaign|null The campaign if found, null otherwise.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When the repository lookup fails.
+	 * @throws CampaignRepositoryExceptionInterface When retrieving the campaign fails.
 	 */
-	public function handle( EntityId $id ): ?Campaign {
+	public function handle( EntityId $campaign_id ): ?Campaign {
 
-		// @infection-ignore-all
-		$this->logger->log_find_by_id_started( $id->get_value() );
-
-		try {
-			$campaign = $this->repository->find_by_id( $id );
-		} catch ( CampaignRepositoryExceptionInterface $e ) {
-
-			$this->logger->log_find_by_id_failed_repository( $id->get_value(), $e );
-			throw $e;
-		}
-
-		// @infection-ignore-all
-		if ( $campaign === null ) {
-			$this->logger->log_find_by_id_not_found( $id->get_value() );
-		} else {
-			$this->logger->log_find_by_id_succeeded( $id->get_value() );
-		}
-
-		return $campaign;
+		return $this->repository->find_by_id( $campaign_id );
 	}
 }

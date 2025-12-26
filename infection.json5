@@ -2,16 +2,5 @@
 	"$schema": "vendor/infection/infection/resources/schema.json",
 	"source": {
 		"directories": ["src"]
-	},
-	"mutators": {
-		"@default": true,
-		"MatchArmRemoval": {
-			"ignore": [
-				"Fundrik\\Core\\Components\\Campaigns\\Application\\Services\\CampaignCommandService::publish_saved_event_or_log"
-			]
-		},
-		"global-ignoreSourceCodeByRegex": [
-			"\\$this->logger->debug\\(.*"
-		]
 	}
 }

@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign;
 
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBusPort;
-use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Throwable;
 
 /**
  * Handles updating an existing campaign.
@@ -24,14 +20,10 @@ final readonly class UpdateCampaignHandler implements UpdateCampaignUseCase {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param CampaignRepositoryPort $repository Persists campaign entities in storage.
-	 * @param UpdateCampaignLogger $logger Logs the update operation and outcomes.
-	 * @param EventBusPort $event_bus Publishes application events to subscribed listeners.
+	 * @param CampaignRepositoryPort $repository Updates campaigns in storage.
 	 */
 	public function __construct(
 		private CampaignRepositoryPort $repository,
-		private UpdateCampaignLogger $logger,
-		private EventBusPort $event_bus,
 	) {}
 
 	/**
@@ -41,55 +33,12 @@ final readonly class UpdateCampaignHandler implements UpdateCampaignUseCase {
 	 *
 	 * @param Campaign $campaign The campaign to update.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When the repository update fails.
+	 * @return Campaign The persisted campaign snapshot.
+	 *
+	 * @throws CampaignRepositoryExceptionInterface When updating the campaign fails.
 	 */
 	public function handle( Campaign $campaign ): Campaign {
 
-		// @infection-ignore-all
-		$this->logger->log_update_started( $campaign->get_id() );
-
-		$updated = $this->update_or_fail( $campaign );
-		$this->publish_updated_event_or_log( $updated->get_entity_id() );
-
-		// @infection-ignore-all
-		$this->logger->log_update_succeeded( $updated->get_id() );
-
-		return $updated;
-	}
-
-	/**
-	 * Executes repository update and rethrows repository errors.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param Campaign $campaign The campaign to update.
-	 *
-	 * @return Campaign The persisted campaign snapshot.
-	 */
-	private function update_or_fail( Campaign $campaign ): Campaign {
-
-		try {
-			return $this->repository->update( $campaign );
-		} catch ( CampaignRepositoryExceptionInterface $e ) {
-
-			$this->logger->log_update_failed_repository( $campaign->get_id(), $e );
-			throw $e;
-		}
-	}
-
-	/**
-	 * Publishes updated event and logs publication errors without throwing.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param EntityId $entity_id The campaign entity ID to include in the event.
-	 */
-	private function publish_updated_event_or_log( EntityId $entity_id ): void {
-
-		try {
-			$this->event_bus->publish( new CampaignUpdatedEvent( $entity_id ) );
-		} catch ( Throwable $e ) {
-			$this->logger->log_publish_updated_event_failed( $entity_id->get_value(), $e );
-		}
+		return $this->repository->update( $campaign );
 	}
 }

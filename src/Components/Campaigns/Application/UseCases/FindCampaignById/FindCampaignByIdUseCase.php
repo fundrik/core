@@ -20,11 +20,11 @@ interface FindCampaignByIdUseCase {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The ID of the campaign to retrieve.
+	 * @param EntityId $campaign_id The campaign ID to retrieve.
 	 *
 	 * @return Campaign|null The campaign if found, null otherwise.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface Thrown when the repository lookup fails.
+	 * @throws CampaignRepositoryExceptionInterface When retrieving the campaign fails.
 	 */
-	public function handle( EntityId $id ): ?Campaign;
+	public function handle( EntityId $campaign_id ): ?Campaign;
 }
