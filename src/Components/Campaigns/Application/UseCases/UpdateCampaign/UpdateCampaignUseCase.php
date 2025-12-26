@@ -6,7 +6,7 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
 
 /**
  * Provides methods for updating an existing campaign.
@@ -25,7 +25,7 @@ interface UpdateCampaignUseCase {
 	 * @return Campaign The persisted campaign snapshot.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When updating the campaign fails.
-	 * @throws EventBusExceptionInterface When publishing the campaign updated event fails
+	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign updated event fails
 	 *                                    (if the implementation publishes events).
 	 */
 	public function handle( Campaign $campaign ): Campaign;

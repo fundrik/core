@@ -12,11 +12,11 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignVersion;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusPort;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
-use Fundrik\Core\Tests\Fixtures\FakeEventBusException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -34,7 +34,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 final class CreateCampaignPublishCreatedEventDecoratorTest extends MockeryTestCase {
 
 	private CreateCampaignUseCase&MockInterface $inner;
-	private EventBusPort&MockInterface $event_bus;
+	private ApplicationEventBusPort&MockInterface $event_bus;
 
 	private CreateCampaignPublishCreatedEventDecorator $decorator;
 
@@ -43,7 +43,7 @@ final class CreateCampaignPublishCreatedEventDecoratorTest extends MockeryTestCa
 		parent::setUp();
 
 		$this->inner = Mockery::mock( CreateCampaignUseCase::class );
-		$this->event_bus = Mockery::mock( EventBusPort::class );
+		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
 		$this->decorator = new CreateCampaignPublishCreatedEventDecorator( $this->inner, $this->event_bus );
 	}
@@ -100,7 +100,7 @@ final class CreateCampaignPublishCreatedEventDecoratorTest extends MockeryTestCa
 	public function handle_throws_event_bus_exception(): void {
 
 		$campaign = $this->make_campaign();
-		$e = new FakeEventBusException();
+		$e = new FakeApplicationEventBusException();
 
 		$this->inner
 			->shouldReceive( 'handle' )
@@ -112,7 +112,7 @@ final class CreateCampaignPublishCreatedEventDecoratorTest extends MockeryTestCa
 			->once()
 			->andThrow( $e );
 
-		$this->expectException( EventBusExceptionInterface::class );
+		$this->expectException( ApplicationEventBusExceptionInterface::class );
 
 		$this->decorator->handle( $campaign );
 	}

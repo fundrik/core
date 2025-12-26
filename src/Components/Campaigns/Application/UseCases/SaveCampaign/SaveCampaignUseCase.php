@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveOutcome;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
 
 /**
  * Provides methods for saving a campaign.
@@ -26,7 +26,7 @@ interface SaveCampaignUseCase {
 	 * @return CampaignRepositorySaveOutcome The repository save outcome.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When saving the campaign fails.
-	 * @throws EventBusExceptionInterface When publishing the campaign created/updated event fails
+	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign created/updated event fails
 	 *                                    (if the implementation publishes events).
 	 */
 	public function handle( Campaign $campaign ): CampaignRepositorySaveOutcome;

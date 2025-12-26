@@ -6,8 +6,8 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusPort;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
@@ -23,11 +23,11 @@ final readonly class DeleteCampaignPublishDeletedEventDecorator implements Delet
 	 * @since 0.1.0
 	 *
 	 * @param DeleteCampaignUseCase $inner Delegates the delete operation to the next use case in the chain.
-	 * @param EventBusPort $event_bus Publishes the application event.
+	 * @param ApplicationEventBusPort $event_bus Publishes the application event.
 	 */
 	public function __construct(
 		private DeleteCampaignUseCase $inner,
-		private EventBusPort $event_bus,
+		private ApplicationEventBusPort $event_bus,
 	) {}
 
 	/**
@@ -38,7 +38,7 @@ final readonly class DeleteCampaignPublishDeletedEventDecorator implements Delet
 	 * @param EntityId $campaign_id The campaign ID to delete.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When deleting the campaign fails.
-	 * @throws EventBusExceptionInterface When publishing the campaign deleted event fails.
+	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign deleted event fails.
 	 */
 	public function handle( EntityId $campaign_id ): void {
 

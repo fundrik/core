@@ -10,8 +10,8 @@ use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\Campa
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveOutcome;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveResult;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusPort;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
 /**
  * Publishes CampaignCreatedEvent/CampaignUpdatedEvent after saving the campaign.
@@ -26,11 +26,11 @@ final readonly class SaveCampaignPublishCreatedOrUpdatedEventDecorator implement
 	 * @since 0.1.0
 	 *
 	 * @param SaveCampaignUseCase $inner Delegates the save operation to the next use case in the chain.
-	 * @param EventBusPort $event_bus Publishes the application event.
+	 * @param ApplicationEventBusPort $event_bus Publishes the application event.
 	 */
 	public function __construct(
 		private SaveCampaignUseCase $inner,
-		private EventBusPort $event_bus,
+		private ApplicationEventBusPort $event_bus,
 	) {}
 
 	/**
@@ -43,7 +43,7 @@ final readonly class SaveCampaignPublishCreatedOrUpdatedEventDecorator implement
 	 * @return CampaignRepositorySaveOutcome The repository save outcome.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When saving the campaign fails.
-	 * @throws EventBusExceptionInterface When publishing the campaign created/updated event fails.
+	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign created/updated event fails.
 	 */
 	public function handle( Campaign $campaign ): CampaignRepositorySaveOutcome {
 

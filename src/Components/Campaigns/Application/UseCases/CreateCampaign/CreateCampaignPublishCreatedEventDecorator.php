@@ -7,8 +7,8 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusPort;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
 /**
  * Publishes CampaignCreatedEvent after creating the campaign.
@@ -23,11 +23,11 @@ final readonly class CreateCampaignPublishCreatedEventDecorator implements Creat
 	 * @since 0.1.0
 	 *
 	 * @param CreateCampaignUseCase $inner Delegates the create operation to the next use case in the chain.
-	 * @param EventBusPort $event_bus Publishes the application event.
+	 * @param ApplicationEventBusPort $event_bus Publishes the application event.
 	 */
 	public function __construct(
 		private CreateCampaignUseCase $inner,
-		private EventBusPort $event_bus,
+		private ApplicationEventBusPort $event_bus,
 	) {}
 
 	/**
@@ -40,7 +40,7 @@ final readonly class CreateCampaignPublishCreatedEventDecorator implements Creat
 	 * @return Campaign The persisted campaign snapshot.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When creating the campaign fails.
-	 * @throws EventBusExceptionInterface When publishing the campaign created event fails.
+	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign created event fails.
 	 */
 	public function handle( Campaign $campaign ): Campaign {
 

@@ -7,8 +7,8 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusPort;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
 /**
  * Publishes CampaignUpdatedEvent after updating the campaign.
@@ -23,11 +23,11 @@ final readonly class UpdateCampaignPublishUpdatedEventDecorator implements Updat
 	 * @since 0.1.0
 	 *
 	 * @param UpdateCampaignUseCase $inner Delegates the update operation to the next use case in the chain.
-	 * @param EventBusPort $event_bus Publishes the application event.
+	 * @param ApplicationEventBusPort $event_bus Publishes the application event.
 	 */
 	public function __construct(
 		private UpdateCampaignUseCase $inner,
-		private EventBusPort $event_bus,
+		private ApplicationEventBusPort $event_bus,
 	) {}
 
 	/**
@@ -40,7 +40,7 @@ final readonly class UpdateCampaignPublishUpdatedEventDecorator implements Updat
 	 * @return Campaign The persisted campaign snapshot.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When updating the campaign fails.
-	 * @throws EventBusExceptionInterface When publishing the campaign updated event fails.
+	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign updated event fails.
 	 */
 	public function handle( Campaign $campaign ): Campaign {
 

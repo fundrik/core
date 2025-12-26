@@ -15,11 +15,11 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignVersion;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusExceptionInterface;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\EventBusPort;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
-use Fundrik\Core\Tests\Fixtures\FakeEventBusException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -39,7 +39,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 final class SaveCampaignPublishCreatedOrUpdatedEventDecoratorTest extends MockeryTestCase {
 
 	private SaveCampaignUseCase&MockInterface $inner;
-	private EventBusPort&MockInterface $event_bus;
+	private ApplicationEventBusPort&MockInterface $event_bus;
 
 	private SaveCampaignPublishCreatedOrUpdatedEventDecorator $decorator;
 
@@ -48,7 +48,7 @@ final class SaveCampaignPublishCreatedOrUpdatedEventDecoratorTest extends Mocker
 		parent::setUp();
 
 		$this->inner = Mockery::mock( SaveCampaignUseCase::class );
-		$this->event_bus = Mockery::mock( EventBusPort::class );
+		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
 		$this->decorator = new SaveCampaignPublishCreatedOrUpdatedEventDecorator( $this->inner, $this->event_bus );
 	}
@@ -150,7 +150,7 @@ final class SaveCampaignPublishCreatedOrUpdatedEventDecoratorTest extends Mocker
 			result: CampaignRepositorySaveResult::Updated,
 		);
 
-		$e = new FakeEventBusException();
+		$e = new FakeApplicationEventBusException();
 
 		$this->inner
 			->shouldReceive( 'handle' )
@@ -162,7 +162,7 @@ final class SaveCampaignPublishCreatedOrUpdatedEventDecoratorTest extends Mocker
 			->once()
 			->andThrow( $e );
 
-		$this->expectException( EventBusExceptionInterface::class );
+		$this->expectException( ApplicationEventBusExceptionInterface::class );
 
 		$this->decorator->handle( $campaign );
 	}

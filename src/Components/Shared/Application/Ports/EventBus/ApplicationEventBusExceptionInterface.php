@@ -11,4 +11,4 @@ use Throwable;
  *
  * @since 0.1.0
  */
-interface EventBusExceptionInterface extends Throwable {}
+interface ApplicationEventBusExceptionInterface extends Throwable {}

@@ -11,16 +11,16 @@ use Fundrik\Core\Components\Shared\Application\Events\ApplicationEventInterface;
  *
  * @since 0.1.0
  */
-interface EventBusPort {
+interface ApplicationEventBusPort {
 
 	/**
 	 * Publishes the given event to all subscribers.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param ApplicationEventInterface $event The event object to publish.
+	 * @param ApplicationEventInterface $event The event to publish.
 	 *
-	 * @throws EventBusExceptionInterface When publishing the event fails.
+	 * @throws ApplicationEventBusExceptionInterface When publishing the event fails.
 	 */
 	public function publish( ApplicationEventInterface $event ): void;
 }
