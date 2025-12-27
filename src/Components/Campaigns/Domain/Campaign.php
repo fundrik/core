@@ -8,6 +8,7 @@ use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignChangeException;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTitleException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 
 /**
  * Represents a fundraising campaign.
@@ -22,7 +23,7 @@ final readonly class Campaign {
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $id The campaign ID.
-	 * @param CampaignVersion $version The campaign version.
+	 * @param EntityVersion $version The campaign version.
 	 * @param CampaignTitle $title The campaign title.
 	 * @param bool $is_active Whether the campaign is active.
 	 * @param bool $is_open Whether the campaign is open for donations.
@@ -30,7 +31,7 @@ final readonly class Campaign {
 	 */
 	public function __construct(
 		private EntityId $id,
-		private CampaignVersion $version,
+		private EntityVersion $version,
 		private CampaignTitle $title,
 		private bool $is_active,
 		private bool $is_open,
@@ -62,13 +63,13 @@ final readonly class Campaign {
 	}
 
 	/**
-	 * Returns the campaign value object.
+	 * Returns the campaign version value object.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return CampaignVersion The campaign version value object.
+	 * @return EntityVersion The campaign version value object.
 	 */
-	public function get_version(): CampaignVersion {
+	public function get_version(): EntityVersion {
 
 		return $this->version;
 	}

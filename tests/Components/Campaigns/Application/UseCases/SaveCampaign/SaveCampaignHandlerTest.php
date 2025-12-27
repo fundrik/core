@@ -12,8 +12,8 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCamp
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignVersion;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -27,7 +27,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
-#[UsesClass( CampaignVersion::class )]
+#[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 final class SaveCampaignHandlerTest extends MockeryTestCase {
 

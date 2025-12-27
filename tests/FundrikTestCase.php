@@ -7,8 +7,8 @@ namespace Fundrik\Core\Tests;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignVersion;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 abstract class FundrikTestCase extends PHPUnitTestCase {
@@ -28,7 +28,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 
 		return new Campaign(
 			id: EntityId::create( $id ),
-			version: CampaignVersion::initial(),
+			version: EntityVersion::initial(),
 			title: CampaignTitle::create( $title ),
 			is_active: $is_active,
 			is_open: $is_open,

@@ -8,9 +8,9 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignVersion;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignFactoryException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -20,7 +20,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
-#[UsesClass( CampaignVersion::class )]
+#[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 final class CampaignFactoryTest extends FundrikTestCase {
 
@@ -85,7 +85,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 	public function create_builds_campaign_from_value_objects(): void {
 
 		$id = EntityId::create( 77 );
-		$version = CampaignVersion::create( 5 );
+		$version = EntityVersion::create( 5 );
 		$title = CampaignTitle::create( 'Help the whales' );
 
 		$campaign = $this->factory->create(

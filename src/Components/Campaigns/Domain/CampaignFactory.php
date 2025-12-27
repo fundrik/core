@@ -7,9 +7,10 @@ namespace Fundrik\Core\Components\Campaigns\Domain;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignFactoryException;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTitleException;
-use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignVersionException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionException;
 
 /**
  * Creates Campaign entities from primitives and value objects.
@@ -25,7 +26,7 @@ final readonly class CampaignFactory {
 	 * @since 0.1.0
 	 *
 	 * @param int|string|EntityId $id The campaign ID.
-	 * @param int|CampaignVersion $version The campaign version.
+	 * @param int|EntityVersion $version The campaign version.
 	 * @param string|CampaignTitle $title The campaign title.
 	 * @param bool $is_active Whether the campaign is active.
 	 * @param bool $is_open Whether the campaign is open.
@@ -38,7 +39,7 @@ final readonly class CampaignFactory {
 	 */
 	public function create(
 		int|string|EntityId $id,
-		int|CampaignVersion $version,
+		int|EntityVersion $version,
 		string|CampaignTitle $title,
 		bool $is_active,
 		bool $is_open,
@@ -49,7 +50,7 @@ final readonly class CampaignFactory {
 		try {
 
 			$id = $id instanceof EntityId ? $id : EntityId::create( $id );
-			$version = is_int( $version ) ? CampaignVersion::create( $version ) : $version;
+			$version = is_int( $version ) ? EntityVersion::create( $version ) : $version;
 			$title = is_string( $title ) ? CampaignTitle::create( $title ) : $title;
 
 			$target = CampaignTarget::create( $has_target, $target_amount );
@@ -65,7 +66,7 @@ final readonly class CampaignFactory {
 
 		} catch (
 			InvalidEntityIdException
-			| InvalidCampaignVersionException
+			| InvalidEntityVersionException
 			| InvalidCampaignTitleException
 			| InvalidCampaignTargetException $e
 		) {
@@ -105,7 +106,7 @@ final readonly class CampaignFactory {
 
 			return $this->create(
 				$id,
-				CampaignVersion::initial(),
+				EntityVersion::initial(),
 				$title,
 				$is_active,
 				$is_open,
