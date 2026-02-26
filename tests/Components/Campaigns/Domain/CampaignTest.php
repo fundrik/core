@@ -10,6 +10,7 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignChangeException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -20,6 +21,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
+#[UsesClass( Money::class )]
 final class CampaignTest extends FundrikTestCase {
 
 	#[Test]
@@ -36,6 +38,8 @@ final class CampaignTest extends FundrikTestCase {
 		$this->assertTrue( $campaign->is_open() );
 		$this->assertTrue( $campaign->has_target() );
 		$this->assertSame( 100, $campaign->get_target_amount() );
+		$this->assertSame( 100, $campaign->get_target_money()->get_amount_minor() );
+		$this->assertSame( 'RUB', $campaign->get_target_money()->get_currency() );
 	}
 
 	#[Test]

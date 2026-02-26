@@ -11,6 +11,9 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionException;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyAmountException;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyCurrencyException;
+use Fundrik\Core\Components\Shared\Domain\Money;
 
 /**
  * Creates Campaign entities from primitives and value objects.
@@ -32,6 +35,7 @@ final readonly class CampaignFactory {
 	 * @param bool $is_open Whether the campaign is open.
 	 * @param bool $has_target Whether targeting is enabled.
 	 * @param int $target_amount The target amount in minor units (0 if disabled).
+	 * @param string $target_currency The ISO 4217 target currency code.
 	 *
 	 * @return Campaign The built campaign entity.
 	 *
@@ -45,6 +49,7 @@ final readonly class CampaignFactory {
 		bool $is_open,
 		bool $has_target,
 		int $target_amount,
+		string $target_currency,
 	): Campaign {
 
 		try {
@@ -53,7 +58,7 @@ final readonly class CampaignFactory {
 			$version = is_int( $version ) ? EntityVersion::create( $version ) : $version;
 			$title = is_string( $title ) ? CampaignTitle::create( $title ) : $title;
 
-			$target = CampaignTarget::create( $has_target, $target_amount );
+			$target = CampaignTarget::create( $has_target, Money::create( $target_amount, $target_currency ) );
 
 			return new Campaign(
 				id: $id,
@@ -68,7 +73,9 @@ final readonly class CampaignFactory {
 			InvalidEntityIdException
 			| InvalidEntityVersionException
 			| InvalidCampaignTitleException
-			| InvalidCampaignTargetException $e
+			| InvalidCampaignTargetException
+			| InvalidMoneyAmountException
+			| InvalidMoneyCurrencyException $e
 		) {
 
 			throw new CampaignFactoryException(
@@ -90,6 +97,7 @@ final readonly class CampaignFactory {
 	 * @param bool $is_open Whether the campaign is open.
 	 * @param bool $has_target Whether targeting is enabled.
 	 * @param int $target_amount The target amount in minor units (0 if disabled).
+	 * @param string $target_currency The ISO 4217 target currency code.
 	 *
 	 * @return Campaign The built campaign entity.
 	 *
@@ -102,16 +110,18 @@ final readonly class CampaignFactory {
 		bool $is_open,
 		bool $has_target,
 		int $target_amount,
+		string $target_currency,
 	): Campaign {
 
-			return $this->create(
-				$id,
-				EntityVersion::initial(),
-				$title,
-				$is_active,
-				$is_open,
-				$has_target,
-				$target_amount,
-			);
+		return $this->create(
+			$id,
+			EntityVersion::initial(),
+			$title,
+			$is_active,
+			$is_open,
+			$has_target,
+			$target_amount,
+			$target_currency,
+		);
 	}
 }

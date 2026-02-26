@@ -11,6 +11,7 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -22,6 +23,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
+#[UsesClass( Money::class )]
 final class CampaignRepositorySaveOutcomeTest extends FundrikTestCase {
 
 	#[Test]

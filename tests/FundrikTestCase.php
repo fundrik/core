@@ -9,6 +9,7 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Money;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 abstract class FundrikTestCase extends PHPUnitTestCase {
@@ -32,7 +33,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 			title: CampaignTitle::create( $title ),
 			is_active: $is_active,
 			is_open: $is_open,
-			target: CampaignTarget::create( $has_target, $target_amount ),
+			target: CampaignTarget::create( $has_target, Money::create( $target_amount, 'RUB' ) ),
 		);
 	}
 }

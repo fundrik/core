@@ -11,6 +11,7 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignFactoryException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -22,6 +23,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
+#[UsesClass( Money::class )]
 final class CampaignFactoryTest extends FundrikTestCase {
 
 	private CampaignFactory $factory;
@@ -44,6 +46,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			is_open: false,
 			has_target: true,
 			target_amount: 123,
+			target_currency: 'RUB',
 		);
 
 		$this->assertInstanceOf( Campaign::class, $campaign );
@@ -55,6 +58,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 		$this->assertSame( false, $campaign->is_open() );
 		$this->assertSame( true, $campaign->has_target() );
 		$this->assertSame( 123, $campaign->get_target_amount() );
+		$this->assertSame( 'RUB', $campaign->get_target_money()->get_currency() );
 	}
 
 	#[Test]
@@ -68,6 +72,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			is_open: true,
 			has_target: false,
 			target_amount: 0,
+			target_currency: 'RUB',
 		);
 
 		$this->assertInstanceOf( Campaign::class, $campaign );
@@ -79,6 +84,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 		$this->assertSame( true, $campaign->is_open() );
 		$this->assertSame( false, $campaign->has_target() );
 		$this->assertSame( 0, $campaign->get_target_amount() );
+		$this->assertSame( 'RUB', $campaign->get_target_money()->get_currency() );
 	}
 
 	#[Test]
@@ -96,6 +102,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			is_open: true,
 			has_target: true,
 			target_amount: 500,
+			target_currency: 'EUR',
 		);
 
 		$this->assertInstanceOf( Campaign::class, $campaign );
@@ -107,6 +114,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 		$this->assertSame( true, $campaign->is_open() );
 		$this->assertSame( true, $campaign->has_target() );
 		$this->assertSame( 500, $campaign->get_target_amount() );
+		$this->assertSame( 'EUR', $campaign->get_target_money()->get_currency() );
 	}
 
 	#[Test]
@@ -122,6 +130,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			is_open: true,
 			has_target: false,
 			target_amount: 0,
+			target_currency: 'RUB',
 		);
 	}
 
@@ -138,6 +147,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			is_open: true,
 			has_target: false,
 			target_amount: 0,
+			target_currency: 'RUB',
 		);
 	}
 
@@ -154,6 +164,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			is_open: true,
 			has_target: false,
 			target_amount: 0,
+			target_currency: 'RUB',
 		);
 	}
 
@@ -170,6 +181,24 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			is_open: true,
 			has_target: false,
 			target_amount: 100,
+			target_currency: 'RUB',
+		);
+	}
+
+	#[Test]
+	public function create_throws_factory_exception_when_target_currency_is_invalid(): void {
+
+		$this->expectException( CampaignFactoryException::class );
+
+		$this->factory->create(
+			id: 1,
+			version: 1,
+			title: 'Bad currency',
+			is_active: true,
+			is_open: true,
+			has_target: true,
+			target_amount: 100,
+			target_currency: 'RU',
 		);
 	}
 
@@ -183,6 +212,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			is_open: true,
 			has_target: false,
 			target_amount: 0,
+			target_currency: 'RUB',
 		);
 
 		$this->assertSame( 1, $campaign->get_version()->get_value() );

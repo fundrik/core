@@ -15,6 +15,7 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
@@ -31,6 +32,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
+#[UsesClass( Money::class )]
 final class CreateCampaignPublishCreatedEventDecoratorTest extends MockeryTestCase {
 
 	private CreateCampaignUseCase&MockInterface $inner;

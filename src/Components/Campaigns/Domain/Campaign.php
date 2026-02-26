@@ -9,6 +9,7 @@ use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTargetExc
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTitleException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Money;
 
 /**
  * Represents a fundraising campaign.
@@ -137,6 +138,18 @@ final readonly class Campaign {
 	}
 
 	/**
+	 * Returns the campaign target money value object.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return Money The campaign target money.
+	 */
+	public function get_target_money(): Money {
+
+		return $this->target->get_money();
+	}
+
+	/**
 	 * Changes the campaign title.
 	 *
 	 * @since 0.1.0
@@ -253,7 +266,7 @@ final readonly class Campaign {
 	 */
 	public function enable_target( int $amount ): self {
 
-		$new = CampaignTarget::create( true, $amount );
+		$new = CampaignTarget::create( true, Money::create( $amount, $this->target->get_money()->get_currency() ) );
 
 		if ( $new->equals( $this->target ) ) {
 
@@ -280,7 +293,7 @@ final readonly class Campaign {
 			throw new CampaignChangeException( 'Cannot disable target: already disabled.' );
 		}
 
-		$new = CampaignTarget::create( false, 0 );
+		$new = CampaignTarget::create( false, Money::create( 0, $this->target->get_money()->get_currency() ), );
 
 		return new self( $this->id, $this->version, $this->title, $this->is_active, $this->is_open, $new );
 	}
