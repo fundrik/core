@@ -3,10 +3,6 @@ deptrac:
     - ./src
 
   layers:
-    - name: PsrLogger
-      collectors:
-        - type: classLike
-          value: ^Psr\\Log\\.*
 
     - name: RamseyUuid
       collectors:
@@ -33,7 +29,6 @@ deptrac:
       - RamseyUuid
 
     Application:
-      - PsrLogger
       - ApplicationPorts
       - Domain
 
