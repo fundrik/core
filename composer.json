@@ -26,7 +26,7 @@
 		"source": "https://github.com/fundrik/core"
 	},
 	"require": {
-		"php": "^8.2",
+		"php": "^8.3",
 		"ramsey/uuid": "^4.7"
 	},
 	"require-dev": {
@@ -43,7 +43,8 @@
 		"phpstan/phpstan-strict-rules": "^2.0",
 		"phpstan/phpstan-deprecation-rules": "^2.0",
 		"deptrac/deptrac": "^3.0",
-		"infection/infection": "^0.31.9"
+		"infection/infection": "^0.31.9",
+		"rector/rector": "^2.3"
 	},
 	"autoload": {
 		"psr-4": {
@@ -63,7 +64,7 @@
 		"test:coverage": "php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html=.phpunit.cache/report-coverage",
 		"phpstan": "vendor/bin/phpstan analyze --memory-limit=2048M",
 		"deptrac": "vendor/bin/deptrac analyze --report-uncovered",
-		"infection": "vendor/bin/infection --show-mutations "
+		"infection": "vendor/bin/infection --show-mutations"
 	},
 	"config": {
 		"allow-plugins": {
