@@ -48,7 +48,7 @@ final readonly class CreateCampaignHandler implements CreateCampaignUseCase {
 		$created_campaign = $this->repository->insert( $campaign );
 
 		$this->event_bus->publish(
-			new CampaignCreatedEvent( $created_campaign->get_entity_id() ),
+			new CampaignCreatedEvent( $created_campaign->get_id() ),
 		);
 
 		return $created_campaign;

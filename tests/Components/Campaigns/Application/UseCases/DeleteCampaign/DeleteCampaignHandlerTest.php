@@ -53,7 +53,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_deletes_campaign_and_publishes_deleted_event(): void {
 
-		$campaign_id = $this->make_campaign()->get_entity_id();
+		$campaign_id = $this->make_campaign()->get_id();
 
 		$this->repository
 			->shouldReceive( 'delete' )
@@ -81,7 +81,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_propagates_repository_exception_without_publishing(): void {
 
-		$campaign_id = $this->make_campaign()->get_entity_id();
+		$campaign_id = $this->make_campaign()->get_id();
 		$e = new FakeCampaignRepositoryException();
 
 		$this->repository
@@ -101,7 +101,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_throws_event_bus_exception_when_publishing_fails(): void {
 
-		$campaign_id = $this->make_campaign()->get_entity_id();
+		$campaign_id = $this->make_campaign()->get_id();
 		$e = new FakeApplicationEventBusException();
 
 		$this->repository

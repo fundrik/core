@@ -51,7 +51,7 @@ final readonly class SaveCampaignHandler implements SaveCampaignUseCase {
 	public function handle( Campaign $campaign ): CampaignRepositorySaveOutcome {
 
 		$outcome = $this->repository->save( $campaign );
-		$entity_id = $outcome->campaign->get_entity_id();
+		$entity_id = $outcome->campaign->get_id();
 
 		$event = match ( $outcome->result ) {
 			CampaignRepositorySaveResult::Inserted => new CampaignCreatedEvent( $entity_id ),

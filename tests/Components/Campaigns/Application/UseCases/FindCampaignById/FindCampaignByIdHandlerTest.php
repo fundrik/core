@@ -47,7 +47,7 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 	public function handle_returns_campaign(): void {
 
 		$campaign = $this->make_campaign();
-		$campaign_id = $campaign->get_entity_id();
+		$campaign_id = $campaign->get_id();
 
 		$this->repository
 			->shouldReceive( 'find_by_id' )
@@ -63,7 +63,7 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_returns_null_when_not_found(): void {
 
-		$campaign_id = $this->make_campaign()->get_entity_id();
+		$campaign_id = $this->make_campaign()->get_id();
 
 		$this->repository
 			->shouldReceive( 'find_by_id' )
@@ -79,7 +79,7 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_throws_repository_exception(): void {
 
-		$campaign_id = $this->make_campaign()->get_entity_id();
+		$campaign_id = $this->make_campaign()->get_id();
 		$e = new FakeCampaignRepositoryException();
 
 		$this->repository

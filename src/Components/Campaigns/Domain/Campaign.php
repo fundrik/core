@@ -40,25 +40,13 @@ final readonly class Campaign {
 	) {}
 
 	/**
-	 * Returns the campaign ID.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return int|string The campaign ID (positive integer or UUID).
-	 */
-	public function get_id(): int|string {
-
-		return $this->id->get_value();
-	}
-
-	/**
 	 * Returns the campaign ID value object.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return EntityId The campaign ID value object.
 	 */
-	public function get_entity_id(): EntityId {
+	public function get_id(): EntityId {
 
 		return $this->id;
 	}
@@ -121,20 +109,6 @@ final readonly class Campaign {
 	public function has_target(): bool {
 
 		return $this->target->is_enabled();
-	}
-
-	/**
-	 * Returns the campaign target amount.
-	 *
-	 * Returns zero if targeting is disabled.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return int The target amount in minor units.
-	 */
-	public function get_target_amount(): int {
-
-		return $this->target->get_amount();
 	}
 
 	/**

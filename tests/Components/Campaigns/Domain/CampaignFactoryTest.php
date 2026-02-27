@@ -51,13 +51,13 @@ final class CampaignFactoryTest extends FundrikTestCase {
 
 		$this->assertInstanceOf( Campaign::class, $campaign );
 
-		$this->assertSame( 1, $campaign->get_id() );
+		$this->assertSame( 1, $campaign->get_id()->get_value() );
 		$this->assertSame( 3, $campaign->get_version()->get_value() );
 		$this->assertSame( 'Save the cats', $campaign->get_title() );
 		$this->assertSame( true, $campaign->is_active() );
 		$this->assertSame( false, $campaign->is_open() );
 		$this->assertSame( true, $campaign->has_target() );
-		$this->assertSame( 123, $campaign->get_target_amount() );
+		$this->assertSame( 123, $campaign->get_target_money()->get_amount_minor() );
 		$this->assertSame( 'RUB', $campaign->get_target_money()->get_currency() );
 	}
 
@@ -77,13 +77,13 @@ final class CampaignFactoryTest extends FundrikTestCase {
 
 		$this->assertInstanceOf( Campaign::class, $campaign );
 
-		$this->assertSame( 'c6f2a6d1-2b2a-4b33-9c9d-8a3e5d9c1b22', $campaign->get_id() );
+		$this->assertSame( 'c6f2a6d1-2b2a-4b33-9c9d-8a3e5d9c1b22', $campaign->get_id()->get_value() );
 		$this->assertSame( 2, $campaign->get_version()->get_value() );
 		$this->assertSame( 'Save the dogs', $campaign->get_title() );
 		$this->assertSame( false, $campaign->is_active() );
 		$this->assertSame( true, $campaign->is_open() );
 		$this->assertSame( false, $campaign->has_target() );
-		$this->assertSame( 0, $campaign->get_target_amount() );
+		$this->assertSame( 0, $campaign->get_target_money()->get_amount_minor() );
 		$this->assertSame( 'RUB', $campaign->get_target_money()->get_currency() );
 	}
 
@@ -107,13 +107,13 @@ final class CampaignFactoryTest extends FundrikTestCase {
 
 		$this->assertInstanceOf( Campaign::class, $campaign );
 
-		$this->assertSame( 77, $campaign->get_id() );
+		$this->assertSame( 77, $campaign->get_id()->get_value() );
 		$this->assertSame( 5, $campaign->get_version()->get_value() );
 		$this->assertSame( 'Help the whales', $campaign->get_title() );
 		$this->assertSame( true, $campaign->is_active() );
 		$this->assertSame( true, $campaign->is_open() );
 		$this->assertSame( true, $campaign->has_target() );
-		$this->assertSame( 500, $campaign->get_target_amount() );
+		$this->assertSame( 500, $campaign->get_target_money()->get_amount_minor() );
 		$this->assertSame( 'EUR', $campaign->get_target_money()->get_currency() );
 	}
 

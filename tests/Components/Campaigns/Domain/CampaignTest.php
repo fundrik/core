@@ -30,14 +30,13 @@ final class CampaignTest extends FundrikTestCase {
 		$campaign = $this->make_campaign();
 		$entity_id = EntityId::create( 1 );
 
-		$this->assertSame( 1, $campaign->get_id() );
+		$this->assertSame( 1, $campaign->get_id()->get_value() );
 		$this->assertSame( 1, $campaign->get_version()->get_value() );
 		$this->assertSame( 'Test Campaign', $campaign->get_title() );
-		$this->assertTrue( $entity_id->equals( $campaign->get_entity_id() ) );
+		$this->assertTrue( $entity_id->equals( $campaign->get_id() ) );
 		$this->assertTrue( $campaign->is_active() );
 		$this->assertTrue( $campaign->is_open() );
 		$this->assertTrue( $campaign->has_target() );
-		$this->assertSame( 100, $campaign->get_target_amount() );
 		$this->assertSame( 100, $campaign->get_target_money()->get_amount_minor() );
 		$this->assertSame( 'RUB', $campaign->get_target_money()->get_currency() );
 	}
@@ -49,7 +48,7 @@ final class CampaignTest extends FundrikTestCase {
 
 		$campaign = $this->make_campaign( id: $uuid );
 
-		$this->assertSame( $uuid, $campaign->get_id() );
+		$this->assertSame( $uuid, $campaign->get_id()->get_value() );
 	}
 
 	#[Test]
@@ -58,8 +57,8 @@ final class CampaignTest extends FundrikTestCase {
 		$campaign = $this->make_campaign( has_target: false, target_amount: 0 );
 
 		$this->assertFalse( $campaign->has_target() );
-		$this->assertSame( 0, $campaign->get_target_amount() );
-		$this->assertSame( 1, $campaign->get_id() );
+		$this->assertSame( 0, $campaign->get_target_money()->get_amount_minor() );
+		$this->assertSame( 1, $campaign->get_id()->get_value() );
 	}
 
 	#[Test]
@@ -70,7 +69,7 @@ final class CampaignTest extends FundrikTestCase {
 
 		$this->assertNotSame( $campaign1, $campaign2 );
 		$this->assertSame( 'New', $campaign2->get_title() );
-		$this->assertSame( $campaign1->get_id(), $campaign2->get_id() );
+		$this->assertTrue( $campaign1->get_id()->equals( $campaign2->get_id() ) );
 	}
 
 	#[Test]
@@ -175,11 +174,11 @@ final class CampaignTest extends FundrikTestCase {
 
 		$campaign2 = $campaign1->enable_target( 500 );
 		$this->assertTrue( $campaign2->has_target() );
-		$this->assertSame( 500, $campaign2->get_target_amount() );
+		$this->assertSame( 500, $campaign2->get_target_money()->get_amount_minor() );
 
 		$campaign3 = $campaign2->disable_target();
 		$this->assertFalse( $campaign3->has_target() );
-		$this->assertSame( 0, $campaign3->get_target_amount() );
+		$this->assertSame( 0, $campaign3->get_target_money()->get_amount_minor() );
 	}
 
 	#[Test]
@@ -211,10 +210,10 @@ final class CampaignTest extends FundrikTestCase {
 
 		$campaign2 = $campaign1->set_target_amount( 250 );
 		$this->assertTrue( $campaign2->has_target() );
-		$this->assertSame( 250, $campaign2->get_target_amount() );
+		$this->assertSame( 250, $campaign2->get_target_money()->get_amount_minor() );
 
 		$campaign3 = $campaign2->set_target_amount( 0 );
 		$this->assertFalse( $campaign3->has_target() );
-		$this->assertSame( 0, $campaign3->get_target_amount() );
+		$this->assertSame( 0, $campaign3->get_target_money()->get_amount_minor() );
 	}
 }

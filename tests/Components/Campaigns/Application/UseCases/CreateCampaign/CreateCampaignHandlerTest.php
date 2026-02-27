@@ -68,7 +68,7 @@ final class CreateCampaignHandlerTest extends MockeryTestCase {
 				function ( object $event ) use ( $campaign ): bool {
 
 					$this->assertInstanceOf( CampaignCreatedEvent::class, $event );
-					$this->assertSame( $campaign->get_entity_id(), $event->campaign_id );
+					$this->assertSame( $campaign->get_id(), $event->campaign_id );
 
 					return true;
 				},

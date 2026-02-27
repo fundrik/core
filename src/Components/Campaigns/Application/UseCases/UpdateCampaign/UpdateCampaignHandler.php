@@ -48,7 +48,7 @@ final readonly class UpdateCampaignHandler implements UpdateCampaignUseCase {
 		$updated_campaign = $this->repository->update( $campaign );
 
 		$this->event_bus->publish(
-			new CampaignUpdatedEvent( $updated_campaign->get_entity_id() ),
+			new CampaignUpdatedEvent( $updated_campaign->get_id() ),
 		);
 
 		return $updated_campaign;
