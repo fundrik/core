@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases\DeleteCampaign;
 
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -22,6 +26,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( DeleteCampaignHandler::class )]
+#[UsesClass( CampaignDeletedEvent::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
@@ -31,6 +36,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 final class DeleteCampaignHandlerTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $repository;
+	private ApplicationEventBusPort&MockInterface $event_bus;
 
 	private DeleteCampaignHandler $handler;
 
@@ -39,12 +45,13 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		parent::setUp();
 
 		$this->repository = Mockery::mock( CampaignRepositoryPort::class );
+		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
-		$this->handler = new DeleteCampaignHandler( $this->repository );
+		$this->handler = new DeleteCampaignHandler( $this->repository, $this->event_bus );
 	}
 
 	#[Test]
-	public function handle_deletes_campaign(): void {
+	public function handle_deletes_campaign_and_publishes_deleted_event(): void {
 
 		$campaign_id = $this->make_campaign()->get_entity_id();
 
@@ -53,13 +60,26 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 			->once()
 			->with( $this->identicalTo( $campaign_id ) );
 
+		$this->event_bus
+			->shouldReceive( 'publish' )
+			->once()
+			->withArgs(
+				function ( object $event ) use ( $campaign_id ): bool {
+
+					$this->assertInstanceOf( CampaignDeletedEvent::class, $event );
+					$this->assertSame( $campaign_id, $event->campaign_id );
+
+					return true;
+				},
+			);
+
 		$this->handler->handle( $campaign_id );
 
 		$this->assertTrue( true );
 	}
 
 	#[Test]
-	public function handle_throws_repository_exception(): void {
+	public function handle_propagates_repository_exception_without_publishing(): void {
 
 		$campaign_id = $this->make_campaign()->get_entity_id();
 		$e = new FakeCampaignRepositoryException();
@@ -67,9 +87,34 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$this->repository
 			->shouldReceive( 'delete' )
 			->once()
+			->with( $this->identicalTo( $campaign_id ) )
 			->andThrow( $e );
 
+		$this->event_bus
+			->shouldNotReceive( 'publish' );
+
 		$this->expectException( CampaignRepositoryExceptionInterface::class );
+
+		$this->handler->handle( $campaign_id );
+	}
+
+	#[Test]
+	public function handle_throws_event_bus_exception_when_publishing_fails(): void {
+
+		$campaign_id = $this->make_campaign()->get_entity_id();
+		$e = new FakeApplicationEventBusException();
+
+		$this->repository
+			->shouldReceive( 'delete' )
+			->once()
+			->with( $this->identicalTo( $campaign_id ) );
+
+		$this->event_bus
+			->shouldReceive( 'publish' )
+			->once()
+			->andThrow( $e );
+
+		$this->expectException( ApplicationEventBusExceptionInterface::class );
 
 		$this->handler->handle( $campaign_id );
 	}
