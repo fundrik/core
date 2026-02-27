@@ -84,7 +84,13 @@ final readonly class CampaignTarget {
 		return $this->is_enabled;
 	}
 
-	/** @return Money The target money. */
+	/**
+	 * Returns the target amount as money value object.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return Money The campaign target amount.
+	 */
 	public function get_money(): Money {
 
 		return $this->amount;
