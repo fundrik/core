@@ -191,8 +191,7 @@ final readonly class DonationFactory {
 			InvalidEntityIdException
 			| InvalidMoneyAmountException
 			| InvalidMoneyCurrencyException
-			| InvalidDonationAmountException
-			| DonationChangeException $e
+			| InvalidDonationAmountException $e
 		) {
 
 			throw new DonationFactoryException(

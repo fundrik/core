@@ -172,6 +172,30 @@ final class DonationFactoryTest extends FundrikTestCase {
 	}
 
 	#[Test]
+	public function create_pending_from_primitives_wraps_invalid_entity_id_exception(): void {
+
+		$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_pending_from_primitives( id: -11, campaign_id: 22, amount_minor: 100, currency: 'EUR' );
+	}
+
+		#[Test]
+	public function create_pending_from_primitives_wraps_invalid_money_amount_exception(): void {
+
+		$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_pending_from_primitives( id: 11, campaign_id: 22, amount_minor: -1, currency: 'EUR' );
+	}
+
+		#[Test]
+	public function create_pending_from_primitives_wraps_invalid_money_currency_exception(): void {
+
+			$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_pending_from_primitives( id: 11, campaign_id: 22, amount_minor: 100, currency: 'EURO' );
+	}
+
+	#[Test]
 	public function create_from_primitives_wraps_exceptions_into_factory_exception(): void {
 
 		$this->expectException( DonationFactoryException::class );
@@ -184,6 +208,103 @@ final class DonationFactoryTest extends FundrikTestCase {
 			currency: 'EUR',
 			status: 'invalid-status',
 			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+		);
+	}
+
+		#[Test]
+	public function create_from_primitives_wraps_invalid_entity_id_exception(): void {
+
+		$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: -11,
+			version: 1,
+			campaign_id: 22,
+			amount_minor: 100,
+			currency: 'EUR',
+			status: DonationStatus::Pending->value,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+		);
+	}
+
+			#[Test]
+	public function create_from_primitives_wraps_invalid_entity_version_exception(): void {
+
+		$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 11,
+			version: 0,
+			campaign_id: 22,
+			amount_minor: 100,
+			currency: 'EUR',
+			status: DonationStatus::Pending->value,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+		);
+	}
+
+		#[Test]
+	public function create_from_primitives_wraps_invalid_money_amount_exception(): void {
+
+			$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 11,
+			version: 1,
+			campaign_id: 22,
+			amount_minor: -1,
+			currency: 'EUR',
+			status: DonationStatus::Pending->value,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+		);
+	}
+
+		#[Test]
+	public function create_from_primitives_wraps_invalid_money_currency_exception(): void {
+
+			$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 11,
+			version: 1,
+			campaign_id: 22,
+			amount_minor: 100,
+			currency: 'EURO',
+			status: DonationStatus::Pending->value,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+		);
+	}
+
+	#[Test]
+	public function create_from_primitives_wraps_invalid_donation_amount_exception(): void {
+
+			$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 11,
+			version: 1,
+			campaign_id: 22,
+			amount_minor: 0,
+			currency: 'EUR',
+			status: DonationStatus::Pending->value,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+		);
+	}
+
+		#[Test]
+	public function create_from_primitives_wraps_donation_change_exception(): void {
+
+				$this->expectException( DonationFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 11,
+			version: 1,
+			campaign_id: 22,
+			amount_minor: 100,
+			currency: 'EUR',
+			status: DonationStatus::Pending->value,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+			status_changed_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
 		);
 	}
 }

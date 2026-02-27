@@ -20,10 +20,24 @@ final class MoneyTest extends FundrikTestCase {
 		$money = Money::create( 1_000, 'rub' );
 
 		$this->assertSame( 1_000, $money->get_amount_minor() );
-		$this->assertSame( 'RUB', $money->get_currency() );
+		$this->assertSame(
+			'RUB',
+			$money->get_currency(),
+		);
 	}
 
 	#[Test]
+	public function trims_currency_before_validation(): void {
+
+		$money = Money::create( 1_000, ' rub ' );
+
+		$this->assertSame(
+			'RUB',
+			$money->get_currency(),
+		);
+	}
+
+		#[Test]
 	public function creates_zero_money(): void {
 
 		$money = Money::create( 0, 'RUB' );
@@ -32,7 +46,7 @@ final class MoneyTest extends FundrikTestCase {
 		$this->assertSame( 'RUB', $money->get_currency() );
 	}
 
-	#[Test]
+		#[Test]
 	public function throws_when_amount_is_negative(): void {
 
 		$this->expectException( InvalidMoneyAmountException::class );
@@ -41,7 +55,7 @@ final class MoneyTest extends FundrikTestCase {
 		Money::create( -100, 'RUB' );
 	}
 
-	#[Test]
+		#[Test]
 	public function throws_when_currency_is_invalid(): void {
 
 		$this->expectException( InvalidMoneyCurrencyException::class );
@@ -50,7 +64,7 @@ final class MoneyTest extends FundrikTestCase {
 		Money::create( 1_000, 'ruble' );
 	}
 
-	#[Test]
+		#[Test]
 	public function equals_compares_amount_and_currency(): void {
 
 		$money1 = Money::create( 1_000, 'RUB' );

@@ -129,20 +129,105 @@ final class CampaignFactoryTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function create_new_from_primitives_builds_campaign_with_initial_version(): void {
+	public function create_from_primitives_wraps_invalid_version_exception(): void {
 
-		$campaign = $this->factory->create_new_from_primitives(
-			id: 20,
-			title: 'New from primitives',
+		$this->expectException( CampaignFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 1,
+			version: 0,
+			title: 'Invalid version',
 			is_active: true,
-			is_open: false,
+			is_open: true,
 			has_target: false,
 			target_amount: 0,
 			target_currency: 'RUB',
 		);
+	}
 
-		$this->assertSame( 20, $campaign->get_id()->get_value() );
-		$this->assertSame( 1, $campaign->get_version()->get_value() );
-		$this->assertSame( 'New from primitives', $campaign->get_title() );
+		#[Test]
+	public function create_from_primitives_wraps_invalid_title_exception(): void {
+
+			$this->expectException( CampaignFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 1,
+			version: 1,
+			title: '   ',
+			is_active: true,
+			is_open: true,
+			has_target: false,
+			target_amount: 0,
+			target_currency: 'RUB',
+		);
+	}
+
+		#[Test]
+	public function create_from_primitives_wraps_invalid_target_exception(): void {
+
+		$this->expectException( CampaignFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 1,
+			version: 1,
+			title: 'Invalid target',
+			is_active: true,
+			is_open: true,
+			has_target: true,
+			target_amount: 0,
+			target_currency: 'RUB',
+		);
+	}
+
+		#[Test]
+	public function create_from_primitives_wraps_invalid_money_amount_exception(): void {
+
+		$this->expectException( CampaignFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 1,
+			version: 1,
+			title: 'Invalid amount',
+			is_active: true,
+			is_open: true,
+			has_target: true,
+			target_amount: -1,
+			target_currency: 'RUB',
+		);
+	}
+
+		#[Test]
+	public function create_from_primitives_wraps_invalid_money_currency_exception(): void {
+
+				$this->expectException( CampaignFactoryException::class );
+
+		$this->factory->create_from_primitives(
+			id: 1,
+			version: 1,
+			title: 'Invalid currency',
+			is_active: true,
+			is_open: true,
+			has_target: false,
+			target_amount: 0,
+			target_currency: 'EURO',
+		);
+	}
+
+				#[Test]
+	public function create_new_from_primitives_builds_campaign_with_initial_version(): void {
+
+					$campaign = $this->factory->create_new_from_primitives(
+						id: 20,
+						title: 'New from primitives',
+						is_active: true,
+						is_open: false,
+						has_target: false,
+						target_amount: 0,
+						target_currency: 'RUB',
+					);
+
+					$this->assertSame( 20, $campaign->get_id()->get_value() );
+					$this->assertSame( 1, $campaign->get_version()->get_value() );
+					$this->assertSame( 'New from primitives', $campaign->get_title() );
 	}
 }

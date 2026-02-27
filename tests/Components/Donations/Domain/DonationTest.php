@@ -132,17 +132,51 @@ final class DonationTest extends FundrikTestCase {
 	}
 
 	#[Test]
+	public function throws_when_authorize_is_called_from_non_pending_status(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'Cannot authorize donation from status "authorized".' );
+		$this->make_pending_donation()->authorize()->authorize();
+	}
+
+		#[Test]
+	public function throws_when_fail_is_called_from_non_pending_or_non_authorized_status(): void {
+
+			$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'Cannot fail donation from status "captured".' );
+		$this->make_pending_donation()->capture()->fail();
+	}
+
+	#[Test]
+	public function throws_when_refund_is_called_from_non_captured_status(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'Cannot refund donation from status "authorized".' );
+		$this->make_pending_donation()->authorize()->refund();
+	}
+
+		#[Test]
+	public function throws_when_cancel_is_called_from_non_pending_or_non_authorized_status(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'Cannot cancel donation from status "captured".' );
+		$this->make_pending_donation()->capture()->cancel();
+	}
+
+			#[Test]
 	public function throws_when_refund_timestamp_is_earlier_than_capture_timestamp(): void {
 
 		$this->expectException( DonationChangeException::class );
-		$this->expectExceptionMessage( 'status_changed_at must not be earlier than captured_at for refunded donation.' );
+		$this->expectExceptionMessage(
+			'status_changed_at must not be earlier than captured_at for refunded donation.',
+		);
 
 		$this->make_pending_donation()
 			->capture( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) )
 			->refund( new DateTimeImmutable( '2026-02-26T10:10:00+00:00' ) );
 	}
 
-	#[Test]
+			#[Test]
 	public function throws_when_donation_amount_is_zero(): void {
 
 		$this->expectException( InvalidDonationAmountException::class );
@@ -156,7 +190,7 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
-	#[Test]
+			#[Test]
 	public function throws_when_pending_has_status_timestamps(): void {
 
 		$this->expectException( DonationChangeException::class );
@@ -173,7 +207,7 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
-	#[Test]
+			#[Test]
 	public function throws_when_non_pending_has_no_status_changed_at(): void {
 
 		$this->expectException( DonationChangeException::class );
@@ -189,7 +223,7 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
-	#[Test]
+			#[Test]
 	public function throws_when_captured_or_refunded_has_no_captured_at(): void {
 
 		$this->expectException( DonationChangeException::class );
@@ -206,7 +240,7 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
-	#[Test]
+			#[Test]
 	public function throws_when_non_captured_or_refunded_has_captured_at(): void {
 
 		$this->expectException( DonationChangeException::class );
@@ -224,7 +258,7 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
-	#[Test]
+			#[Test]
 	public function throws_when_status_changed_at_is_earlier_than_created_at(): void {
 
 		$this->expectException( DonationChangeException::class );
@@ -241,9 +275,84 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
-	/**
-	 * Builds a valid pending donation for tests.
-	 */
+	#[Test]
+	public function throws_when_captured_at_is_earlier_than_created_at(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'captured_at must not be earlier than created_at.' );
+
+		new Donation(
+			id: EntityId::create( 1 ),
+			version: EntityVersion::initial(),
+			campaign_id: EntityId::create( 2 ),
+			money: Money::create( 100, 'RUB' ),
+			status: DonationStatus::Captured,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+			captured_at: new DateTimeImmutable( '2026-02-26T09:59:00+00:00' ),
+			status_changed_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
+		);
+	}
+
+			#[Test]
+	public function allows_refund_when_status_changed_at_equals_captured_at(): void {
+
+			$captured_at = new DateTimeImmutable( '2026-02-26T10:15:00+00:00' );
+		$refunded = $this->make_pending_donation()->capture( $captured_at )->refund( $captured_at );
+		$this->assertSame( DonationStatus::Refunded, $refunded->get_status() );
+		$this->assertSame(
+			$captured_at,
+			$refunded->get_captured_at(),
+		);
+		$this->assertSame(
+			$captured_at,
+			$refunded->get_status_changed_at(),
+		);
+	}
+
+		#[Test]
+	public function allows_captured_state_when_status_changed_at_is_before_captured_at(): void {
+
+				$captured = new Donation(
+					id: EntityId::create( 1 ),
+					version: EntityVersion::initial(),
+					campaign_id: EntityId::create( 2 ),
+					money: Money::create( 100, 'RUB' ),
+					status: DonationStatus::Captured,
+					created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+					captured_at: new DateTimeImmutable( '2026-02-26T10:10:00+00:00' ),
+					status_changed_at: new DateTimeImmutable( '2026-02-26T10:05:00+00:00' ),
+				);
+
+		$this->assertSame(
+			DonationStatus::Captured,
+			$captured->get_status(),
+		);
+	}
+
+	#[Test]
+	public function allows_non_pending_status_when_status_changed_at_equals_created_at(): void {
+
+		$created_at = new DateTimeImmutable( '2026-02-26T10:00:00+00:00' );
+
+		$authorized = new Donation(
+			id: EntityId::create( 1 ),
+			version: EntityVersion::initial(),
+			campaign_id: EntityId::create( 2 ),
+			money: Money::create( 100, 'RUB' ),
+			status: DonationStatus::Authorized,
+			created_at: $created_at,
+			status_changed_at: $created_at,
+		);
+
+		$this->assertSame(
+			DonationStatus::Authorized,
+			$authorized->get_status(),
+		);
+	}
+
+			/**
+			 * Builds a valid pending donation for tests.
+			 */
 	private function make_pending_donation( ?DateTimeImmutable $created_at = null ): Donation {
 
 		return $this->factory->create_pending(
