@@ -84,25 +84,7 @@ final readonly class CampaignTarget {
 		return $this->is_enabled;
 	}
 
-	/**
-	 * Returns the fundraising target amount in minor units.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return int The target amount (positive if enabled, zero if disabled).
-	 */
-	public function get_amount(): int {
-
-		return $this->amount->get_amount_minor();
-	}
-
-	/**
-	 * Returns the fundraising target money value object.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return Money The target money.
-	 */
+	/** @return Money The target money. */
 	public function get_money(): Money {
 
 		return $this->amount;

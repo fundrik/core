@@ -21,19 +21,33 @@ final class CampaignTargetTest extends FundrikTestCase {
 
 		$target = CampaignTarget::create( true, Money::create( 100, 'RUB' ) );
 
-		$this->assertTrue( $target->is_enabled() );
-		$this->assertSame( 100, $target->get_amount() );
-	}
+ $this->assertTrue(
+			$target->is_enabled(),
+		);
+ $this->assertSame(
+			100,
+			$target->get_money()->get_amount_minor(),
+		);
+ }
+
 
 	#[Test]
 	public function creates_target_from_money_value_object(): void {
 
 		$target = CampaignTarget::create( true, Money::create( 200, 'USD' ) );
+		$this->assertTrue(
+			$target->is_enabled(),
+		);
+ $this->assertSame(
+			200,
+			$target->get_money()->get_amount_minor(),
+		);
+ $this->assertSame(
+			'USD',
+			$target->get_money()->get_currency(),
+		);
+ }
 
-		$this->assertTrue( $target->is_enabled() );
-		$this->assertSame( 200, $target->get_amount() );
-		$this->assertSame( 'USD', $target->get_money()->get_currency() );
-	}
 
 	#[Test]
 	public function throws_when_enabled_but_zero_amount(): void {
@@ -48,10 +62,15 @@ final class CampaignTargetTest extends FundrikTestCase {
 	public function creates_disabled_target_with_zero_amount(): void {
 
 		$target = CampaignTarget::create( false, Money::create( 0, 'RUB' ) );
+		$this->assertFalse(
+			$target->is_enabled(),
+		);
+ $this->assertSame(
+			0,
+			$target->get_money()->get_amount_minor(),
+		);
+ }
 
-		$this->assertFalse( $target->is_enabled() );
-		$this->assertSame( 0, $target->get_amount() );
-	}
 
 	#[Test]
 	public function throws_when_disabled_but_positive_amount(): void {

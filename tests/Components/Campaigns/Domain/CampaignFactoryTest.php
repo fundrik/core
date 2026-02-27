@@ -21,6 +21,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
+#[UsesClass( CampaignFactoryException::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
@@ -36,68 +37,66 @@ final class CampaignFactoryTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function create_builds_campaign_from_int_id_and_string_title(): void {
+	public function create_builds_campaign_from_value_objects(): void {
 
 		$campaign = $this->factory->create(
-			id: 1,
-			version: 3,
-			title: 'Save the cats',
+			id: EntityId::create( 1 ),
+			version: EntityVersion::create( 3 ),
+			title: CampaignTitle::create( 'Save the cats' ),
 			is_active: true,
 			is_open: false,
-			has_target: true,
-			target_amount: 123,
-			target_currency: 'RUB',
+			target: CampaignTarget::create( true, Money::create( 123, 'RUB' ) ),
 		);
 
 		$this->assertInstanceOf( Campaign::class, $campaign );
-
 		$this->assertSame( 1, $campaign->get_id()->get_value() );
 		$this->assertSame( 3, $campaign->get_version()->get_value() );
 		$this->assertSame( 'Save the cats', $campaign->get_title() );
-		$this->assertSame( true, $campaign->is_active() );
-		$this->assertSame( false, $campaign->is_open() );
-		$this->assertSame( true, $campaign->has_target() );
+		$this->assertTrue( $campaign->is_active() );
+		$this->assertFalse( $campaign->is_open() );
+		$this->assertTrue( $campaign->has_target() );
 		$this->assertSame( 123, $campaign->get_target_money()->get_amount_minor() );
 		$this->assertSame( 'RUB', $campaign->get_target_money()->get_currency() );
 	}
 
 	#[Test]
-	public function create_builds_campaign_from_string_id(): void {
+	public function create_accepts_uuid_entity_id(): void {
 
 		$campaign = $this->factory->create(
-			id: 'c6f2a6d1-2b2a-4b33-9c9d-8a3e5d9c1b22',
-			version: 2,
-			title: 'Save the dogs',
+			id: EntityId::create( 'c6f2a6d1-2b2a-4b33-9c9d-8a3e5d9c1b22' ),
+			version: EntityVersion::create( 2 ),
+			title: CampaignTitle::create( 'Save the dogs' ),
 			is_active: false,
 			is_open: true,
-			has_target: false,
-			target_amount: 0,
-			target_currency: 'RUB',
+			target: CampaignTarget::create( false, Money::create( 0, 'RUB' ) ),
 		);
 
-		$this->assertInstanceOf( Campaign::class, $campaign );
-
 		$this->assertSame( 'c6f2a6d1-2b2a-4b33-9c9d-8a3e5d9c1b22', $campaign->get_id()->get_value() );
-		$this->assertSame( 2, $campaign->get_version()->get_value() );
-		$this->assertSame( 'Save the dogs', $campaign->get_title() );
-		$this->assertSame( false, $campaign->is_active() );
-		$this->assertSame( true, $campaign->is_open() );
-		$this->assertSame( false, $campaign->has_target() );
 		$this->assertSame( 0, $campaign->get_target_money()->get_amount_minor() );
-		$this->assertSame( 'RUB', $campaign->get_target_money()->get_currency() );
+		$this->assertFalse( $campaign->has_target() );
 	}
 
 	#[Test]
-	public function create_builds_campaign_from_value_objects(): void {
+	public function create_new_builds_campaign_with_initial_version(): void {
 
-		$id = EntityId::create( 77 );
-		$version = EntityVersion::create( 5 );
-		$title = CampaignTitle::create( 'Help the whales' );
+		$campaign = $this->factory->create_new(
+			id: EntityId::create( 1 ),
+			title: CampaignTitle::create( 'New campaign' ),
+			is_active: true,
+			is_open: true,
+			target: CampaignTarget::create( false, Money::create( 0, 'RUB' ) ),
+		);
 
-		$campaign = $this->factory->create(
-			id: $id,
-			version: $version,
-			title: $title,
+		$this->assertSame( 1, $campaign->get_version()->get_value() );
+	}
+
+	#[Test]
+	public function create_from_primitives_builds_campaign(): void {
+
+		$campaign = $this->factory->create_from_primitives(
+			id: 10,
+			version: 2,
+			title: 'From primitives',
 			is_active: true,
 			is_open: true,
 			has_target: true,
@@ -105,27 +104,22 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			target_currency: 'EUR',
 		);
 
-		$this->assertInstanceOf( Campaign::class, $campaign );
-
-		$this->assertSame( 77, $campaign->get_id()->get_value() );
-		$this->assertSame( 5, $campaign->get_version()->get_value() );
-		$this->assertSame( 'Help the whales', $campaign->get_title() );
-		$this->assertSame( true, $campaign->is_active() );
-		$this->assertSame( true, $campaign->is_open() );
-		$this->assertSame( true, $campaign->has_target() );
+		$this->assertSame( 10, $campaign->get_id()->get_value() );
+		$this->assertSame( 2, $campaign->get_version()->get_value() );
+		$this->assertSame( 'From primitives', $campaign->get_title() );
 		$this->assertSame( 500, $campaign->get_target_money()->get_amount_minor() );
 		$this->assertSame( 'EUR', $campaign->get_target_money()->get_currency() );
 	}
 
 	#[Test]
-	public function create_throws_factory_exception_when_id_is_invalid(): void {
+	public function create_from_primitives_wraps_exceptions_into_factory_exception(): void {
 
 		$this->expectException( CampaignFactoryException::class );
 
-		$this->factory->create(
+		$this->factory->create_from_primitives(
 			id: -1,
 			version: 1,
-			title: 'Anything',
+			title: 'Invalid id',
 			is_active: true,
 			is_open: true,
 			has_target: false,
@@ -135,86 +129,20 @@ final class CampaignFactoryTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function create_throws_factory_exception_when_version_is_invalid(): void {
+	public function create_new_from_primitives_builds_campaign_with_initial_version(): void {
 
-		$this->expectException( CampaignFactoryException::class );
-
-		$this->factory->create(
-			id: 1,
-			version: 0,
-			title: 'Anything',
+		$campaign = $this->factory->create_new_from_primitives(
+			id: 20,
+			title: 'New from primitives',
 			is_active: true,
-			is_open: true,
-			has_target: false,
-			target_amount: 0,
-			target_currency: 'RUB',
-		);
-	}
-
-	#[Test]
-	public function create_throws_factory_exception_when_title_is_invalid(): void {
-
-		$this->expectException( CampaignFactoryException::class );
-
-		$this->factory->create(
-			id: 1,
-			version: 1,
-			title: '',
-			is_active: true,
-			is_open: true,
-			has_target: false,
-			target_amount: 0,
-			target_currency: 'RUB',
-		);
-	}
-
-	#[Test]
-	public function create_throws_factory_exception_when_target_amount_is_invalid(): void {
-
-		$this->expectException( CampaignFactoryException::class );
-
-		$this->factory->create(
-			id: 1,
-			version: 1,
-			title: 'Bad target',
-			is_active: true,
-			is_open: true,
-			has_target: false,
-			target_amount: 100,
-			target_currency: 'RUB',
-		);
-	}
-
-	#[Test]
-	public function create_throws_factory_exception_when_target_currency_is_invalid(): void {
-
-		$this->expectException( CampaignFactoryException::class );
-
-		$this->factory->create(
-			id: 1,
-			version: 1,
-			title: 'Bad currency',
-			is_active: true,
-			is_open: true,
-			has_target: true,
-			target_amount: 100,
-			target_currency: 'RU',
-		);
-	}
-
-	#[Test]
-	public function create_new_builds_campaign_with_initial_version(): void {
-
-		$campaign = $this->factory->create_new(
-			id: 1,
-			title: 'New campaign',
-			is_active: true,
-			is_open: true,
+			is_open: false,
 			has_target: false,
 			target_amount: 0,
 			target_currency: 'RUB',
 		);
 
+		$this->assertSame( 20, $campaign->get_id()->get_value() );
 		$this->assertSame( 1, $campaign->get_version()->get_value() );
+		$this->assertSame( 'New from primitives', $campaign->get_title() );
 	}
 }

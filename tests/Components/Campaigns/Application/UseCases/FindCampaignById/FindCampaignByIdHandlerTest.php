@@ -90,5 +90,5 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 		$this->expectException( CampaignRepositoryExceptionInterface::class );
 
 		$this->handler->handle( $campaign_id );
-	}
+ }
 }

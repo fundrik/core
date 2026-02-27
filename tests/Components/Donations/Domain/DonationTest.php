@@ -156,6 +156,91 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
+	#[Test]
+	public function throws_when_pending_has_status_timestamps(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'Pending donation must not have status timestamps.' );
+
+		new Donation(
+			id: EntityId::create( 1 ),
+			version: EntityVersion::initial(),
+			campaign_id: EntityId::create( 2 ),
+			money: Money::create( 100, 'RUB' ),
+			status: DonationStatus::Pending,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+			captured_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
+		);
+	}
+
+	#[Test]
+	public function throws_when_non_pending_has_no_status_changed_at(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'Non-pending donation must have status_changed_at timestamp.' );
+
+		new Donation(
+			id: EntityId::create( 1 ),
+			version: EntityVersion::initial(),
+			campaign_id: EntityId::create( 2 ),
+			money: Money::create( 100, 'RUB' ),
+			status: DonationStatus::Authorized,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+		);
+	}
+
+	#[Test]
+	public function throws_when_captured_or_refunded_has_no_captured_at(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'Captured/refunded donation must have captured_at timestamp.' );
+
+		new Donation(
+			id: EntityId::create( 1 ),
+			version: EntityVersion::initial(),
+			campaign_id: EntityId::create( 2 ),
+			money: Money::create( 100, 'RUB' ),
+			status: DonationStatus::Captured,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+			status_changed_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
+		);
+	}
+
+	#[Test]
+	public function throws_when_non_captured_or_refunded_has_captured_at(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'Only captured/refunded donations can have captured_at timestamp.' );
+
+		new Donation(
+			id: EntityId::create( 1 ),
+			version: EntityVersion::initial(),
+			campaign_id: EntityId::create( 2 ),
+			money: Money::create( 100, 'RUB' ),
+			status: DonationStatus::Failed,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+			captured_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
+			status_changed_at: new DateTimeImmutable( '2026-02-26T10:02:00+00:00' ),
+		);
+	}
+
+	#[Test]
+	public function throws_when_status_changed_at_is_earlier_than_created_at(): void {
+
+		$this->expectException( DonationChangeException::class );
+		$this->expectExceptionMessage( 'status_changed_at must not be earlier than created_at.' );
+
+		new Donation(
+			id: EntityId::create( 1 ),
+			version: EntityVersion::initial(),
+			campaign_id: EntityId::create( 2 ),
+			money: Money::create( 100, 'RUB' ),
+			status: DonationStatus::Authorized,
+			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+			status_changed_at: new DateTimeImmutable( '2026-02-26T09:59:00+00:00' ),
+		);
+	}
+
 	/**
 	 * Builds a valid pending donation for tests.
 	 */

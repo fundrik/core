@@ -132,7 +132,7 @@ final readonly class Campaign {
 	 *
 	 * @return self The campaign with updated title.
 	 *
-	 * @throws InvalidCampaignTitleException When the provided title is invalid.
+	 * @throws InvalidCampaignTitleException When provided title string is invalid.
 	 * @throws CampaignChangeException When the title matches the current one.
 	 */
 	public function rename( string|CampaignTitle $new_title ): self {
@@ -231,16 +231,28 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $amount The positive target amount in minor currency units.
+	 * @param int|CampaignTarget $amount The positive target amount in minor currency units
+	 *                                   or enabled target value object.
 	 *
 	 * @return self The campaign with targeting enabled and amount set.
 	 *
 	 * @throws InvalidCampaignTargetException When the amount is invalid.
 	 * @throws CampaignChangeException When targeting is already enabled with the same amount.
 	 */
-	public function enable_target( int $amount ): self {
+	public function enable_target( int|CampaignTarget $amount ): self {
 
-		$new = CampaignTarget::create( true, Money::create( $amount, $this->target->get_money()->get_currency() ) );
+		if ( $amount instanceof CampaignTarget ) {
+
+			if ( ! $amount->is_enabled() ) {
+				throw new InvalidCampaignTargetException( 'Target must be enabled in enable_target().' );
+			}
+
+			$new = $amount;
+			$amount = $new->get_money()->get_amount_minor();
+
+		} else {
+			$new = CampaignTarget::create( true, Money::create( $amount, $this->target->get_money()->get_currency() ) );
+		}
 
 		if ( $new->equals( $this->target ) ) {
 
@@ -279,14 +291,19 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $amount The desired target amount in minor currency units (0 to disable; >0 to enable/update).
+	 * @param int|CampaignTarget $amount The desired target amount in minor currency units
+	 *                                   (0 to disable; >0 to enable/update) or target value object.
 	 *
 	 * @return self The campaign with updated targeting state.
 	 *
 	 * @throws InvalidCampaignTargetException When the amount is invalid (e.g., negative).
 	 * @throws CampaignChangeException When the operation would not change the current state.
 	 */
-	public function set_target_amount( int $amount ): self {
+	public function set_target_amount( int|CampaignTarget $amount ): self {
+
+		if ( $amount instanceof CampaignTarget ) {
+			return $amount->is_enabled() ? $this->enable_target( $amount ) : $this->disable_target();
+		}
 
 		if ( $amount === 0 ) {
 			return $this->disable_target();
