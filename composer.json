@@ -61,7 +61,7 @@
 		"lint": "vendor/bin/phpcs .",
 		"lint:fix": "vendor/bin/phpcbf .",
 		"test": "vendor/bin/phpunit",
-		"test:coverage": "php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html=.phpunit.cache/report-coverage",
+		"test:coverage": "php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html=.tmp/phpunit/report-coverage",
 		"phpstan": "vendor/bin/phpstan analyze --memory-limit=2048M",
 		"deptrac": "vendor/bin/deptrac analyze --report-uncovered",
 		"infection": "vendor/bin/infection --show-mutations"

@@ -1,4 +1,6 @@
 deptrac:
+  cache_file: .tmp/deptrac.cache
+
   paths:
     - ./src
 

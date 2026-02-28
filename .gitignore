@@ -1,4 +1,2 @@
-.phpunit.cache/
-vendor/
-.deptrac.cache
 .tmp/
+vendor/
