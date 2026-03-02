@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\Events;
 
-use Fundrik\Core\Components\Shared\Application\Events\ApplicationEventInterface;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
@@ -12,7 +11,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
  *
  * @since 0.1.0
  */
-final readonly class CampaignCreatedEvent implements ApplicationEventInterface {
+final readonly class CampaignCreatedEvent implements CampaignApplicationEventInterface {
 
 	/**
 	 * Constructor.
@@ -22,6 +21,18 @@ final readonly class CampaignCreatedEvent implements ApplicationEventInterface {
 	 * @param EntityId $campaign_id The campaign ID.
 	 */
 	public function __construct(
-		public EntityId $campaign_id,
+		private EntityId $campaign_id,
 	) {}
+
+	/**
+	 * Returns the campaign ID associated with this event.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return EntityId The campaign ID.
+	 */
+	public function get_campaign_id(): EntityId {
+
+		return $this->campaign_id;
+	}
 }

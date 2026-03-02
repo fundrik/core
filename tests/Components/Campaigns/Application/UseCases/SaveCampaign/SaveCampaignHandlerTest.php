@@ -78,7 +78,7 @@ final class SaveCampaignHandlerTest extends MockeryTestCase {
 				function ( object $event ) use ( $campaign ): bool {
 
 					$this->assertInstanceOf( CampaignCreatedEvent::class, $event );
-					$this->assertSame( $campaign->get_id(), $event->campaign_id );
+					$this->assertSame( $campaign->get_id(), $event->get_campaign_id() );
 
 					return true;
 				},
@@ -112,7 +112,7 @@ final class SaveCampaignHandlerTest extends MockeryTestCase {
 				function ( object $event ) use ( $campaign ): bool {
 
 					$this->assertInstanceOf( CampaignUpdatedEvent::class, $event );
-					$this->assertSame( $campaign->get_id(), $event->campaign_id );
+					$this->assertSame( $campaign->get_id(), $event->get_campaign_id() );
 
 					return true;
 				},
