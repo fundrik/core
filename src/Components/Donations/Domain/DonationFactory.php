@@ -119,7 +119,7 @@ final readonly class DonationFactory {
 		) {
 
 			throw new DonationFactoryException(
-				sprintf( 'Cannot create Donation from primitives: %s', $e->getMessage() ),
+				'Failed to create donation from primitives.',
 				previous: $e,
 			);
 		}
@@ -195,7 +195,7 @@ final readonly class DonationFactory {
 		) {
 
 			throw new DonationFactoryException(
-				sprintf( 'Cannot create pending Donation from primitives: %s', $e->getMessage() ),
+				'Failed to create pending donation from primitives.',
 				previous: $e,
 			);
 		}

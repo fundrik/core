@@ -32,7 +32,7 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return array<Campaign> The list of campaigns.
+	 * @return array<int, Campaign> The list of campaigns.
 	 *
 	 * @phpstan-return list<Campaign>
 	 *

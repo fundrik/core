@@ -165,7 +165,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 
 		$this->expectException( DonationFactoryException::class );
 		$this->expectExceptionMessage(
-			'Cannot create pending Donation from primitives: Donation amount must be a positive integer in minor units. Given: 0.',
+			'Failed to create pending donation from primitives.',
 		);
 
 		$this->factory->create_pending_from_primitives( id: 11, campaign_id: 22, amount_minor: 0, currency: 'EUR' );

@@ -244,7 +244,7 @@ final readonly class Campaign {
 		if ( $amount instanceof CampaignTarget ) {
 
 			if ( ! $amount->is_enabled() ) {
-				throw new InvalidCampaignTargetException( 'Target must be enabled in enable_target().' );
+				throw new InvalidCampaignTargetException( 'Target must be enabled when calling enable_target().' );
 			}
 
 			$new = $amount;

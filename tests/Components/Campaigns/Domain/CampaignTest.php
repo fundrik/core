@@ -223,7 +223,7 @@ final class CampaignTest extends FundrikTestCase {
 
 		$campaign = $this->make_campaign( has_target: false, target_amount: 0 );
 		$this->expectException( InvalidCampaignTargetException::class );
-		$this->expectExceptionMessage( 'Target must be enabled in enable_target().' );
+		$this->expectExceptionMessage( 'Target must be enabled when calling enable_target().' );
 
 		$campaign->enable_target(
 			CampaignTarget::create( false, Money::create( 0, 'RUB' ) ),

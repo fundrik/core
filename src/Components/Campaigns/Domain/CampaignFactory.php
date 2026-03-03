@@ -105,10 +105,7 @@ final readonly class CampaignFactory {
 			| InvalidMoneyCurrencyException $e
 		) {
 
-			throw new CampaignFactoryException(
-				sprintf( 'Cannot create Campaign from primitives: %s', $e->getMessage() ),
-				previous: $e,
-			);
+			throw new CampaignFactoryException( 'Failed to create campaign from primitives.', previous: $e );
 		}
 	}
 	// phpcs:enable
