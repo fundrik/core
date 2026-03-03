@@ -8,6 +8,7 @@ use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
@@ -31,6 +32,7 @@ final readonly class CreateCampaignHandler implements CreateCampaignUseCase {
 		private ApplicationEventBusPort $event_bus,
 	) {}
 
+	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	/**
 	 * Creates a new campaign.
 	 *
@@ -40,17 +42,36 @@ final readonly class CreateCampaignHandler implements CreateCampaignUseCase {
 	 *
 	 * @return Campaign The persisted campaign snapshot.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When creating the campaign fails.
-	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign created event fails.
+	 * @throws CreateCampaignException When campaign creation fails.
 	 */
 	public function handle( Campaign $campaign ): Campaign {
 
-		$created_campaign = $this->repository->insert( $campaign );
+		try {
+			$created_campaign = $this->repository->insert( $campaign );
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
+			throw new CreateCampaignException(
+				stage: UseCaseFailureStage::Persistence,
+				message: sprintf( 'Failed to create campaign "%s".', (string) $campaign->get_id()->get_value() ),
+				previous: $e,
+			);
+		}
 
-		$this->event_bus->publish(
-			new CampaignCreatedEvent( $created_campaign->get_id() ),
-		);
+		try {
+			$this->event_bus->publish(
+				new CampaignCreatedEvent( $created_campaign->get_id() ),
+			);
+		} catch ( ApplicationEventBusExceptionInterface $e ) {
+			throw new CreateCampaignException(
+				stage: UseCaseFailureStage::EventPublish,
+				message: sprintf(
+					'Campaign "%s" was created, but publishing the created event failed.',
+					(string) $created_campaign->get_id()->get_value(),
+				),
+				previous: $e,
+			);
+		}
 
 		return $created_campaign;
 	}
+	// phpcs:enable
 }

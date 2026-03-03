@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById;
 
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
@@ -24,7 +23,7 @@ interface FindCampaignByIdUseCase {
 	 *
 	 * @return Campaign|null The campaign if found, null otherwise.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When retrieving the campaign fails.
+	 * @throws FindCampaignByIdException When retrieving the campaign fails.
 	 */
 	public function handle( EntityId $campaign_id ): ?Campaign;
 }

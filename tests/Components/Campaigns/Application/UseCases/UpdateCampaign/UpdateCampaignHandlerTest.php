@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases\UpdateCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
@@ -26,6 +28,10 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( UpdateCampaignHandler::class )]
+#[UsesClass( UpdateCampaignException::class )]
+#[UsesClass( UseCaseFailureStage::class )]
+#[UsesClass( CampaignApplicationException::class )]
+#[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( CampaignUpdatedEvent::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
@@ -94,9 +100,13 @@ final class UpdateCampaignHandlerTest extends MockeryTestCase {
 		$this->event_bus
 			->shouldNotReceive( 'publish' );
 
-		$this->expectException( CampaignRepositoryExceptionInterface::class );
-
-		$this->handler->handle( $campaign );
+		try {
+			$this->handler->handle( $campaign );
+			$this->fail( 'Expected UpdateCampaignException to be thrown.' );
+		} catch ( UpdateCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
 	}
 
 	#[Test]
@@ -116,8 +126,12 @@ final class UpdateCampaignHandlerTest extends MockeryTestCase {
 			->once()
 			->andThrow( $e );
 
-		$this->expectException( ApplicationEventBusExceptionInterface::class );
-
-		$this->handler->handle( $campaign );
+		try {
+			$this->handler->handle( $campaign );
+			$this->fail( 'Expected UpdateCampaignException to be thrown.' );
+		} catch ( UpdateCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::EventPublish, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
 	}
 }

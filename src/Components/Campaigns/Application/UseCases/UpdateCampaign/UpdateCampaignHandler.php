@@ -8,6 +8,7 @@ use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
@@ -31,6 +32,7 @@ final readonly class UpdateCampaignHandler implements UpdateCampaignUseCase {
 		private ApplicationEventBusPort $event_bus,
 	) {}
 
+	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	/**
 	 * Updates an existing campaign.
 	 *
@@ -40,17 +42,36 @@ final readonly class UpdateCampaignHandler implements UpdateCampaignUseCase {
 	 *
 	 * @return Campaign The persisted campaign snapshot.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When updating the campaign fails.
-	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign updated event fails.
+	 * @throws UpdateCampaignException When campaign update fails.
 	 */
 	public function handle( Campaign $campaign ): Campaign {
 
-		$updated_campaign = $this->repository->update( $campaign );
+		try {
+			$updated_campaign = $this->repository->update( $campaign );
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
+			throw new UpdateCampaignException(
+				stage: UseCaseFailureStage::Persistence,
+				message: sprintf( 'Failed to update campaign "%s".', (string) $campaign->get_id()->get_value() ),
+				previous: $e,
+			);
+		}
 
-		$this->event_bus->publish(
-			new CampaignUpdatedEvent( $updated_campaign->get_id() ),
-		);
+		try {
+			$this->event_bus->publish(
+				new CampaignUpdatedEvent( $updated_campaign->get_id() ),
+			);
+		} catch ( ApplicationEventBusExceptionInterface $e ) {
+			throw new UpdateCampaignException(
+				stage: UseCaseFailureStage::EventPublish,
+				message: sprintf(
+					'Campaign "%s" was updated, but publishing the updated event failed.',
+					(string) $updated_campaign->get_id()->get_value(),
+				),
+				previous: $e,
+			);
+		}
 
 		return $updated_campaign;
 	}
+	// phpcs:enable
 }

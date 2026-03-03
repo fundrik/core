@@ -36,10 +36,17 @@ final readonly class FindCampaignByIdHandler implements FindCampaignByIdUseCase 
 	 *
 	 * @return Campaign|null The campaign if found, null otherwise.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When retrieving the campaign fails.
+	 * @throws FindCampaignByIdException When retrieving the campaign fails.
 	 */
 	public function handle( EntityId $campaign_id ): ?Campaign {
 
-		return $this->repository->find_by_id( $campaign_id );
+		try {
+			return $this->repository->find_by_id( $campaign_id );
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
+			throw new FindCampaignByIdException(
+				sprintf( 'Failed to retrieve campaign "%s" by ID.', (string) $campaign_id->get_value() ),
+				previous: $e,
+			);
+		}
 	}
 }

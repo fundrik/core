@@ -6,15 +6,17 @@ namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases\SaveCampa
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveOutcome;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveResult;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
@@ -29,6 +31,10 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( SaveCampaignHandler::class )]
+#[UsesClass( SaveCampaignException::class )]
+#[UsesClass( UseCaseFailureStage::class )]
+#[UsesClass( CampaignApplicationException::class )]
+#[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( CampaignCreatedEvent::class )]
 #[UsesClass( CampaignUpdatedEvent::class )]
 #[UsesClass( CampaignRepositorySaveOutcome::class )]
@@ -138,9 +144,13 @@ final class SaveCampaignHandlerTest extends MockeryTestCase {
 		$this->event_bus
 			->shouldNotReceive( 'publish' );
 
-		$this->expectException( CampaignRepositoryExceptionInterface::class );
-
-		$this->handler->handle( $campaign );
+		try {
+			$this->handler->handle( $campaign );
+			$this->fail( 'Expected SaveCampaignException to be thrown.' );
+		} catch ( SaveCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
 	}
 
 	#[Test]
@@ -165,8 +175,12 @@ final class SaveCampaignHandlerTest extends MockeryTestCase {
 			->once()
 			->andThrow( $e );
 
-		$this->expectException( ApplicationEventBusExceptionInterface::class );
-
-		$this->handler->handle( $campaign );
+		try {
+			$this->handler->handle( $campaign );
+			$this->fail( 'Expected SaveCampaignException to be thrown.' );
+		} catch ( SaveCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::EventPublish, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
 	}
 }

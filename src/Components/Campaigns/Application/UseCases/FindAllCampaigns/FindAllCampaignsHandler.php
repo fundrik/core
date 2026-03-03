@@ -31,14 +31,18 @@ final readonly class FindAllCampaignsHandler implements FindAllCampaignsUseCase 
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return array<Campaign> The list of campaigns.
+	 * @return array<int, Campaign> The list of campaigns.
 	 *
 	 * @phpstan-return list<Campaign>
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When retrieving campaigns fails.
+	 * @throws FindAllCampaignsException When retrieving campaigns fails.
 	 */
 	public function handle(): array {
 
-		return $this->repository->find_all();
+		try {
+			return $this->repository->find_all();
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
+			throw new FindAllCampaignsException( 'Failed to retrieve campaigns.', previous: $e );
+		}
 	}
 }

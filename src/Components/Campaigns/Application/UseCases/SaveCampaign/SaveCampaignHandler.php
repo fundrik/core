@@ -11,6 +11,7 @@ use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\Campa
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveOutcome;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveResult;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
@@ -36,6 +37,7 @@ final readonly class SaveCampaignHandler implements SaveCampaignUseCase {
 		private ApplicationEventBusPort $event_bus,
 	) {}
 
+	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	/**
 	 * Saves the given campaign.
 	 *
@@ -45,12 +47,20 @@ final readonly class SaveCampaignHandler implements SaveCampaignUseCase {
 	 *
 	 * @return CampaignRepositorySaveOutcome The repository save outcome.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When saving the campaign fails.
-	 * @throws ApplicationEventBusExceptionInterface When publishing the campaign created/updated event fails.
+	 * @throws SaveCampaignException When campaign save fails.
 	 */
 	public function handle( Campaign $campaign ): CampaignRepositorySaveOutcome {
 
-		$outcome = $this->repository->save( $campaign );
+		try {
+			$outcome = $this->repository->save( $campaign );
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
+			throw new SaveCampaignException(
+				stage: UseCaseFailureStage::Persistence,
+				message: sprintf( 'Failed to save campaign "%s".', (string) $campaign->get_id()->get_value() ),
+				previous: $e,
+			);
+		}
+
 		$entity_id = $outcome->campaign->get_id();
 
 		$event = match ( $outcome->result ) {
@@ -58,8 +68,20 @@ final readonly class SaveCampaignHandler implements SaveCampaignUseCase {
 			CampaignRepositorySaveResult::Updated => new CampaignUpdatedEvent( $entity_id ),
 		};
 
-		$this->event_bus->publish( $event );
+		try {
+			$this->event_bus->publish( $event );
+		} catch ( ApplicationEventBusExceptionInterface $e ) {
+			throw new SaveCampaignException(
+				stage: UseCaseFailureStage::EventPublish,
+				message: sprintf(
+					'Campaign "%s" was saved, but publishing the lifecycle event failed.',
+					(string) $entity_id->get_value(),
+				),
+				previous: $e,
+			);
+		}
 
 		return $outcome;
 	}
+	// phpcs:enable
 }

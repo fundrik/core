@@ -26,3 +26,11 @@
 # Architecture Conventions
 
 - Port interface docblocks should use the standard wording `Provides the <inbound|outbound> port for ...` for consistency across the codebase.
+
+# Use Case Failure Conventions
+
+- For application use-case failures, use the shared `UseCaseFailureStage` enum (`Precondition`, `Persistence`, `EventPublish`) by default.
+- Treat `stage` as "where the failure happened" and `reason` as "why it happened within that stage".
+- Add operation-specific reason enums only when needed for branching logic, and scope them to a stage (for example, `DeleteCampaignPreconditionReason` for `Precondition`).
+- Do not introduce per-use-case `*FailureStage` enums unless there is an explicit and documented need to diverge from `UseCaseFailureStage`.
+- Keep `reason` nullable for non-precondition failures unless a use case explicitly defines another stage-specific reason contract.

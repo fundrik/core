@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases\FindCampaignById;
 
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
+use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
@@ -22,6 +24,9 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( FindCampaignByIdHandler::class )]
+#[UsesClass( FindCampaignByIdException::class )]
+#[UsesClass( CampaignApplicationException::class )]
+#[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
@@ -87,8 +92,11 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 			->once()
 			->andThrow( $e );
 
-		$this->expectException( CampaignRepositoryExceptionInterface::class );
-
-		$this->handler->handle( $campaign_id );
+		try {
+			$this->handler->handle( $campaign_id );
+			$this->fail( 'Expected FindCampaignByIdException to be thrown.' );
+		} catch ( FindCampaignByIdException $exception ) {
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
 	}
 }

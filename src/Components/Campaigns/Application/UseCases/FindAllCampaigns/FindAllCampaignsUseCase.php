@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\FindAllCampaigns;
 
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 
 /**
@@ -19,11 +18,11 @@ interface FindAllCampaignsUseCase {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return array<Campaign> The list of campaigns.
+	 * @return array<int, Campaign> The list of campaigns.
 	 *
 	 * @phpstan-return list<Campaign>
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When retrieving campaigns fails.
+	 * @throws FindAllCampaignsException When retrieving campaigns fails.
 	 */
 	public function handle(): array;
 }

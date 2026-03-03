@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases\DeleteCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\CampaignHasDonationsException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignPreconditionReason;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
-use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
@@ -33,7 +34,11 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( DeleteCampaignHandler::class )]
-#[UsesClass( CampaignHasDonationsException::class )]
+#[UsesClass( DeleteCampaignException::class )]
+#[UsesClass( UseCaseFailureStage::class )]
+#[UsesClass( DeleteCampaignPreconditionReason::class )]
+#[UsesClass( CampaignApplicationException::class )]
+#[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( CampaignDeletedEvent::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
@@ -69,7 +74,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$campaign_id = $this->make_campaign()->get_id();
 
 		$this->donations
-			->shouldReceive( 'find_by_campaign_id' )
+			->shouldReceive( 'find_all_by_campaign_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( [] );
@@ -104,7 +109,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$e = new FakeCampaignRepositoryException();
 
 		$this->donations
-			->shouldReceive( 'find_by_campaign_id' )
+			->shouldReceive( 'find_all_by_campaign_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( [] );
@@ -118,9 +123,13 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$this->event_bus
 			->shouldNotReceive( 'publish' );
 
-		$this->expectException( CampaignRepositoryExceptionInterface::class );
-
-		$this->handler->handle( $campaign_id );
+		try {
+			$this->handler->handle( $campaign_id );
+			$this->fail( 'Expected DeleteCampaignException to be thrown.' );
+		} catch ( DeleteCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
 	}
 
 	#[Test]
@@ -130,7 +139,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$e = new FakeApplicationEventBusException();
 
 		$this->donations
-			->shouldReceive( 'find_by_campaign_id' )
+			->shouldReceive( 'find_all_by_campaign_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( [] );
@@ -145,9 +154,13 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 			->once()
 			->andThrow( $e );
 
-		$this->expectException( ApplicationEventBusExceptionInterface::class );
-
-		$this->handler->handle( $campaign_id );
+		try {
+			$this->handler->handle( $campaign_id );
+			$this->fail( 'Expected DeleteCampaignException to be thrown.' );
+		} catch ( DeleteCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::EventPublish, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
 	}
 
 	#[Test]
@@ -157,7 +170,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$donation = $this->make_donation( $campaign_id );
 
 		$this->donations
-			->shouldReceive( 'find_by_campaign_id' )
+			->shouldReceive( 'find_all_by_campaign_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( [ $donation ] );
@@ -168,10 +181,14 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$this->event_bus
 			->shouldNotReceive( 'publish' );
 
-		$this->expectException( CampaignHasDonationsException::class );
-		$this->expectExceptionMessage( 'Cannot delete campaign "1": campaign already has donations.' );
-
-		$this->handler->handle( $campaign_id );
+		try {
+			$this->handler->handle( $campaign_id );
+			$this->fail( 'Expected DeleteCampaignException to be thrown.' );
+		} catch ( DeleteCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+			$this->assertSame( DeleteCampaignPreconditionReason::HasDonations, $exception->get_reason() );
+			$this->assertSame( 'Cannot delete campaign "1": campaign already has donations.', $exception->getMessage() );
+		}
 	}
 
 	#[Test]
@@ -181,7 +198,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$e = new FakeDonationRepositoryException();
 
 		$this->donations
-			->shouldReceive( 'find_by_campaign_id' )
+			->shouldReceive( 'find_all_by_campaign_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andThrow( $e );
@@ -192,9 +209,14 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 		$this->event_bus
 			->shouldNotReceive( 'publish' );
 
-		$this->expectException( DonationRepositoryExceptionInterface::class );
-
-		$this->handler->handle( $campaign_id );
+		try {
+			$this->handler->handle( $campaign_id );
+			$this->fail( 'Expected DeleteCampaignException to be thrown.' );
+		} catch ( DeleteCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+			$this->assertSame( DeleteCampaignPreconditionReason::DonationsLookupFailed, $exception->get_reason() );
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
 	}
 
 	private function make_donation( EntityId $campaign_id ): Donation {
