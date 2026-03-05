@@ -27,6 +27,10 @@
 
 - Port interface docblocks should use the standard wording `Provides the <inbound|outbound> port for ...` for consistency across the codebase.
 
+# Public API Conventions
+
+- Treat this package as a public library: when designing or changing behavior, evaluate not only current internal usage, but also API clarity, ergonomics, and logical consistency for external consumers.
+
 # Use Case Failure Conventions
 
 - For application use-case failures, use the shared `UseCaseFailureStage` enum (`Precondition`, `Persistence`, `EventPublish`) by default.
