@@ -13,6 +13,8 @@ use Fundrik\Core\Components\Donations\Domain\Exceptions\InvalidDonationAmountExc
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidUtcDateTimeException;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -24,6 +26,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
 #[UsesClass( EntityVersion::class )]
+#[UsesClass( InvalidUtcDateTimeException::class )]
 final class DonationTest extends FundrikTestCase {
 
 	private DonationFactory $factory;
@@ -52,7 +55,8 @@ final class DonationTest extends FundrikTestCase {
 		$this->assertSame( 1_000, $donation->get_money()->get_amount_minor() );
 		$this->assertSame( 'RUB', $donation->get_money()->get_currency() );
 		$this->assertSame( DonationStatus::Pending, $donation->get_status() );
-		$this->assertSame( $created_at, $donation->get_created_at() );
+		$this->assertSame( 'UTC', $donation->get_created_at()->get_value()->getTimezone()->getName() );
+		$this->assertSame( $created_at->getTimestamp(), $donation->get_created_at()->get_value()->getTimestamp() );
 		$this->assertNull( $donation->get_captured_at() );
 		$this->assertNull( $donation->get_status_changed_at() );
 	}
@@ -63,22 +67,49 @@ final class DonationTest extends FundrikTestCase {
 		$donation = $this->make_pending_donation();
 		$authorized_at = new DateTimeImmutable( '2026-02-26T10:10:00+00:00' );
 
-		$authorized = $donation->authorize( $authorized_at );
+		$authorized = $donation->authorize( UtcDateTime::create( $authorized_at ) );
 
 		$this->assertSame( DonationStatus::Authorized, $authorized->get_status() );
-		$this->assertSame( $authorized_at, $authorized->get_status_changed_at() );
+		$this->assertSame( 'UTC', $authorized->get_status_changed_at()?->get_value()->getTimezone()->getName() );
+		$this->assertSame( $authorized_at->getTimestamp(), $authorized->get_status_changed_at()?->get_value()->getTimestamp() );
 		$this->assertNull( $authorized->get_captured_at() );
+	}
+
+	#[Test]
+	public function throws_when_authorize_timestamp_is_not_utc(): void {
+
+		$this->expectException( InvalidUtcDateTimeException::class );
+		$this->expectExceptionMessage( 'Timestamp must use UTC timezone offset. Given: "+03:00".' );
+
+		$donation = $this->make_pending_donation();
+		$donation->authorize( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T13:10:00+03:00' ) ) );
+	}
+
+	#[Test]
+	public function throws_when_created_at_timestamp_is_not_utc(): void {
+
+		$this->expectException( InvalidUtcDateTimeException::class );
+		$this->expectExceptionMessage( 'Timestamp must use UTC timezone offset. Given: "+03:00".' );
+
+		new Donation(
+			id: EntityId::create( 1 ),
+			version: EntityVersion::initial(),
+			campaign_id: EntityId::create( 2 ),
+			money: Money::create( 100, 'RUB' ),
+			status: DonationStatus::Pending,
+			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T13:00:00+03:00' ) ),
+		);
 	}
 
 	#[Test]
 	public function capture_is_allowed_from_pending_and_authorized(): void {
 
 		$capture_from_pending = $this->make_pending_donation()
-			->capture( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) );
+			->capture( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) ) );
 
 		$capture_from_authorized = $this->make_pending_donation()
-			->authorize( new DateTimeImmutable( '2026-02-26T10:10:00+00:00' ) )
-			->capture( new DateTimeImmutable( '2026-02-26T10:20:00+00:00' ) );
+			->authorize( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:10:00+00:00' ) ) )
+			->capture( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:20:00+00:00' ) ) );
 
 		$this->assertSame( DonationStatus::Captured, $capture_from_pending->get_status() );
 		$this->assertSame( DonationStatus::Captured, $capture_from_authorized->get_status() );
@@ -90,9 +121,9 @@ final class DonationTest extends FundrikTestCase {
 	public function refund_is_allowed_only_from_captured(): void {
 
 		$captured = $this->make_pending_donation()
-			->capture( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) );
+			->capture( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) ) );
 
-		$refunded = $captured->refund( new DateTimeImmutable( '2026-02-26T10:20:00+00:00' ) );
+		$refunded = $captured->refund( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:20:00+00:00' ) ) );
 
 		$this->assertSame( DonationStatus::Refunded, $refunded->get_status() );
 		$this->assertNotNull( $refunded->get_status_changed_at() );
@@ -106,6 +137,8 @@ final class DonationTest extends FundrikTestCase {
 
 		$this->assertSame( DonationStatus::Canceled, $canceled_from_pending->get_status() );
 		$this->assertSame( DonationStatus::Canceled, $canceled_from_authorized->get_status() );
+		$this->assertSame( 'UTC', $canceled_from_pending->get_status_changed_at()?->get_value()->getTimezone()->getName() );
+		$this->assertSame( 'UTC', $canceled_from_authorized->get_status_changed_at()?->get_value()->getTimezone()->getName() );
 	}
 
 	#[Test]
@@ -122,8 +155,8 @@ final class DonationTest extends FundrikTestCase {
 	public function throws_when_transition_is_not_allowed(): void {
 
 		$refunded = $this->make_pending_donation()
-			->capture( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) )
-			->refund( new DateTimeImmutable( '2026-02-26T10:20:00+00:00' ) );
+			->capture( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) ) )
+			->refund( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:20:00+00:00' ) ) );
 
 		$this->expectException( DonationChangeException::class );
 		$this->expectExceptionMessage( 'Cannot capture donation from status "refunded".' );
@@ -172,8 +205,8 @@ final class DonationTest extends FundrikTestCase {
 		);
 
 		$this->make_pending_donation()
-			->capture( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) )
-			->refund( new DateTimeImmutable( '2026-02-26T10:10:00+00:00' ) );
+			->capture( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:15:00+00:00' ) ) )
+			->refund( UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:10:00+00:00' ) ) );
 	}
 
 			#[Test]
@@ -202,8 +235,8 @@ final class DonationTest extends FundrikTestCase {
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
 			status: DonationStatus::Pending,
-			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
-			captured_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
+			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
+			captured_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
 		);
 	}
 
@@ -219,7 +252,7 @@ final class DonationTest extends FundrikTestCase {
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
 			status: DonationStatus::Authorized,
-			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
+			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
 		);
 	}
 
@@ -235,8 +268,8 @@ final class DonationTest extends FundrikTestCase {
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
 			status: DonationStatus::Captured,
-			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
-			status_changed_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
+			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
+			status_changed_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
 		);
 	}
 
@@ -252,9 +285,9 @@ final class DonationTest extends FundrikTestCase {
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
 			status: DonationStatus::Failed,
-			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
-			captured_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
-			status_changed_at: new DateTimeImmutable( '2026-02-26T10:02:00+00:00' ),
+			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
+			captured_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
+			status_changed_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:02:00+00:00' ) ),
 		);
 	}
 
@@ -270,8 +303,8 @@ final class DonationTest extends FundrikTestCase {
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
 			status: DonationStatus::Authorized,
-			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
-			status_changed_at: new DateTimeImmutable( '2026-02-26T09:59:00+00:00' ),
+			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
+			status_changed_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T09:59:00+00:00' ) ),
 		);
 	}
 
@@ -287,26 +320,24 @@ final class DonationTest extends FundrikTestCase {
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
 			status: DonationStatus::Captured,
-			created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
-			captured_at: new DateTimeImmutable( '2026-02-26T09:59:00+00:00' ),
-			status_changed_at: new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ),
+			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
+			captured_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T09:59:00+00:00' ) ),
+			status_changed_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
 		);
 	}
 
 			#[Test]
 	public function allows_refund_when_status_changed_at_equals_captured_at(): void {
 
-			$captured_at = new DateTimeImmutable( '2026-02-26T10:15:00+00:00' );
-		$refunded = $this->make_pending_donation()->capture( $captured_at )->refund( $captured_at );
+		$captured_at = new DateTimeImmutable( '2026-02-26T10:15:00+00:00' );
+		$refunded = $this->make_pending_donation()
+			->capture( UtcDateTime::create( $captured_at ) )
+			->refund( UtcDateTime::create( $captured_at ) );
 		$this->assertSame( DonationStatus::Refunded, $refunded->get_status() );
-		$this->assertSame(
-			$captured_at,
-			$refunded->get_captured_at(),
-		);
-		$this->assertSame(
-			$captured_at,
-			$refunded->get_status_changed_at(),
-		);
+		$this->assertSame( 'UTC', $refunded->get_captured_at()?->get_value()->getTimezone()->getName() );
+		$this->assertSame( 'UTC', $refunded->get_status_changed_at()?->get_value()->getTimezone()->getName() );
+		$this->assertSame( $captured_at->getTimestamp(), $refunded->get_captured_at()?->get_value()->getTimestamp() );
+		$this->assertSame( $captured_at->getTimestamp(), $refunded->get_status_changed_at()?->get_value()->getTimestamp() );
 	}
 
 		#[Test]
@@ -318,9 +349,9 @@ final class DonationTest extends FundrikTestCase {
 					campaign_id: EntityId::create( 2 ),
 					money: Money::create( 100, 'RUB' ),
 					status: DonationStatus::Captured,
-					created_at: new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
-					captured_at: new DateTimeImmutable( '2026-02-26T10:10:00+00:00' ),
-					status_changed_at: new DateTimeImmutable( '2026-02-26T10:05:00+00:00' ),
+					created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
+					captured_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:10:00+00:00' ) ),
+					status_changed_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:05:00+00:00' ) ),
 				);
 
 		$this->assertSame(
@@ -340,8 +371,8 @@ final class DonationTest extends FundrikTestCase {
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
 			status: DonationStatus::Authorized,
-			created_at: $created_at,
-			status_changed_at: $created_at,
+			created_at: UtcDateTime::create( $created_at ),
+			status_changed_at: UtcDateTime::create( $created_at ),
 		);
 
 		$this->assertSame(

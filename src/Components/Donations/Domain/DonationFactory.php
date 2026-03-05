@@ -14,11 +14,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyAmountException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyCurrencyException;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidUtcDateTimeException;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use ValueError;
 
 /**
  * Creates Donation entities.
+ * Validates timestamps as UTC.
  *
  * @since 0.1.0
  */
@@ -34,9 +37,9 @@ final readonly class DonationFactory {
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Money $money Donation amount and currency.
 	 * @param DonationStatus $status Donation status.
-	 * @param DateTimeImmutable $created_at Creation timestamp.
-	 * @param DateTimeImmutable|null $captured_at Capture timestamp.
-	 * @param DateTimeImmutable|null $status_changed_at Status change timestamp.
+	 * @param UtcDateTime $created_at Creation timestamp.
+	 * @param UtcDateTime|null $captured_at Capture timestamp.
+	 * @param UtcDateTime|null $status_changed_at Status change timestamp.
 	 *
 	 * @return Donation Donation entity.
 	 */
@@ -46,9 +49,9 @@ final readonly class DonationFactory {
 		EntityId $campaign_id,
 		Money $money,
 		DonationStatus $status,
-		DateTimeImmutable $created_at,
-		?DateTimeImmutable $captured_at = null,
-		?DateTimeImmutable $status_changed_at = null,
+		UtcDateTime $created_at,
+		?UtcDateTime $captured_at = null,
+		?UtcDateTime $status_changed_at = null,
 	): Donation {
 
 		return new Donation(
@@ -103,9 +106,9 @@ final readonly class DonationFactory {
 				campaign_id: EntityId::create( $campaign_id ),
 				money: Money::create( $amount_minor, $currency ),
 				status: DonationStatus::from( $status ),
-				created_at: $created_at,
-				captured_at: $captured_at,
-				status_changed_at: $status_changed_at,
+				created_at: UtcDateTime::create( $created_at ),
+				captured_at: $captured_at === null ? null : UtcDateTime::create( $captured_at ),
+				status_changed_at: $status_changed_at === null ? null : UtcDateTime::create( $status_changed_at ),
 			);
 
 		} catch (
@@ -113,15 +116,13 @@ final readonly class DonationFactory {
 			| InvalidEntityVersionException
 			| InvalidMoneyAmountException
 			| InvalidMoneyCurrencyException
+			| InvalidUtcDateTimeException
 			| InvalidDonationAmountException
 			| DonationChangeException
 			| ValueError $e
 		) {
 
-			throw new DonationFactoryException(
-				'Failed to create donation from primitives.',
-				previous: $e,
-			);
+			throw new DonationFactoryException( 'Failed to create donation from primitives.', previous: $e );
 		}
 	}
 	// phpcs:enable
@@ -134,7 +135,7 @@ final readonly class DonationFactory {
 	 * @param EntityId $id Donation ID.
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Money $money Donation amount and currency.
-	 * @param DateTimeImmutable|null $created_at Optional creation timestamp.
+	 * @param DateTimeImmutable|null $created_at Optional creation timestamp. If null, current UTC time is used.
 	 *
 	 * @return Donation Pending donation.
 	 */
@@ -151,7 +152,7 @@ final readonly class DonationFactory {
 			campaign_id: $campaign_id,
 			money: $money,
 			status: DonationStatus::Pending,
-			created_at: $created_at ?? new DateTimeImmutable(),
+			created_at: $created_at === null ? UtcDateTime::now() : UtcDateTime::create( $created_at ),
 		);
 	}
 
@@ -164,7 +165,7 @@ final readonly class DonationFactory {
 	 * @param int|string $campaign_id Campaign ID.
 	 * @param int $amount_minor Donation amount in minor units.
 	 * @param string $currency Donation currency (ISO 4217).
-	 * @param DateTimeImmutable|null $created_at Creation timestamp.
+	 * @param DateTimeImmutable|null $created_at Optional creation timestamp. If null, current UTC time is used.
 	 *
 	 * @return Donation Pending donation.
 	 *
@@ -191,13 +192,11 @@ final readonly class DonationFactory {
 			InvalidEntityIdException
 			| InvalidMoneyAmountException
 			| InvalidMoneyCurrencyException
+			| InvalidUtcDateTimeException
 			| InvalidDonationAmountException $e
 		) {
 
-			throw new DonationFactoryException(
-				'Failed to create pending donation from primitives.',
-				previous: $e,
-			);
+			throw new DonationFactoryException( 'Failed to create pending donation from primitives.', previous: $e );
 		}
 	}
 }

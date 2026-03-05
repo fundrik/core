@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Domain;
 
-use DateTimeImmutable;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\InvalidDonationAmountException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 
 /**
  * Represents a fundraising donation.
@@ -28,9 +28,9 @@ final readonly class Donation {
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Money $money Donation amount and currency.
 	 * @param DonationStatus $status Donation status.
-	 * @param DateTimeImmutable $created_at Creation timestamp.
-	 * @param DateTimeImmutable|null $captured_at Capture timestamp.
-	 * @param DateTimeImmutable|null $status_changed_at Status change timestamp.
+	 * @param UtcDateTime $created_at Creation timestamp.
+	 * @param UtcDateTime|null $captured_at Capture timestamp.
+	 * @param UtcDateTime|null $status_changed_at Status change timestamp.
 	 *
 	 * @throws InvalidDonationAmountException When amount is zero or negative.
 	 * @throws DonationChangeException When state/timestamps are inconsistent.
@@ -41,9 +41,9 @@ final readonly class Donation {
 		private EntityId $campaign_id,
 		private Money $money,
 		private DonationStatus $status,
-		private DateTimeImmutable $created_at,
-		private ?DateTimeImmutable $captured_at = null,
-		private ?DateTimeImmutable $status_changed_at = null,
+		private UtcDateTime $created_at,
+		private ?UtcDateTime $captured_at = null,
+		private ?UtcDateTime $status_changed_at = null,
 	) {
 
 		if ( $this->money->get_amount_minor() <= 0 ) {
@@ -124,9 +124,9 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return DateTimeImmutable Creation timestamp.
+	 * @return UtcDateTime Creation timestamp.
 	 */
-	public function get_created_at(): DateTimeImmutable {
+	public function get_created_at(): UtcDateTime {
 
 		return $this->created_at;
 	}
@@ -136,9 +136,9 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return DateTimeImmutable|null Capture timestamp.
+	 * @return UtcDateTime|null Capture timestamp.
 	 */
-	public function get_captured_at(): ?DateTimeImmutable {
+	public function get_captured_at(): ?UtcDateTime {
 
 		return $this->captured_at;
 	}
@@ -148,9 +148,9 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return DateTimeImmutable|null Status change timestamp.
+	 * @return UtcDateTime|null Status change timestamp.
 	 */
-	public function get_status_changed_at(): ?DateTimeImmutable {
+	public function get_status_changed_at(): ?UtcDateTime {
 
 		return $this->status_changed_at;
 	}
@@ -162,13 +162,13 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DateTimeImmutable|null $at Optional authorization timestamp.
+	 * @param UtcDateTime|null $at Optional authorization timestamp. If omitted or null, current UTC time is used.
 	 *
 	 * @return self Donation in authorized status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function authorize( ?DateTimeImmutable $at = null ): self {
+	public function authorize( ?UtcDateTime $at = null ): self {
 
 		$this->assert_transition_allowed( [ DonationStatus::Pending ], 'authorize' );
 
@@ -185,13 +185,13 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DateTimeImmutable|null $at Optional capture timestamp.
+	 * @param UtcDateTime|null $at Optional capture timestamp. If omitted or null, current UTC time is used.
 	 *
 	 * @return self Donation in captured status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function capture( ?DateTimeImmutable $at = null ): self {
+	public function capture( ?UtcDateTime $at = null ): self {
 
 		$this->assert_transition_allowed(
 			[ DonationStatus::Pending, DonationStatus::Authorized ],
@@ -210,13 +210,13 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DateTimeImmutable|null $at Optional failure timestamp.
+	 * @param UtcDateTime|null $at Optional failure timestamp. If omitted or null, current UTC time is used.
 	 *
 	 * @return self Donation in failed status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function fail( ?DateTimeImmutable $at = null ): self {
+	public function fail( ?UtcDateTime $at = null ): self {
 
 		$this->assert_transition_allowed(
 			[ DonationStatus::Pending, DonationStatus::Authorized ],
@@ -236,13 +236,13 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DateTimeImmutable|null $at Optional refund timestamp.
+	 * @param UtcDateTime|null $at Optional refund timestamp. If omitted or null, current UTC time is used.
 	 *
 	 * @return self Donation in refunded status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function refund( ?DateTimeImmutable $at = null ): self {
+	public function refund( ?UtcDateTime $at = null ): self {
 
 		$this->assert_transition_allowed( [ DonationStatus::Captured ], 'refund' );
 
@@ -260,13 +260,13 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DateTimeImmutable|null $at Optional cancel timestamp.
+	 * @param UtcDateTime|null $at Optional cancel timestamp. If omitted or null, current UTC time is used.
 	 *
 	 * @return self Donation in canceled status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function cancel( ?DateTimeImmutable $at = null ): self {
+	public function cancel( ?UtcDateTime $at = null ): self {
 
 		$this->assert_transition_allowed(
 			[ DonationStatus::Pending, DonationStatus::Authorized ],
@@ -285,15 +285,15 @@ final readonly class Donation {
 	 * @since 0.1.0
 	 *
 	 * @param DonationStatus $status New status.
-	 * @param DateTimeImmutable|null $captured_at Capture timestamp.
-	 * @param DateTimeImmutable|null $status_changed_at Status change timestamp.
+	 * @param UtcDateTime|null $captured_at Capture timestamp.
+	 * @param UtcDateTime|null $status_changed_at Status change timestamp.
 	 *
 	 * @return self Updated immutable donation.
 	 */
 	private function with_status(
 		DonationStatus $status,
-		?DateTimeImmutable $captured_at = null,
-		?DateTimeImmutable $status_changed_at = null,
+		?UtcDateTime $captured_at = null,
+		?UtcDateTime $status_changed_at = null,
 	): self {
 
 		return new self(
@@ -317,68 +317,148 @@ final readonly class Donation {
 	 */
 	private function assert_state_consistency(): void {
 
-		$this->assert_pending_state();
-		$this->assert_non_pending_state();
-		$this->assert_captured_state();
+		$this->assert_status_invariants();
 		$this->assert_temporal_order();
 	}
 
 	/**
-	 * Validates pending state.
+	 * Validates status-dependent invariants.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @throws DonationChangeException When status fields are inconsistent.
+	 */
+	private function assert_status_invariants(): void {
+
+		match ( $this->status ) {
+			DonationStatus::Pending => $this->assert_pending_status_invariants(),
+			DonationStatus::Captured => $this->assert_captured_status_invariants(),
+			DonationStatus::Refunded => $this->assert_refunded_status_invariants(),
+			DonationStatus::Authorized,
+			DonationStatus::Failed,
+			DonationStatus::Canceled => $this->assert_non_capture_status_invariants(),
+		};
+	}
+
+	/**
+	 * Validates pending status invariants.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @throws DonationChangeException When pending state carries status timestamps.
 	 */
-	private function assert_pending_state(): void {
+	private function assert_pending_status_invariants(): void {
 
-		if ( $this->status !== DonationStatus::Pending ) {
+		if ( $this->captured_at === null && $this->status_changed_at === null ) {
 			return;
 		}
 
-		if ( $this->captured_at !== null || $this->status_changed_at !== null ) {
-			throw new DonationChangeException( 'Pending donation must not have status timestamps.' );
-		}
+		throw new DonationChangeException( 'Pending donation must not have status timestamps.' );
 	}
 
 	/**
-	 * Validates non-pending state.
+	 * Validates non-capture statuses (authorized/failed/canceled).
 	 *
 	 * @since 0.1.0
 	 *
-	 * @throws DonationChangeException When non-pending state has no status timestamp.
+	 * @throws DonationChangeException When status fields are inconsistent.
 	 */
-	private function assert_non_pending_state(): void {
+	private function assert_non_capture_status_invariants(): void {
 
-		if ( $this->status === DonationStatus::Pending || $this->status_changed_at !== null ) {
+		$this->require_status_changed_at();
+
+		if ( $this->captured_at === null ) {
 			return;
+		}
+
+		throw new DonationChangeException( 'Only captured/refunded donations can have captured_at timestamp.' );
+	}
+
+	/**
+	 * Validates captured status invariants.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @throws DonationChangeException When status fields are inconsistent.
+	 */
+	private function assert_captured_status_invariants(): void {
+
+		$this->require_status_changed_at();
+		$this->require_captured_at();
+	}
+
+	/**
+	 * Validates refunded status invariants.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @throws DonationChangeException When status fields are inconsistent.
+	 */
+	private function assert_refunded_status_invariants(): void {
+
+		$this->require_status_changed_at();
+		$this->require_captured_at();
+	}
+
+	/**
+	 * Returns non-null status_changed_at for non-pending statuses.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return UtcDateTime Status change timestamp.
+	 *
+	 * @throws DonationChangeException When status_changed_at is missing.
+	 */
+	private function require_status_changed_at(): UtcDateTime {
+
+		if ( $this->status_changed_at !== null ) {
+			return $this->status_changed_at;
 		}
 
 		throw new DonationChangeException( 'Non-pending donation must have status_changed_at timestamp.' );
 	}
 
 	/**
-	 * Validates captured/refunded state requirements.
+	 * Returns non-null captured_at for captured/refunded statuses.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @throws DonationChangeException When captured_at usage is inconsistent.
+	 * @return UtcDateTime Capture timestamp.
+	 *
+	 * @throws DonationChangeException When captured_at is missing.
 	 */
-	private function assert_captured_state(): void {
+	private function require_captured_at(): UtcDateTime {
 
-		$requires_capture = in_array(
-			$this->status,
-			[ DonationStatus::Captured, DonationStatus::Refunded ],
-			true,
+		if ( $this->captured_at !== null ) {
+			return $this->captured_at;
+		}
+
+		throw new DonationChangeException( 'Captured/refunded donation must have captured_at timestamp.' );
+	}
+
+	/**
+	 * Validates refunded status temporal order.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @throws DonationChangeException When refund is earlier than capture.
+	 */
+	private function assert_refunded_after_capture(): void {
+
+		if ( $this->status !== DonationStatus::Refunded ) {
+			return;
+		}
+
+		$status_changed_at = $this->require_status_changed_at();
+		$captured_at = $this->require_captured_at();
+
+		if ( $status_changed_at->get_value() >= $captured_at->get_value() ) {
+			return;
+		}
+
+		throw new DonationChangeException(
+			'status_changed_at must not be earlier than captured_at for refunded donation.',
 		);
-
-		if ( $requires_capture && $this->captured_at === null ) {
-			throw new DonationChangeException( 'Captured/refunded donation must have captured_at timestamp.' );
-		}
-
-		if ( ! $requires_capture && $this->captured_at !== null ) {
-			throw new DonationChangeException( 'Only captured/refunded donations can have captured_at timestamp.' );
-		}
 	}
 
 	/**
@@ -392,17 +472,7 @@ final readonly class Donation {
 
 		$this->assert_not_before_created( $this->captured_at, 'captured_at' );
 		$this->assert_not_before_created( $this->status_changed_at, 'status_changed_at' );
-
-		if (
-			$this->status === DonationStatus::Refunded
-			&& $this->captured_at !== null
-			&& $this->status_changed_at !== null
-			&& $this->status_changed_at < $this->captured_at
-		) {
-			throw new DonationChangeException(
-				'status_changed_at must not be earlier than captured_at for refunded donation.',
-			);
-		}
+		$this->assert_refunded_after_capture();
 	}
 
 	/**
@@ -410,14 +480,14 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DateTimeImmutable|null $timestamp Timestamp to validate.
+	 * @param UtcDateTime|null $timestamp Timestamp to validate.
 	 * @param string $field_name Field name for exception message.
 	 *
 	 * @throws DonationChangeException When timestamp is earlier than created_at.
 	 */
-	private function assert_not_before_created( ?DateTimeImmutable $timestamp, string $field_name ): void {
+	private function assert_not_before_created( ?UtcDateTime $timestamp, string $field_name ): void {
 
-		if ( $timestamp === null || $timestamp >= $this->created_at ) {
+		if ( $timestamp === null || $timestamp->get_value() >= $this->created_at->get_value() ) {
 			return;
 		}
 
@@ -452,12 +522,12 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DateTimeImmutable|null $at Optional timestamp.
+	 * @param UtcDateTime|null $at Optional timestamp in UTC. If omitted or null, current UTC time is used.
 	 *
-	 * @return DateTimeImmutable Provided timestamp or now.
+	 * @return UtcDateTime UTC timestamp.
 	 */
-	private static function resolve_time( ?DateTimeImmutable $at ): DateTimeImmutable {
+	private static function resolve_time( ?UtcDateTime $at ): UtcDateTime {
 
-		return $at ?? new DateTimeImmutable();
+		return $at ?? UtcDateTime::now();
 	}
 }

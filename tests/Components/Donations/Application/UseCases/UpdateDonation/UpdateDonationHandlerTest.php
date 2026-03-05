@@ -17,6 +17,7 @@ use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -99,9 +100,9 @@ final class UpdateDonationHandlerTest extends MockeryTestCase {
 			campaign_id: EntityId::create( 901 ),
 			money: Money::create( 1_000, 'RUB' ),
 			status: DonationStatus::Captured,
-			created_at: $created_at,
-			captured_at: $captured_at,
-			status_changed_at: $captured_at,
+			created_at: UtcDateTime::create( $created_at ),
+			captured_at: UtcDateTime::create( $captured_at ),
+			status_changed_at: UtcDateTime::create( $captured_at ),
 		);
 	}
 }
