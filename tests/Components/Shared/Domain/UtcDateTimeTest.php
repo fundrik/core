@@ -45,6 +45,14 @@ final class UtcDateTimeTest extends FundrikTestCase {
 	}
 
 	#[Test]
+	public function format_returns_formatted_utc_timestamp(): void {
+
+		$utc_date_time = UtcDateTime::create( new DateTimeImmutable( '2026-03-01T10:00:00+00:00' ) );
+
+		$this->assertSame( '2026-03-01T10:00:00+00:00', $utc_date_time->format( 'Y-m-d\TH:i:sP' ) );
+	}
+
+	#[Test]
 	public function equals_compares_timestamp_values(): void {
 
 		$date_time1 = UtcDateTime::create( new DateTimeImmutable( '2026-03-01T10:00:00+00:00' ) );

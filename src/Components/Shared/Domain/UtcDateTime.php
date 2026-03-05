@@ -83,6 +83,20 @@ final readonly class UtcDateTime {
 	}
 
 	/**
+	 * Formats UTC timestamp using DateTime format.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $format DateTime format string.
+	 *
+	 * @return string Formatted UTC timestamp.
+	 */
+	public function format( string $format ): string {
+
+		return $this->value->format( $format );
+	}
+
+	/**
 	 * Checks whether this UTC timestamp equals another.
 	 *
 	 * @since 0.1.0
