@@ -100,6 +100,18 @@ final readonly class Campaign {
 	}
 
 	/**
+	 * Returns whether the campaign can receive new donations.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return bool True when the campaign is active and open for donations.
+	 */
+	public function can_receive_donations(): bool {
+
+		return $this->is_active && $this->is_open;
+	}
+
+	/**
 	 * Returns whether the campaign has a target.
 	 *
 	 * @since 0.1.0

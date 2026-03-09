@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation;
 
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
@@ -21,12 +23,15 @@ final readonly class CreateDonationHandler implements CreateDonationUseCase {
 	 *
 	 * @since 0.1.0
 	 *
+	 * @param CampaignRepositoryPort $campaigns Retrieves campaigns for donation precondition checks.
 	 * @param DonationRepositoryPort $repository Adds donations to storage.
 	 */
 	public function __construct(
+		private CampaignRepositoryPort $campaigns,
 		private DonationRepositoryPort $repository,
 	) {}
 
+	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	/**
 	 * Creates a new donation.
 	 *
@@ -39,6 +44,47 @@ final readonly class CreateDonationHandler implements CreateDonationUseCase {
 	 * @throws CreateDonationException When donation creation fails.
 	 */
 	public function handle( Donation $donation ): Donation {
+
+		$campaign_id = $donation->get_campaign_id();
+		$donation_id = $donation->get_id();
+
+		try {
+			$campaign = $this->campaigns->find_by_id( $campaign_id );
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: CreateDonationPreconditionReason::CampaignLookupFailed,
+				message: sprintf(
+					'Failed to retrieve campaign "%s".',
+					(string) $campaign_id->get_value(),
+				),
+				previous: $e,
+			);
+		}
+
+		if ( $campaign === null ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: CreateDonationPreconditionReason::CampaignNotFound,
+				message: sprintf(
+					'Cannot create donation "%s": campaign "%s" does not exist.',
+					(string) $donation_id->get_value(),
+					(string) $campaign_id->get_value(),
+				),
+			);
+		}
+
+		if ( ! $campaign->can_receive_donations() ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: CreateDonationPreconditionReason::CampaignCannotReceiveDonations,
+				message: sprintf(
+					'Cannot create donation "%s": campaign "%s" cannot receive donations.',
+					(string) $donation_id->get_value(),
+					(string) $campaign_id->get_value(),
+				),
+			);
+		}
 
 		try {
 			return $this->repository->insert( $donation );
@@ -53,4 +99,5 @@ final readonly class CreateDonationHandler implements CreateDonationUseCase {
 			);
 		}
 	}
+	// phpcs:enable
 }

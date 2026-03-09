@@ -36,6 +36,7 @@ final class CampaignTest extends FundrikTestCase {
 		$this->assertTrue( $entity_id->equals( $campaign->get_id() ) );
 		$this->assertTrue( $campaign->is_active() );
 		$this->assertTrue( $campaign->is_open() );
+		$this->assertTrue( $campaign->can_receive_donations() );
 		$this->assertTrue(
 			$campaign->has_target(),
 		);
@@ -184,6 +185,20 @@ final class CampaignTest extends FundrikTestCase {
 		$this->expectExceptionMessage( 'Cannot close campaign: already closed.' );
 
 		$closed->close();
+	}
+
+	#[Test]
+	public function can_receive_donations_requires_campaign_to_be_active_and_open(): void {
+
+		$active_open = $this->make_campaign( is_active: true, is_open: true );
+		$active_closed = $this->make_campaign( is_active: true, is_open: false );
+		$inactive_open = $this->make_campaign( is_active: false, is_open: true );
+		$inactive_closed = $this->make_campaign( is_active: false, is_open: false );
+
+		$this->assertTrue( $active_open->can_receive_donations() );
+		$this->assertFalse( $active_closed->can_receive_donations() );
+		$this->assertFalse( $inactive_open->can_receive_donations() );
+		$this->assertFalse( $inactive_closed->can_receive_donations() );
 	}
 
 	#[Test]
