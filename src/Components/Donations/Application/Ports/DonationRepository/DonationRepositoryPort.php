@@ -77,7 +77,8 @@ interface DonationRepositoryPort {
 	 *
 	 * @return Donation The persisted donation snapshot.
 	 *
-	 * @throws DonationRepositoryExceptionInterface When the insert fails.
+	 * @throws DonationRepositoryExceptionInterface When the insert fails, including when a
+	 *                                              donation with the same ID already exists.
 	 */
 	public function insert( Donation $donation ): Donation;
 
@@ -90,7 +91,8 @@ interface DonationRepositoryPort {
 	 *
 	 * @return Donation The persisted donation snapshot.
 	 *
-	 * @throws DonationRepositoryExceptionInterface When the update fails.
+	 * @throws DonationRepositoryExceptionInterface When the update fails, including when the
+	 *                                              donation does not exist.
 	 */
 	public function update( Donation $donation ): Donation;
 }
