@@ -23,6 +23,7 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
@@ -49,6 +50,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
+#[UsesClass( UtcDateTime::class )]
 final class DeleteCampaignHandlerTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $repository;
