@@ -38,3 +38,10 @@
 - Add operation-specific reason enums only when needed for branching logic, and scope them to a stage (for example, `DeleteCampaignPreconditionReason` for `Precondition`).
 - Do not introduce per-use-case `*FailureStage` enums unless there is an explicit and documented need to diverge from `UseCaseFailureStage`.
 - Keep `reason` nullable for non-precondition failures unless a use case explicitly defines another stage-specific reason contract.
+
+# Project Scripts
+
+- Source of truth for runnable project commands is the `scripts` section in `composer.json`.
+- Before running lint/tests commands, read scripts from those files and execute via `composer run <script>`.
+- In this workspace, if `composer run <script>` fails because Composer uses a PHP build without `openssl`, rerun it as `$env:COMPOSER_ALLOW_XDEBUG='1'; php -c .tmp/php.ini -d extension=php_openssl.dll C:\ProgramData\ComposerSetup\bin\composer.phar run <script>`.
+- If a Composer script invokes `php` directly and still fails because extensions such as `mbstring` are missing, copy the underlying command from `composer.json` and run it with `php -c .tmp/php.ini ...` instead of plain `php`.
