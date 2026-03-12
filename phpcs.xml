@@ -39,6 +39,15 @@
 		</properties>
 	</rule>
 
+	<rule ref="FundrikStandard.Classes.RequireAbstractOrFinal">
+		<properties>
+			<property name="excludedClasses" type="array">
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationException"/>
+			</property>
+		</properties>
+	</rule>
+
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">

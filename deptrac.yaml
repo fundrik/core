@@ -16,23 +16,39 @@ deptrac:
         - type: classLike
           value: ^Fundrik\\Core\\Components\\[^\\]+\\Domain\\.+
 
-    - name: Application
+    - name: ApplicationSharedInterfaces
       collectors:
         - type: classLike
-          value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\(?!Ports\\).+
+          value: ^Fundrik\\Core\\Components\\Shared\\Application\\Exceptions\\FundrikApplicationExceptionInterface$
+        - type: classLike
+          value: ^Fundrik\\Core\\Components\\Shared\\Application\\Events\\ApplicationEventInterface$
 
     - name: ApplicationPorts
       collectors:
         - type: classLike
           value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\Ports\\.+
 
+    - name: Application
+      collectors:
+        - type: bool
+          must:
+            - type: classLike
+              value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\.+
+          must_not:
+            - type: layer
+              value: ApplicationSharedInterfaces
+            - type: layer
+              value: ApplicationPorts
+
   ruleset:
     Domain:
       - RamseyUuid
 
     Application:
+      - ApplicationSharedInterfaces
       - ApplicationPorts
       - Domain
 
     ApplicationPorts:
+      - ApplicationSharedInterfaces
       - Domain
