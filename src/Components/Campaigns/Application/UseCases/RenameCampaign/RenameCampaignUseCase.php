@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign;
 
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -26,7 +25,7 @@ interface RenameCampaignUseCase {
 	 *
 	 * @return Campaign Persisted campaign snapshot.
 	 *
-	 * @throws CampaignMutationException When renaming fails.
+	 * @throws RenameCampaignException When renaming fails.
 	 */
 	public function handle( EntityId $campaign_id, string|CampaignTitle $new_title ): Campaign;
 }

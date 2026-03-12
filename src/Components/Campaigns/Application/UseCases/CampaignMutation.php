@@ -51,12 +51,8 @@ enum CampaignMutation: string {
 	public function infinitive(): string {
 
 		return match ( $this ) {
-			self::Rename => 'rename',
-			self::Activate => 'activate',
-			self::Deactivate => 'deactivate',
-			self::Open => 'open',
-			self::Close => 'close',
 			self::SetTargetAmount => 'set target amount for',
+			default => $this->value,
 		};
 	}
 
@@ -89,12 +85,8 @@ enum CampaignMutation: string {
 	public function past_participle(): string {
 
 		return match ( $this ) {
-			self::Rename => 'renamed',
-			self::Activate => 'activated',
-			self::Deactivate => 'deactivated',
-			self::Open => 'opened',
-			self::Close => 'closed',
 			self::SetTargetAmount => 'updated',
+			default => $this->event_label(),
 		};
 	}
 }

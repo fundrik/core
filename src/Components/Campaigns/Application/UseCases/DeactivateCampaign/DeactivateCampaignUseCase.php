@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign;
 
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
@@ -24,7 +23,7 @@ interface DeactivateCampaignUseCase {
 	 *
 	 * @return Campaign Persisted campaign snapshot.
 	 *
-	 * @throws CampaignMutationException When deactivation fails.
+	 * @throws DeactivateCampaignException When deactivation fails.
 	 */
 	public function handle( EntityId $campaign_id ): Campaign;
 }

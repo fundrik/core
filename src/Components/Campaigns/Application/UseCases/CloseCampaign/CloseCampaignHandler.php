@@ -19,6 +19,20 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 final readonly class CloseCampaignHandler extends AbstractCampaignMutationHandler implements CloseCampaignUseCase {
 
 	/**
+	 * Returns the exception class exposed by this mutation use case.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string Mutation exception class.
+	 *
+	 * @phpstan-return class-string<CloseCampaignException>
+	 */
+	protected function mutation_exception_class(): string {
+
+		return CloseCampaignException::class;
+	}
+
+	/**
 	 * Closes an existing campaign for donations.
 	 *
 	 * @since 0.1.0

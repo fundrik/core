@@ -20,6 +20,20 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 final readonly class ActivateCampaignHandler extends AbstractCampaignMutationHandler implements ActivateCampaignUseCase {
 
 	/**
+	 * Returns the exception class exposed by this mutation use case.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string Mutation exception class.
+	 *
+	 * @phpstan-return class-string<ActivateCampaignException>
+	 */
+	protected function mutation_exception_class(): string {
+
+		return ActivateCampaignException::class;
+	}
+
+	/**
 	 * Activates an existing campaign.
 	 *
 	 * @since 0.1.0

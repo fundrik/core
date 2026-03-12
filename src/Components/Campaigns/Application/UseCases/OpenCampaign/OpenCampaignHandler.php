@@ -19,6 +19,20 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 final readonly class OpenCampaignHandler extends AbstractCampaignMutationHandler implements OpenCampaignUseCase {
 
 	/**
+	 * Returns the exception class exposed by this mutation use case.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string Mutation exception class.
+	 *
+	 * @phpstan-return class-string<OpenCampaignException>
+	 */
+	protected function mutation_exception_class(): string {
+
+		return OpenCampaignException::class;
+	}
+
+	/**
 	 * Opens an existing campaign for donations.
 	 *
 	 * @since 0.1.0

@@ -13,16 +13,22 @@ use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEv
 use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutation;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationPreconditionReason;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdUseCase;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
@@ -51,6 +57,12 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[CoversClass( CloseCampaignHandler::class )]
 #[CoversClass( SetCampaignTargetAmountHandler::class )]
 #[UsesClass( CampaignMutationException::class )]
+#[UsesClass( RenameCampaignException::class )]
+#[UsesClass( ActivateCampaignException::class )]
+#[UsesClass( DeactivateCampaignException::class )]
+#[UsesClass( OpenCampaignException::class )]
+#[UsesClass( CloseCampaignException::class )]
+#[UsesClass( SetCampaignTargetAmountException::class )]
 #[UsesClass( CampaignMutationPreconditionReason::class )]
 #[UsesClass( CampaignMutation::class )]
 #[UsesClass( FindCampaignByIdException::class )]
@@ -157,6 +169,7 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 			$this->invoke_handler( $handler, 'rename', $campaign_id );
 			$this->fail( 'Expected CampaignMutationException to be thrown.' );
 		} catch ( CampaignMutationException $exception ) {
+			$this->assertInstanceOf( RenameCampaignException::class, $exception );
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
 			$this->assertSame( CampaignMutationPreconditionReason::CampaignLookupFailed, $exception->get_reason() );
 			$this->assertSame( 'Failed to retrieve campaign "1".', $exception->getMessage() );
@@ -166,7 +179,11 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 	#[Test]
 	#[DataProvider( 'action_phrase_provider' )]
-	public function handle_throws_when_campaign_does_not_exist( string $action, string $phrase ): void {
+	public function handle_throws_when_campaign_does_not_exist(
+		string $action,
+		string $phrase,
+		string $exception_class,
+	): void {
 
 		$campaign_id = EntityId::create( 1 );
 		$handler = $this->make_handler( $action );
@@ -187,6 +204,7 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 			$this->invoke_handler( $handler, $action, $campaign_id );
 			$this->fail( 'Expected CampaignMutationException to be thrown.' );
 		} catch ( CampaignMutationException $exception ) {
+			$this->assertInstanceOf( $exception_class, $exception );
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
 			$this->assertSame( CampaignMutationPreconditionReason::CampaignNotFound, $exception->get_reason() );
 			$this->assertSame(
@@ -198,7 +216,11 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 	#[Test]
 	#[DataProvider( 'action_phrase_provider' )]
-	public function handle_throws_when_campaign_action_is_rejected( string $action, string $phrase ): void {
+	public function handle_throws_when_campaign_action_is_rejected(
+		string $action,
+		string $phrase,
+		string $exception_class,
+	): void {
 
 		$campaign_id = EntityId::create( 1 );
 		$campaign = $this->make_rejected_campaign_for_action( $action );
@@ -220,6 +242,7 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 			$this->invoke_rejected_handler( $handler, $action, $campaign_id );
 			$this->fail( 'Expected CampaignMutationException to be thrown.' );
 		} catch ( CampaignMutationException $exception ) {
+			$this->assertInstanceOf( $exception_class, $exception );
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
 			$this->assertSame( CampaignMutationPreconditionReason::CampaignMutationRejected, $exception->get_reason() );
 			$this->assertSame(
@@ -264,6 +287,7 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 			$this->invoke_handler( $handler, 'rename', $campaign_id );
 			$this->fail( 'Expected CampaignMutationException to be thrown.' );
 		} catch ( CampaignMutationException $exception ) {
+			$this->assertInstanceOf( RenameCampaignException::class, $exception );
 			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
 			$this->assertNull( $exception->get_reason() );
 			$this->assertSame( 'Failed to rename campaign "1".', $exception->getMessage() );
@@ -277,6 +301,7 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 		string $action,
 		string $event_label,
 		string $past_participle,
+		string $exception_class,
 	): void {
 
 		$campaign_id = EntityId::create( 1 );
@@ -312,6 +337,7 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 			$this->invoke_handler( $handler, $action, $campaign_id );
 			$this->fail( 'Expected CampaignMutationException to be thrown.' );
 		} catch ( CampaignMutationException $exception ) {
+			$this->assertInstanceOf( $exception_class, $exception );
 			$this->assertSame( UseCaseFailureStage::EventPublish, $exception->get_stage() );
 			$this->assertNull( $exception->get_reason() );
 			$this->assertSame(
@@ -341,24 +367,24 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 	public static function action_phrase_provider(): array {
 
 		return [
-			'rename' => [ 'rename', 'rename' ],
-			'activate' => [ 'activate', 'activate' ],
-			'deactivate' => [ 'deactivate', 'deactivate' ],
-			'open' => [ 'open', 'open' ],
-			'close' => [ 'close', 'close' ],
-			'set_target_amount' => [ 'set_target_amount', 'set target amount for' ],
+			'rename' => [ 'rename', 'rename', RenameCampaignException::class ],
+			'activate' => [ 'activate', 'activate', ActivateCampaignException::class ],
+			'deactivate' => [ 'deactivate', 'deactivate', DeactivateCampaignException::class ],
+			'open' => [ 'open', 'open', OpenCampaignException::class ],
+			'close' => [ 'close', 'close', CloseCampaignException::class ],
+			'set_target_amount' => [ 'set_target_amount', 'set target amount for', SetCampaignTargetAmountException::class ],
 		];
 	}
 
 	public static function event_publish_provider(): array {
 
 		return [
-			'rename' => [ 'rename', 'renamed', 'renamed' ],
-			'activate' => [ 'activate', 'activated', 'activated' ],
-			'deactivate' => [ 'deactivate', 'deactivated', 'deactivated' ],
-			'open' => [ 'open', 'opened', 'opened' ],
-			'close' => [ 'close', 'closed', 'closed' ],
-			'set_target_amount' => [ 'set_target_amount', 'target changed', 'updated' ],
+			'rename' => [ 'rename', 'renamed', 'renamed', RenameCampaignException::class ],
+			'activate' => [ 'activate', 'activated', 'activated', ActivateCampaignException::class ],
+			'deactivate' => [ 'deactivate', 'deactivated', 'deactivated', DeactivateCampaignException::class ],
+			'open' => [ 'open', 'opened', 'opened', OpenCampaignException::class ],
+			'close' => [ 'close', 'closed', 'closed', CloseCampaignException::class ],
+			'set_target_amount' => [ 'set_target_amount', 'target changed', 'updated', SetCampaignTargetAmountException::class ],
 		];
 	}
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount;
 
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -26,7 +25,7 @@ interface SetCampaignTargetAmountUseCase {
 	 *
 	 * @return Campaign Persisted campaign snapshot.
 	 *
-	 * @throws CampaignMutationException When changing the target amount fails.
+	 * @throws SetCampaignTargetAmountException When changing the target amount fails.
 	 */
 	public function handle( EntityId $campaign_id, int|CampaignTarget $amount ): Campaign;
 }

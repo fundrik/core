@@ -21,6 +21,20 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 final readonly class SetCampaignTargetAmountHandler extends AbstractCampaignMutationHandler implements SetCampaignTargetAmountUseCase {
 
 	/**
+	 * Returns the exception class exposed by this mutation use case.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string Mutation exception class.
+	 *
+	 * @phpstan-return class-string<SetCampaignTargetAmountException>
+	 */
+	protected function mutation_exception_class(): string {
+
+		return SetCampaignTargetAmountException::class;
+	}
+
+	/**
 	 * Sets the target amount for an existing campaign.
 	 *
 	 * @since 0.1.0

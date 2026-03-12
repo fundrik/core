@@ -24,6 +24,17 @@ use Throwable;
 abstract readonly class AbstractCampaignMutationHandler {
 
 	/**
+	 * Returns the exception class exposed by the concrete mutation use case.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string Mutation exception class.
+	 *
+	 * @phpstan-return class-string<CampaignMutationException>
+	 */
+	abstract protected function mutation_exception_class(): string;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 0.1.0
@@ -56,11 +67,11 @@ abstract readonly class AbstractCampaignMutationHandler {
 		try {
 			$campaign = $this->find_campaign_by_id->handle( $campaign_id );
 		} catch ( FindCampaignByIdException $e ) {
-			throw new CampaignMutationException(
+			throw $this->new_mutation_exception(
 				stage: UseCaseFailureStage::Precondition,
-				reason: CampaignMutationPreconditionReason::CampaignLookupFailed,
 				message: sprintf( 'Failed to retrieve campaign "%s".', (string) $campaign_id->get_value() ),
 				previous: $e,
+				reason: CampaignMutationPreconditionReason::CampaignLookupFailed,
 			);
 		}
 
@@ -68,14 +79,14 @@ abstract readonly class AbstractCampaignMutationHandler {
 			return $campaign;
 		}
 
-		throw new CampaignMutationException(
+		throw $this->new_mutation_exception(
 			stage: UseCaseFailureStage::Precondition,
-			reason: CampaignMutationPreconditionReason::CampaignNotFound,
 			message: sprintf(
 				'Cannot %s campaign "%s": campaign does not exist.',
 				$mutation->infinitive(),
 				(string) $campaign_id->get_value(),
 			),
+			reason: CampaignMutationPreconditionReason::CampaignNotFound,
 		);
 	}
 	// phpcs:enable
@@ -94,15 +105,15 @@ abstract readonly class AbstractCampaignMutationHandler {
 	 */
 	protected function reject_mutation( EntityId $campaign_id, CampaignMutation $mutation, Throwable $previous ): never {
 
-		throw new CampaignMutationException(
+		throw $this->new_mutation_exception(
 			stage: UseCaseFailureStage::Precondition,
-			reason: CampaignMutationPreconditionReason::CampaignMutationRejected,
 			message: sprintf(
 				'Cannot %s campaign "%s": change was rejected.',
 				$mutation->infinitive(),
 				(string) $campaign_id->get_value(),
 			),
 			previous: $previous,
+			reason: CampaignMutationPreconditionReason::CampaignMutationRejected,
 		);
 	}
 	// phpcs:enable
@@ -130,7 +141,7 @@ abstract readonly class AbstractCampaignMutationHandler {
 		try {
 			$updated_campaign = $this->campaigns->update( $campaign );
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
-			throw new CampaignMutationException(
+			throw $this->new_mutation_exception(
 				stage: UseCaseFailureStage::Persistence,
 				message: sprintf(
 					'Failed to %s campaign "%s".',
@@ -144,7 +155,7 @@ abstract readonly class AbstractCampaignMutationHandler {
 		try {
 			$this->event_bus->publish( $event );
 		} catch ( ApplicationEventBusExceptionInterface $e ) {
-			throw new CampaignMutationException(
+			throw $this->new_mutation_exception(
 				stage: UseCaseFailureStage::EventPublish,
 				message: sprintf(
 					'Campaign "%s" was %s, but publishing the %s event failed.',
@@ -157,6 +168,35 @@ abstract readonly class AbstractCampaignMutationHandler {
 		}
 
 		return $updated_campaign;
+	}
+
+	/**
+	 * Creates the mutation exception exposed by the concrete use case.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
+	 * @param string $message Exception message.
+	 * @param Throwable|null $previous Previous exception.
+	 * @param CampaignMutationPreconditionReason|null $reason Optional precondition failure reason.
+	 *
+	 * @return CampaignMutationException Concrete mutation exception.
+	 */
+	private function new_mutation_exception(
+		UseCaseFailureStage $stage,
+		string $message,
+		?Throwable $previous = null,
+		?CampaignMutationPreconditionReason $reason = null,
+	): CampaignMutationException {
+
+		$class = $this->mutation_exception_class();
+
+		return new $class(
+			stage: $stage,
+			message: $message,
+			previous: $previous,
+			reason: $reason,
+		);
 	}
 	// phpcs:enable
 }
