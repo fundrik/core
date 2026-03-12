@@ -16,6 +16,7 @@ use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationExce
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -34,6 +35,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
+#[UsesClass( UtcDateTime::class )]
 final class FindDonationsByCampaignIdHandlerTest extends MockeryTestCase {
 
 	private DonationRepositoryPort&MockInterface $repository;
@@ -52,7 +54,10 @@ final class FindDonationsByCampaignIdHandlerTest extends MockeryTestCase {
 	public function handle_returns_campaign_donation_list(): void {
 
 		$campaign_id = EntityId::create( 901 );
-		$donations = [ $this->make_pending_donation( 5_001, $campaign_id ), $this->make_pending_donation( 5_002, $campaign_id ) ];
+		$donations = [
+			$this->make_pending_donation( 5_001, $campaign_id ),
+			$this->make_pending_donation( 5_002, $campaign_id ),
+		];
 
 		$this->repository
 			->shouldReceive( 'find_all_by_campaign_id' )

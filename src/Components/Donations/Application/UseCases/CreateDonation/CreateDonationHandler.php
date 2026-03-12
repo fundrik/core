@@ -6,10 +6,13 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation;
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
 /**
  * Handles creating a new donation.
@@ -25,10 +28,12 @@ final readonly class CreateDonationHandler implements CreateDonationUseCase {
 	 *
 	 * @param CampaignRepositoryPort $campaigns Retrieves campaigns for donation precondition checks.
 	 * @param DonationRepositoryPort $repository Adds donations to storage.
+	 * @param ApplicationEventBusPort $event_bus Publishes donation events.
 	 */
 	public function __construct(
 		private CampaignRepositoryPort $campaigns,
 		private DonationRepositoryPort $repository,
+		private ApplicationEventBusPort $event_bus,
 	) {}
 
 	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
@@ -87,7 +92,7 @@ final readonly class CreateDonationHandler implements CreateDonationUseCase {
 		}
 
 		try {
-			return $this->repository->insert( $donation );
+			$created_donation = $this->repository->insert( $donation );
 		} catch ( DonationRepositoryExceptionInterface $e ) {
 			throw new CreateDonationException(
 				stage: UseCaseFailureStage::Persistence,
@@ -98,6 +103,23 @@ final readonly class CreateDonationHandler implements CreateDonationUseCase {
 				previous: $e,
 			);
 		}
+
+		try {
+			$this->event_bus->publish(
+				new DonationCreatedEvent( $created_donation->get_id() ),
+			);
+		} catch ( ApplicationEventBusExceptionInterface $e ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::EventPublish,
+				message: sprintf(
+					'Donation "%s" was created, but publishing the created event failed.',
+					(string) $created_donation->get_id()->get_value(),
+				),
+				previous: $e,
+			);
+		}
+
+		return $created_donation;
 	}
 	// phpcs:enable
 }

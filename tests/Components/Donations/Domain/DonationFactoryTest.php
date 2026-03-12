@@ -13,9 +13,9 @@ use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationFactoryException
 use Fundrik\Core\Components\Donations\Domain\Exceptions\InvalidDonationAmountException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidUtcDateTimeException;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidUtcDateTimeException;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -28,6 +28,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( EntityId::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( Money::class )]
+#[UsesClass( UtcDateTime::class )]
 #[UsesClass( InvalidUtcDateTimeException::class )]
 final class DonationFactoryTest extends FundrikTestCase {
 
@@ -68,7 +69,10 @@ final class DonationFactoryTest extends FundrikTestCase {
 		$this->assertSame( 'UTC', $donation->get_status_changed_at()?->get_value()->getTimezone()->getName() );
 		$this->assertSame( $created_at->getTimestamp(), $donation->get_created_at()->get_value()->getTimestamp() );
 		$this->assertSame( $captured_at->getTimestamp(), $donation->get_captured_at()?->get_value()->getTimestamp() );
-		$this->assertSame( $captured_at->getTimestamp(), $donation->get_status_changed_at()?->get_value()->getTimestamp() );
+		$this->assertSame(
+			$captured_at->getTimestamp(),
+			$donation->get_status_changed_at()?->get_value()->getTimestamp(),
+		);
 	}
 
 	#[Test]
@@ -204,9 +208,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 	public function create_pending_from_primitives_wraps_exceptions_into_factory_exception(): void {
 
 		$this->expectException( DonationFactoryException::class );
-		$this->expectExceptionMessage(
-			'Failed to create pending donation from primitives.',
-		);
+		$this->expectExceptionMessage( 'Failed to create pending donation from primitives.' );
 
 		$this->factory->create_pending_from_primitives( id: 11, campaign_id: 22, amount_minor: 0, currency: 'EUR' );
 	}

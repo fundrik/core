@@ -12,9 +12,9 @@ use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\InvalidDonationAmountException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidUtcDateTimeException;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidUtcDateTimeException;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
@@ -26,6 +26,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
 #[UsesClass( EntityVersion::class )]
+#[UsesClass( UtcDateTime::class )]
 #[UsesClass( InvalidUtcDateTimeException::class )]
 final class DonationTest extends FundrikTestCase {
 
@@ -71,7 +72,10 @@ final class DonationTest extends FundrikTestCase {
 
 		$this->assertSame( DonationStatus::Authorized, $authorized->get_status() );
 		$this->assertSame( 'UTC', $authorized->get_status_changed_at()?->get_value()->getTimezone()->getName() );
-		$this->assertSame( $authorized_at->getTimestamp(), $authorized->get_status_changed_at()?->get_value()->getTimestamp() );
+		$this->assertSame(
+			$authorized_at->getTimestamp(),
+			$authorized->get_status_changed_at()?->get_value()->getTimestamp(),
+		);
 		$this->assertNull( $authorized->get_captured_at() );
 	}
 
@@ -137,8 +141,14 @@ final class DonationTest extends FundrikTestCase {
 
 		$this->assertSame( DonationStatus::Canceled, $canceled_from_pending->get_status() );
 		$this->assertSame( DonationStatus::Canceled, $canceled_from_authorized->get_status() );
-		$this->assertSame( 'UTC', $canceled_from_pending->get_status_changed_at()?->get_value()->getTimezone()->getName() );
-		$this->assertSame( 'UTC', $canceled_from_authorized->get_status_changed_at()?->get_value()->getTimezone()->getName() );
+		$this->assertSame(
+			'UTC',
+			$canceled_from_pending->get_status_changed_at()?->get_value()->getTimezone()->getName(),
+		);
+		$this->assertSame(
+			'UTC',
+			$canceled_from_authorized->get_status_changed_at()?->get_value()->getTimezone()->getName(),
+		);
 	}
 
 	#[Test]
@@ -337,7 +347,10 @@ final class DonationTest extends FundrikTestCase {
 		$this->assertSame( 'UTC', $refunded->get_captured_at()?->get_value()->getTimezone()->getName() );
 		$this->assertSame( 'UTC', $refunded->get_status_changed_at()?->get_value()->getTimezone()->getName() );
 		$this->assertSame( $captured_at->getTimestamp(), $refunded->get_captured_at()?->get_value()->getTimestamp() );
-		$this->assertSame( $captured_at->getTimestamp(), $refunded->get_status_changed_at()?->get_value()->getTimestamp() );
+		$this->assertSame(
+			$captured_at->getTimestamp(),
+			$refunded->get_status_changed_at()?->get_value()->getTimestamp(),
+		);
 	}
 
 		#[Test]

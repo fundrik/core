@@ -16,6 +16,7 @@ use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationExce
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -34,6 +35,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
+#[UsesClass( UtcDateTime::class )]
 final class FindDonationByIdHandlerTest extends MockeryTestCase {
 
 	private DonationRepositoryPort&MockInterface $repository;

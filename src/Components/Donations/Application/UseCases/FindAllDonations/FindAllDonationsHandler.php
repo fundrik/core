@@ -42,10 +42,7 @@ final readonly class FindAllDonationsHandler implements FindAllDonationsUseCase 
 		try {
 			return $this->repository->find_all();
 		} catch ( DonationRepositoryExceptionInterface $e ) {
-			throw new FindAllDonationsException(
-				'Failed to retrieve donations.',
-				previous: $e,
-			);
+			throw new FindAllDonationsException( 'Failed to retrieve donations.', previous: $e );
 		}
 	}
 }

@@ -33,6 +33,7 @@ final class CreateDonationException extends DonationApplicationException {
 		?Throwable $previous = null,
 		private readonly ?CreateDonationPreconditionReason $reason = null,
 	) {
+
 		parent::__construct( $message, $code, $previous );
 	}
 

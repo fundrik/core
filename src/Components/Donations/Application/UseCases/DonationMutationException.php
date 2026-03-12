@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation;
+namespace Fundrik\Core\Components\Donations\Application\UseCases;
 
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Throwable;
 
 /**
- * Thrown when update-donation operation fails.
+ * Thrown when a donation mutation use case fails.
  *
  * @since 0.1.0
  */
-final class UpdateDonationException extends DonationApplicationException {
+class DonationMutationException extends DonationApplicationException {
 
 	/**
 	 * Constructor.
@@ -24,12 +24,14 @@ final class UpdateDonationException extends DonationApplicationException {
 	 * @param string $message Exception message.
 	 * @param int $code Exception code.
 	 * @param Throwable|null $previous Previous exception.
+	 * @param DonationMutationPreconditionReason|null $reason Optional precondition failure reason.
 	 */
 	public function __construct(
 		private readonly UseCaseFailureStage $stage,
 		string $message = '',
 		int $code = 0,
 		?Throwable $previous = null,
+		private readonly ?DonationMutationPreconditionReason $reason = null,
 	) {
 
 		parent::__construct( $message, $code, $previous );
@@ -45,5 +47,17 @@ final class UpdateDonationException extends DonationApplicationException {
 	public function get_stage(): UseCaseFailureStage {
 
 		return $this->stage;
+	}
+
+	/**
+	 * Returns precondition failure reason, when available.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return DonationMutationPreconditionReason|null Precondition reason.
+	 */
+	public function get_reason(): ?DonationMutationPreconditionReason {
+
+		return $this->reason;
 	}
 }
