@@ -17,6 +17,7 @@ use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
@@ -250,8 +251,12 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
-			#[Test]
-	public function throws_when_non_pending_has_no_status_changed_at(): void {
+	#[Test]
+	#[DataProvider( 'provide_non_pending_states_without_status_changed_at' )]
+	public function throws_when_non_pending_has_no_status_changed_at(
+		DonationStatus $status,
+		?UtcDateTime $captured_at,
+	): void {
 
 		$this->expectException( DonationChangeException::class );
 		$this->expectExceptionMessage( 'Non-pending donation must have status_changed_at timestamp.' );
@@ -261,13 +266,18 @@ final class DonationTest extends FundrikTestCase {
 			version: EntityVersion::initial(),
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
-			status: DonationStatus::Authorized,
+			status: $status,
 			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
+			captured_at: $captured_at,
 		);
 	}
 
-			#[Test]
-	public function throws_when_captured_or_refunded_has_no_captured_at(): void {
+	#[Test]
+	#[DataProvider( 'provide_captured_states_without_captured_at' )]
+	public function throws_when_captured_or_refunded_has_no_captured_at(
+		DonationStatus $status,
+		UtcDateTime $status_changed_at,
+	): void {
 
 		$this->expectException( DonationChangeException::class );
 		$this->expectExceptionMessage( 'Captured/refunded donation must have captured_at timestamp.' );
@@ -277,9 +287,9 @@ final class DonationTest extends FundrikTestCase {
 			version: EntityVersion::initial(),
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 100, 'RUB' ),
-			status: DonationStatus::Captured,
+			status: $status,
 			created_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ) ),
-			status_changed_at: UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
+			status_changed_at: $status_changed_at,
 		);
 	}
 
@@ -394,9 +404,35 @@ final class DonationTest extends FundrikTestCase {
 		);
 	}
 
-			/**
-			 * Builds a valid pending donation for tests.
-			 */
+	public static function provide_non_pending_states_without_status_changed_at(): array {
+
+		return [
+			'authorized' => [ DonationStatus::Authorized, null ],
+			'captured' => [
+				DonationStatus::Captured,
+				UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
+			],
+			'refunded' => [
+				DonationStatus::Refunded,
+				UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
+			],
+		];
+	}
+
+	public static function provide_captured_states_without_captured_at(): array {
+
+		return [
+			'captured' => [
+				DonationStatus::Captured,
+				UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
+			],
+			'refunded' => [
+				DonationStatus::Refunded,
+				UtcDateTime::create( new DateTimeImmutable( '2026-02-26T10:01:00+00:00' ) ),
+			],
+		];
+	}
+
 	private function make_pending_donation( ?DateTimeImmutable $created_at = null ): Donation {
 
 		return $this->factory->create_pending(

@@ -396,8 +396,10 @@ final readonly class Donation {
 	 */
 	private function assert_refunded_status_invariants(): void {
 
-		$this->require_status_changed_at();
-		$this->require_captured_at();
+		$status_changed_at = $this->require_status_changed_at();
+		$captured_at = $this->require_captured_at();
+
+		$this->assert_refunded_after_capture( $status_changed_at, $captured_at );
 	}
 
 	/**
@@ -441,16 +443,12 @@ final readonly class Donation {
 	 *
 	 * @since 0.1.0
 	 *
+	 * @param UtcDateTime $status_changed_at Refund status change timestamp.
+	 * @param UtcDateTime $captured_at Capture timestamp.
+	 *
 	 * @throws DonationChangeException When refund is earlier than capture.
 	 */
-	private function assert_refunded_after_capture(): void {
-
-		if ( $this->status !== DonationStatus::Refunded ) {
-			return;
-		}
-
-		$status_changed_at = $this->require_status_changed_at();
-		$captured_at = $this->require_captured_at();
+	private function assert_refunded_after_capture( UtcDateTime $status_changed_at, UtcDateTime $captured_at, ): void {
 
 		if ( $status_changed_at->get_value() >= $captured_at->get_value() ) {
 			return;
@@ -472,7 +470,6 @@ final readonly class Donation {
 
 		$this->assert_not_before_created( $this->captured_at, 'captured_at' );
 		$this->assert_not_before_created( $this->status_changed_at, 'status_changed_at' );
-		$this->assert_refunded_after_capture();
 	}
 
 	/**
