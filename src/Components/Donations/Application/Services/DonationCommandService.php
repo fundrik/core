@@ -20,7 +20,6 @@ use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\Update
 use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 
 /**
  * Provides the public entry point for donation write operations.
@@ -90,15 +89,14 @@ final readonly class DonationCommandService {
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
-	 * @param UtcDateTime|null $at Optional authorization timestamp.
 	 *
 	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws AuthorizeDonationException When authorization fails.
 	 */
-	public function authorize( EntityId $donation_id, ?UtcDateTime $at = null ): Donation {
+	public function authorize( EntityId $donation_id ): Donation {
 
-		return $this->authorize_donation->handle( $donation_id, $at );
+		return $this->authorize_donation->handle( $donation_id );
 	}
 
 	/**
@@ -107,15 +105,14 @@ final readonly class DonationCommandService {
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
-	 * @param UtcDateTime|null $at Optional capture timestamp.
 	 *
 	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws CaptureDonationException When capture fails.
 	 */
-	public function capture( EntityId $donation_id, ?UtcDateTime $at = null ): Donation {
+	public function capture( EntityId $donation_id ): Donation {
 
-		return $this->capture_donation->handle( $donation_id, $at );
+		return $this->capture_donation->handle( $donation_id );
 	}
 
 	/**
@@ -124,15 +121,14 @@ final readonly class DonationCommandService {
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
-	 * @param UtcDateTime|null $at Optional failure timestamp.
 	 *
 	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws FailDonationException When failure marking fails.
 	 */
-	public function fail( EntityId $donation_id, ?UtcDateTime $at = null ): Donation {
+	public function fail( EntityId $donation_id ): Donation {
 
-		return $this->fail_donation->handle( $donation_id, $at );
+		return $this->fail_donation->handle( $donation_id );
 	}
 
 	/**
@@ -141,15 +137,14 @@ final readonly class DonationCommandService {
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
-	 * @param UtcDateTime|null $at Optional refund timestamp.
 	 *
 	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws RefundDonationException When refund fails.
 	 */
-	public function refund( EntityId $donation_id, ?UtcDateTime $at = null ): Donation {
+	public function refund( EntityId $donation_id ): Donation {
 
-		return $this->refund_donation->handle( $donation_id, $at );
+		return $this->refund_donation->handle( $donation_id );
 	}
 
 	/**
@@ -158,14 +153,13 @@ final readonly class DonationCommandService {
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
-	 * @param UtcDateTime|null $at Optional cancellation timestamp.
 	 *
 	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws CancelDonationException When cancellation fails.
 	 */
-	public function cancel( EntityId $donation_id, ?UtcDateTime $at = null ): Donation {
+	public function cancel( EntityId $donation_id ): Donation {
 
-		return $this->cancel_donation->handle( $donation_id, $at );
+		return $this->cancel_donation->handle( $donation_id );
 	}
 }

@@ -10,9 +10,19 @@ use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServic
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServiceFactory;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryServiceFactory;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindAllCampaigns\FindAllCampaignsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -33,11 +43,12 @@ use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationsByCampai
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Fundrik;
 use Fundrik\Core\FundrikFactory;
 use Mockery;
@@ -52,12 +63,22 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignCommandService::class )]
 #[UsesClass( CampaignQueryServiceFactory::class )]
 #[UsesClass( CampaignCommandServiceFactory::class )]
+#[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( DonationQueryService::class )]
 #[UsesClass( DonationCommandService::class )]
 #[UsesClass( DonationQueryServiceFactory::class )]
 #[UsesClass( DonationCommandServiceFactory::class )]
 #[UsesClass( FindCampaignByIdHandler::class )]
 #[UsesClass( FindAllCampaignsHandler::class )]
+#[UsesClass( CreateCampaignHandler::class )]
+#[UsesClass( SaveCampaignHandler::class )]
+#[UsesClass( UpdateCampaignHandler::class )]
+#[UsesClass( RenameCampaignHandler::class )]
+#[UsesClass( ActivateCampaignHandler::class )]
+#[UsesClass( DeactivateCampaignHandler::class )]
+#[UsesClass( OpenCampaignHandler::class )]
+#[UsesClass( CloseCampaignHandler::class )]
+#[UsesClass( SetCampaignTargetAmountHandler::class )]
 #[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
 #[UsesClass( FindAllDonationsHandler::class )]
@@ -75,10 +96,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationFactory::class )]
+#[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
-#[UsesClass( UtcDateTime::class )]
 final class FundrikFactoryTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $campaign_repository;

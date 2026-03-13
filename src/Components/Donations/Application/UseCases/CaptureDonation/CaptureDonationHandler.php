@@ -10,7 +10,6 @@ use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutation;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationDomainException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 
 /**
  * Handles capturing an existing donation.
@@ -39,17 +38,16 @@ final readonly class CaptureDonationHandler extends AbstractDonationMutationHand
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
-	 * @param UtcDateTime|null $at Optional capture timestamp.
 	 *
 	 * @return Donation Persisted donation snapshot.
 	 */
-	public function handle( EntityId $donation_id, ?UtcDateTime $at = null ): Donation {
+	public function handle( EntityId $donation_id ): Donation {
 
 		$mutation = DonationMutation::Capture;
 		$donation = $this->require_donation( $donation_id, $mutation );
 
 		try {
-			$captured_donation = $donation->capture( $at );
+			$captured_donation = $donation->capture();
 		} catch ( DonationDomainException $e ) {
 			$this->reject_mutation( $donation_id, $mutation, $e );
 		}

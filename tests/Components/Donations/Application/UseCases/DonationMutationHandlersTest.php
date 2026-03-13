@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases;
 
-use DateTimeImmutable;
 use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCanceledEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCapturedEvent;
@@ -27,6 +26,7 @@ use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDona
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
@@ -34,7 +34,6 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
@@ -67,11 +66,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationRefundedEvent::class )]
 #[UsesClass( DonationCanceledEvent::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
-#[UsesClass( UtcDateTime::class )]
 final class DonationMutationHandlersTest extends MockeryTestCase {
 
 	private DonationRepositoryPort&MockInterface $donations;
@@ -95,7 +94,6 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 		$donation_id = EntityId::create( 5_001 );
 		$donation = $this->make_donation_for_action( $action );
 		$handler = $this->make_handler( $action );
-		$at = $this->make_action_timestamp();
 
 		$this->donations
 			->shouldReceive( 'find_by_id' )
@@ -107,9 +105,9 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 			->shouldReceive( 'update' )
 			->once()
 			->withArgs(
-				function ( Donation $updated_donation ) use ( $action, $at ): bool {
+				function ( Donation $updated_donation ) use ( $action ): bool {
 
-					$this->assert_donation_action_result( $action, $updated_donation, $at );
+					$this->assert_donation_action_result( $action, $updated_donation );
 
 					return true;
 				},
@@ -129,9 +127,9 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 				},
 			);
 
-		$result = $this->invoke_handler( $handler, $action, $donation_id, $at );
+		$result = $this->invoke_handler( $handler, $action, $donation_id );
 
-		$this->assert_donation_action_result( $action, $result, $at );
+		$this->assert_donation_action_result( $action, $result );
 	}
 
 	#[Test]
@@ -154,7 +152,7 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 			->shouldNotReceive( 'publish' );
 
 		try {
-			$this->invoke_handler( $handler, 'authorize', $donation_id, $this->make_action_timestamp() );
+			$this->invoke_handler( $handler, 'authorize', $donation_id );
 			$this->fail( 'Expected DonationMutationException to be thrown.' );
 		} catch ( DonationMutationException $exception ) {
 			$this->assertInstanceOf( AuthorizeDonationException::class, $exception );
@@ -189,7 +187,7 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 			->shouldNotReceive( 'publish' );
 
 		try {
-			$this->invoke_handler( $handler, $action, $donation_id, $this->make_action_timestamp() );
+			$this->invoke_handler( $handler, $action, $donation_id );
 			$this->fail( 'Expected DonationMutationException to be thrown.' );
 		} catch ( DonationMutationException $exception ) {
 			$this->assertInstanceOf( $exception_class, $exception );
@@ -227,7 +225,7 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 			->shouldNotReceive( 'publish' );
 
 		try {
-			$this->invoke_handler( $handler, $action, $donation_id, $this->make_action_timestamp() );
+			$this->invoke_handler( $handler, $action, $donation_id );
 			$this->fail( 'Expected DonationMutationException to be thrown.' );
 		} catch ( DonationMutationException $exception ) {
 			$this->assertInstanceOf( $exception_class, $exception );
@@ -272,7 +270,7 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 			->shouldNotReceive( 'publish' );
 
 		try {
-			$this->invoke_handler( $handler, 'authorize', $donation_id, $this->make_action_timestamp() );
+			$this->invoke_handler( $handler, 'authorize', $donation_id );
 			$this->fail( 'Expected DonationMutationException to be thrown.' );
 		} catch ( DonationMutationException $exception ) {
 			$this->assertInstanceOf( AuthorizeDonationException::class, $exception );
@@ -295,7 +293,6 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 		$donation_id = EntityId::create( 5_001 );
 		$donation = $this->make_donation_for_action( $action );
 		$handler = $this->make_handler( $action );
-		$at = $this->make_action_timestamp();
 		$e = new FakeApplicationEventBusException();
 
 		$this->donations
@@ -308,9 +305,9 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 			->shouldReceive( 'update' )
 			->once()
 			->withArgs(
-				function ( Donation $updated_donation ) use ( $action, $at ): bool {
+				function ( Donation $updated_donation ) use ( $action ): bool {
 
-					$this->assert_donation_action_result( $action, $updated_donation, $at );
+					$this->assert_donation_action_result( $action, $updated_donation );
 
 					return true;
 				},
@@ -323,7 +320,7 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 			->andThrow( $e );
 
 		try {
-			$this->invoke_handler( $handler, $action, $donation_id, $at );
+			$this->invoke_handler( $handler, $action, $donation_id );
 			$this->fail( 'Expected DonationMutationException to be thrown.' );
 		} catch ( DonationMutationException $exception ) {
 			$this->assertInstanceOf( $exception_class, $exception );
@@ -396,76 +393,56 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 	private function make_rejected_donation_for_action( string $action ): Donation {
 
 		return match ( $action ) {
-			'authorize' => $this->make_pending_donation()->authorize( $this->make_prior_timestamp() ),
-			'capture' => $this->make_pending_donation()->fail( $this->make_prior_timestamp() ),
+			'authorize' => $this->make_pending_donation()->authorize(),
+			'capture' => $this->make_pending_donation()->fail(),
 			'fail' => $this->make_captured_donation(),
 			'refund' => $this->make_pending_donation(),
 			'cancel' => $this->make_captured_donation(),
 		};
 	}
 
-	private function invoke_handler( object $handler, string $action, EntityId $donation_id, UtcDateTime $at ): Donation {
+	private function invoke_handler( object $handler, string $action, EntityId $donation_id ): Donation {
 
 		return match ( $action ) {
-			'authorize', 'capture', 'fail', 'refund', 'cancel' => $handler->handle( $donation_id, $at ),
+			'authorize', 'capture', 'fail', 'refund', 'cancel' => $handler->handle( $donation_id ),
 		};
 	}
 
-	private function assert_donation_action_result( string $action, Donation $donation, UtcDateTime $at ): void {
+	private function assert_donation_action_result( string $action, Donation $donation ): void {
 
 		$this->assertSame( 5_001, $donation->get_id()->get_value() );
 
 		match ( $action ) {
-			'authorize' => $this->assert_authorized_donation( $donation, $at ),
-			'capture' => $this->assert_captured_donation( $donation, $at ),
-			'fail' => $this->assert_failed_donation( $donation, $at ),
-			'refund' => $this->assert_refunded_donation( $donation, $at ),
-			'cancel' => $this->assert_canceled_donation( $donation, $at ),
+			'authorize' => $this->assert_authorized_donation( $donation ),
+			'capture' => $this->assert_captured_donation( $donation ),
+			'fail' => $this->assert_failed_donation( $donation ),
+			'refund' => $this->assert_refunded_donation( $donation ),
+			'cancel' => $this->assert_canceled_donation( $donation ),
 		};
 	}
 
-	private function assert_authorized_donation( Donation $donation, UtcDateTime $at ): void {
+	private function assert_authorized_donation( Donation $donation ): void {
 
 		$this->assertSame( DonationStatus::Authorized, $donation->get_status() );
-		$this->assertTrue( $donation->get_status_changed_at()?->equals( $at ) ?? false );
-		$this->assertNull( $donation->get_captured_at() );
 	}
 
-	private function assert_captured_donation( Donation $donation, UtcDateTime $at ): void {
+	private function assert_captured_donation( Donation $donation ): void {
 
 		$this->assertSame( DonationStatus::Captured, $donation->get_status() );
-		$this->assertTrue( $donation->get_status_changed_at()?->equals( $at ) ?? false );
-		$this->assertTrue( $donation->get_captured_at()?->equals( $at ) ?? false );
 	}
 
-	private function assert_failed_donation( Donation $donation, UtcDateTime $at ): void {
+	private function assert_failed_donation( Donation $donation ): void {
 
 		$this->assertSame( DonationStatus::Failed, $donation->get_status() );
-		$this->assertTrue( $donation->get_status_changed_at()?->equals( $at ) ?? false );
-		$this->assertNull( $donation->get_captured_at() );
 	}
 
-	private function assert_refunded_donation( Donation $donation, UtcDateTime $at ): void {
+	private function assert_refunded_donation( Donation $donation ): void {
 
 		$this->assertSame( DonationStatus::Refunded, $donation->get_status() );
-		$this->assertTrue( $donation->get_status_changed_at()?->equals( $at ) ?? false );
-		$this->assertNotNull( $donation->get_captured_at() );
 	}
 
-	private function assert_canceled_donation( Donation $donation, UtcDateTime $at ): void {
+	private function assert_canceled_donation( Donation $donation ): void {
 
 		$this->assertSame( DonationStatus::Canceled, $donation->get_status() );
-		$this->assertTrue( $donation->get_status_changed_at()?->equals( $at ) ?? false );
-		$this->assertNull( $donation->get_captured_at() );
-	}
-
-	private function make_action_timestamp(): UtcDateTime {
-
-		return UtcDateTime::create( new DateTimeImmutable( '2026-03-02T12:00:00+00:00' ) );
-	}
-
-	private function make_prior_timestamp(): UtcDateTime {
-
-		return UtcDateTime::create( new DateTimeImmutable( '2026-03-01T11:00:00+00:00' ) );
 	}
 }

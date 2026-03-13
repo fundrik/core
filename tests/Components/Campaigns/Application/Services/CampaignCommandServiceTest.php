@@ -18,6 +18,17 @@ use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\Campa
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveResult;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServiceFactory;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -46,6 +57,17 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignDeletedEvent::class )]
 #[UsesClass( CampaignRepositorySaveOutcome::class )]
 #[UsesClass( CampaignRepositorySaveResult::class )]
+#[UsesClass( AbstractCampaignMutationHandler::class )]
+#[UsesClass( CreateCampaignHandler::class )]
+#[UsesClass( SaveCampaignHandler::class )]
+#[UsesClass( UpdateCampaignHandler::class )]
+#[UsesClass( RenameCampaignHandler::class )]
+#[UsesClass( ActivateCampaignHandler::class )]
+#[UsesClass( DeactivateCampaignHandler::class )]
+#[UsesClass( OpenCampaignHandler::class )]
+#[UsesClass( CloseCampaignHandler::class )]
+#[UsesClass( SetCampaignTargetAmountHandler::class )]
+#[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]

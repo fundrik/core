@@ -9,8 +9,13 @@ use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServic
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServiceFactory;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryServiceFactory;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindAllCampaigns\FindAllCampaignsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignHandler;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandServiceFactory;
@@ -39,12 +44,17 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignCommandService::class )]
 #[UsesClass( CampaignQueryServiceFactory::class )]
 #[UsesClass( CampaignCommandServiceFactory::class )]
+#[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( DonationQueryService::class )]
 #[UsesClass( DonationCommandService::class )]
 #[UsesClass( DonationQueryServiceFactory::class )]
 #[UsesClass( DonationCommandServiceFactory::class )]
 #[UsesClass( FindCampaignByIdHandler::class )]
 #[UsesClass( FindAllCampaignsHandler::class )]
+#[UsesClass( CreateCampaignHandler::class )]
+#[UsesClass( SaveCampaignHandler::class )]
+#[UsesClass( UpdateCampaignHandler::class )]
+#[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
 #[UsesClass( FindAllDonationsHandler::class )]
 #[UsesClass( FindDonationsByCampaignIdHandler::class )]

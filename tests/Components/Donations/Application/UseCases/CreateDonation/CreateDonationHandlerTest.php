@@ -6,6 +6,8 @@ namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases\CreateDon
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
+use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
+use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
@@ -13,12 +15,14 @@ use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\Create
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationPreconditionReason;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
+use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
@@ -37,10 +41,14 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( DonationCreatedEvent::class )]
 #[UsesClass( Campaign::class )]
+#[UsesClass( CampaignTarget::class )]
+#[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( UtcDateTime::class )]
+#[UsesClass( EntityVersion::class )]
+#[UsesClass( Money::class )]
 final class CreateDonationHandlerTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $campaigns;

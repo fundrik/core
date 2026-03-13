@@ -9,11 +9,12 @@ use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\Donat
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationsByCampaignId\FindDonationsByCampaignIdException;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationsByCampaignId\FindDonationsByCampaignIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
+use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -27,10 +28,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( UtcDateTime::class )]
+#[UsesClass( Money::class )]
 final class FindDonationsByCampaignIdHandlerTest extends MockeryTestCase {
 
 	private DonationRepositoryPort&MockInterface $repository;

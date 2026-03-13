@@ -10,7 +10,6 @@ use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutation;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationDomainException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 
 // phpcs:disable SlevomatCodingStandard.Files.LineLength.LineTooLong
 /**
@@ -40,17 +39,16 @@ final readonly class AuthorizeDonationHandler extends AbstractDonationMutationHa
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
-	 * @param UtcDateTime|null $at Optional authorization timestamp.
 	 *
 	 * @return Donation Persisted donation snapshot.
 	 */
-	public function handle( EntityId $donation_id, ?UtcDateTime $at = null ): Donation {
+	public function handle( EntityId $donation_id ): Donation {
 
 		$mutation = DonationMutation::Authorize;
 		$donation = $this->require_donation( $donation_id, $mutation );
 
 		try {
-			$authorized_donation = $donation->authorize( $at );
+			$authorized_donation = $donation->authorize();
 		} catch ( DonationDomainException $e ) {
 			$this->reject_mutation( $donation_id, $mutation, $e );
 		}

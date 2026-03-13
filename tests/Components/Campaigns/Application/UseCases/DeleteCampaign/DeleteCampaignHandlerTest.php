@@ -15,6 +15,7 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
@@ -22,7 +23,6 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
@@ -44,11 +44,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
-#[UsesClass( UtcDateTime::class )]
 final class DeleteCampaignHandlerTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $repository;

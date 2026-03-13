@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests;
 
-use DateTimeImmutable;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -13,7 +12,6 @@ use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 abstract class FundrikTestCase extends PHPUnitTestCase {
@@ -50,7 +48,6 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 		int|string|EntityId $campaign_id = 901,
 		int $amount = 1_000,
 		string $currency = 'RUB',
-		?DateTimeImmutable $created_at = null,
 	): Donation {
 
 		$factory = new DonationFactory();
@@ -59,7 +56,6 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 			id: EntityId::create( $id ),
 			campaign_id: $campaign_id instanceof EntityId ? $campaign_id : EntityId::create( $campaign_id ),
 			money: Money::create( $amount, $currency ),
-			created_at: $created_at ?? new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
 		);
 	}
 
@@ -72,8 +68,6 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 		int|string|EntityId $campaign_id = 901,
 		int $amount = 1_000,
 		string $currency = 'RUB',
-		?DateTimeImmutable $created_at = null,
-		?DateTimeImmutable $captured_at = null,
 	): Donation {
 
 		return $this->make_pending_donation(
@@ -81,9 +75,6 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 			campaign_id: $campaign_id,
 			amount: $amount,
 			currency: $currency,
-			created_at: $created_at,
-		)->capture(
-			UtcDateTime::create( $captured_at ?? new DateTimeImmutable( '2026-02-26T11:00:00+00:00' ) ),
-		);
+		)->capture();
 	}
 }

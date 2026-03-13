@@ -10,13 +10,14 @@ use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\Donat
 use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
+use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
@@ -33,10 +34,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( DonationUpdatedEvent::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( UtcDateTime::class )]
+#[UsesClass( Money::class )]
 final class UpdateDonationHandlerTest extends MockeryTestCase {
 
 	private DonationRepositoryPort&MockInterface $repository;

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Donations\Application\Services;
 
-use DateTimeImmutable;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
+use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
+use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCanceledEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCapturedEvent;
@@ -17,13 +18,21 @@ use Fundrik\Core\Components\Donations\Application\Events\DonationUpdatedEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandServiceFactory;
+use Fundrik\Core\Components\Donations\Application\UseCases\AbstractDonationMutationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -41,13 +50,23 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationFailedEvent::class )]
 #[UsesClass( DonationRefundedEvent::class )]
 #[UsesClass( DonationCanceledEvent::class )]
+#[UsesClass( AbstractDonationMutationHandler::class )]
+#[UsesClass( CreateDonationHandler::class )]
+#[UsesClass( UpdateDonationHandler::class )]
+#[UsesClass( AuthorizeDonationHandler::class )]
+#[UsesClass( CaptureDonationHandler::class )]
+#[UsesClass( FailDonationHandler::class )]
+#[UsesClass( RefundDonationHandler::class )]
+#[UsesClass( CancelDonationHandler::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( Campaign::class )]
+#[UsesClass( CampaignTarget::class )]
+#[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
-#[UsesClass( UtcDateTime::class )]
 final class DonationCommandServiceTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $campaign_repository;
@@ -130,7 +149,6 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 	): void {
 
 		$donation_id = EntityId::create( 5_001 );
-		$timestamp = UtcDateTime::create( new DateTimeImmutable( '2026-03-02T12:00:00+00:00' ) );
 		$donation = $source_state === 'captured'
 			? $this->make_captured_donation( 5_001, 901 )
 			: $this->make_pending_donation( 5_001, 901 );
@@ -145,10 +163,9 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 			->shouldReceive( 'update' )
 			->once()
 			->withArgs(
-				function ( Donation $updated_donation ) use ( $expected_status, $timestamp ): bool {
+				function ( Donation $updated_donation ) use ( $expected_status ): bool {
 
 					$this->assertSame( $expected_status, $updated_donation->get_status()->value );
-					$this->assertTrue( $updated_donation->get_status_changed_at()?->equals( $timestamp ) ?? false );
 
 					return true;
 				},
@@ -160,7 +177,7 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( $event_class, $donation_id ) );
 
-		$result = $this->command->{$method}( $donation_id, $timestamp );
+		$result = $this->command->{$method}( $donation_id );
 
 		$this->assertSame( $expected_status, $result->get_status()->value );
 	}

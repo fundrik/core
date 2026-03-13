@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Domain;
 
-use DateTimeImmutable;
-use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationFactoryException;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\InvalidDonationAmountException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -14,14 +12,11 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyAmountException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyCurrencyException;
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidUtcDateTimeException;
 use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use ValueError;
 
 /**
  * Creates Donation entities.
- * Validates timestamps as UTC.
  *
  * @since 0.1.0
  */
@@ -37,9 +32,6 @@ final readonly class DonationFactory {
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Money $money Donation amount and currency.
 	 * @param DonationStatus $status Donation status.
-	 * @param UtcDateTime $created_at Creation timestamp.
-	 * @param UtcDateTime|null $captured_at Capture timestamp.
-	 * @param UtcDateTime|null $status_changed_at Status change timestamp.
 	 *
 	 * @return Donation Donation entity.
 	 */
@@ -49,24 +41,11 @@ final readonly class DonationFactory {
 		EntityId $campaign_id,
 		Money $money,
 		DonationStatus $status,
-		UtcDateTime $created_at,
-		?UtcDateTime $captured_at = null,
-		?UtcDateTime $status_changed_at = null,
 	): Donation {
 
-		return new Donation(
-			id: $id,
-			version: $version,
-			campaign_id: $campaign_id,
-			money: $money,
-			status: $status,
-			created_at: $created_at,
-			captured_at: $captured_at,
-			status_changed_at: $status_changed_at,
-		);
+		return new Donation( id: $id, version: $version, campaign_id: $campaign_id, money: $money, status: $status );
 	}
 
-	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	/**
 	 * Creates a donation from primitive values.
 	 *
@@ -78,9 +57,6 @@ final readonly class DonationFactory {
 	 * @param int $amount_minor Donation amount in minor units.
 	 * @param string $currency Donation currency (ISO 4217).
 	 * @param string $status Donation status value.
-	 * @param DateTimeImmutable $created_at Creation timestamp.
-	 * @param DateTimeImmutable|null $captured_at Capture timestamp.
-	 * @param DateTimeImmutable|null $status_changed_at Status change timestamp.
 	 *
 	 * @return Donation Donation entity.
 	 *
@@ -93,9 +69,6 @@ final readonly class DonationFactory {
 		int $amount_minor,
 		string $currency,
 		string $status,
-		DateTimeImmutable $created_at,
-		?DateTimeImmutable $captured_at = null,
-		?DateTimeImmutable $status_changed_at = null,
 	): Donation {
 
 		try {
@@ -106,9 +79,6 @@ final readonly class DonationFactory {
 				campaign_id: EntityId::create( $campaign_id ),
 				money: Money::create( $amount_minor, $currency ),
 				status: DonationStatus::from( $status ),
-				created_at: UtcDateTime::create( $created_at ),
-				captured_at: $captured_at === null ? null : UtcDateTime::create( $captured_at ),
-				status_changed_at: $status_changed_at === null ? null : UtcDateTime::create( $status_changed_at ),
 			);
 
 		} catch (
@@ -116,16 +86,13 @@ final readonly class DonationFactory {
 			| InvalidEntityVersionException
 			| InvalidMoneyAmountException
 			| InvalidMoneyCurrencyException
-			| InvalidUtcDateTimeException
 			| InvalidDonationAmountException
-			| DonationChangeException
 			| ValueError $e
 		) {
 
 			throw new DonationFactoryException( 'Failed to create donation from primitives.', previous: $e );
 		}
 	}
-	// phpcs:enable
 
 	/**
 	 * Creates a new pending donation with initial version.
@@ -135,16 +102,10 @@ final readonly class DonationFactory {
 	 * @param EntityId $id Donation ID.
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Money $money Donation amount and currency.
-	 * @param DateTimeImmutable|null $created_at Optional creation timestamp. If null, current UTC time is used.
 	 *
 	 * @return Donation Pending donation.
 	 */
-	public function create_pending(
-		EntityId $id,
-		EntityId $campaign_id,
-		Money $money,
-		?DateTimeImmutable $created_at = null,
-	): Donation {
+	public function create_pending( EntityId $id, EntityId $campaign_id, Money $money, ): Donation {
 
 		return $this->create(
 			id: $id,
@@ -152,7 +113,6 @@ final readonly class DonationFactory {
 			campaign_id: $campaign_id,
 			money: $money,
 			status: DonationStatus::Pending,
-			created_at: $created_at === null ? UtcDateTime::now() : UtcDateTime::create( $created_at ),
 		);
 	}
 
@@ -165,7 +125,6 @@ final readonly class DonationFactory {
 	 * @param int|string $campaign_id Campaign ID.
 	 * @param int $amount_minor Donation amount in minor units.
 	 * @param string $currency Donation currency (ISO 4217).
-	 * @param DateTimeImmutable|null $created_at Optional creation timestamp. If null, current UTC time is used.
 	 *
 	 * @return Donation Pending donation.
 	 *
@@ -176,7 +135,6 @@ final readonly class DonationFactory {
 		int|string $campaign_id,
 		int $amount_minor,
 		string $currency,
-		?DateTimeImmutable $created_at = null,
 	): Donation {
 
 		try {
@@ -185,14 +143,12 @@ final readonly class DonationFactory {
 				id: EntityId::create( $id ),
 				campaign_id: EntityId::create( $campaign_id ),
 				money: Money::create( $amount_minor, $currency ),
-				created_at: $created_at,
 			);
 
 		} catch (
 			InvalidEntityIdException
 			| InvalidMoneyAmountException
 			| InvalidMoneyCurrencyException
-			| InvalidUtcDateTimeException
 			| InvalidDonationAmountException $e
 		) {
 

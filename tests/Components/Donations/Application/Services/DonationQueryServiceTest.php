@@ -11,6 +11,8 @@ use Fundrik\Core\Components\Donations\Application\UseCases\FindAllDonations\Find
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationsByCampaignId\FindDonationsByCampaignIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
@@ -27,6 +29,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FindAllDonationsHandler::class )]
 #[UsesClass( FindDonationsByCampaignIdHandler::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationFactory::class )]
+#[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Money::class )]
