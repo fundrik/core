@@ -18,7 +18,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
  *
  * @since 0.1.0
  */
-final readonly class SetCampaignTargetAmountHandler extends AbstractCampaignMutationHandler implements SetCampaignTargetAmountUseCase {
+final readonly class SetCampaignTargetAmountHandler extends AbstractCampaignMutationHandler {
 
 	/**
 	 * Returns the exception class exposed by this mutation use case.

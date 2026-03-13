@@ -22,8 +22,6 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCa
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdUseCase;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignException;
@@ -65,7 +63,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( SetCampaignTargetAmountException::class )]
 #[UsesClass( CampaignMutationPreconditionReason::class )]
 #[UsesClass( CampaignMutation::class )]
-#[UsesClass( FindCampaignByIdException::class )]
 #[UsesClass( CampaignApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( CampaignRenamedEvent::class )]
@@ -82,7 +79,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Money::class )]
 final class CampaignMutationHandlersTest extends MockeryTestCase {
 
-	private FindCampaignByIdUseCase&MockInterface $find_campaign_by_id;
 	private CampaignRepositoryPort&MockInterface $campaigns;
 	private ApplicationEventBusPort&MockInterface $event_bus;
 
@@ -90,7 +86,6 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		parent::setUp();
 
-		$this->find_campaign_by_id = Mockery::mock( FindCampaignByIdUseCase::class );
 		$this->campaigns = Mockery::mock( CampaignRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 	}
@@ -106,8 +101,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 		$campaign = $this->make_campaign_for_action( $action );
 		$handler = $this->make_handler( $action );
 
-		$this->find_campaign_by_id
-			->shouldReceive( 'handle' )
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( $campaign );
@@ -148,13 +143,10 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		$campaign_id = EntityId::create( 1 );
 		$handler = $this->make_handler( 'rename' );
-		$e = new FindCampaignByIdException(
-			'Failed to retrieve campaign "1" by ID.',
-			previous: new FakeCampaignRepositoryException(),
-		);
+		$e = new FakeCampaignRepositoryException();
 
-		$this->find_campaign_by_id
-			->shouldReceive( 'handle' )
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andThrow( $e );
@@ -188,8 +180,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 		$campaign_id = EntityId::create( 1 );
 		$handler = $this->make_handler( $action );
 
-		$this->find_campaign_by_id
-			->shouldReceive( 'handle' )
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( null );
@@ -226,8 +218,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 		$campaign = $this->make_rejected_campaign_for_action( $action );
 		$handler = $this->make_handler( $action );
 
-		$this->find_campaign_by_id
-			->shouldReceive( 'handle' )
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( $campaign );
@@ -261,8 +253,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 		$handler = $this->make_handler( 'rename' );
 		$e = new FakeCampaignRepositoryException();
 
-		$this->find_campaign_by_id
-			->shouldReceive( 'handle' )
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( $campaign );
@@ -309,8 +301,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 		$handler = $this->make_handler( $action );
 		$e = new FakeApplicationEventBusException();
 
-		$this->find_campaign_by_id
-			->shouldReceive( 'handle' )
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
 			->andReturn( $campaign );
@@ -392,12 +384,12 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		// phpcs:disable SlevomatCodingStandard.Functions.RequireMultiLineCall.RequiredMultiLineCall
 		return match ( $action ) {
-			'rename' => new RenameCampaignHandler( $this->find_campaign_by_id, $this->campaigns, $this->event_bus ),
-			'activate' => new ActivateCampaignHandler( $this->find_campaign_by_id, $this->campaigns, $this->event_bus ),
-			'deactivate' => new DeactivateCampaignHandler( $this->find_campaign_by_id, $this->campaigns, $this->event_bus ),
-			'open' => new OpenCampaignHandler( $this->find_campaign_by_id, $this->campaigns, $this->event_bus ),
-			'close' => new CloseCampaignHandler( $this->find_campaign_by_id, $this->campaigns, $this->event_bus ),
-			'set_target_amount' => new SetCampaignTargetAmountHandler( $this->find_campaign_by_id, $this->campaigns, $this->event_bus ),
+			'rename' => new RenameCampaignHandler( $this->campaigns, $this->event_bus ),
+			'activate' => new ActivateCampaignHandler( $this->campaigns, $this->event_bus ),
+			'deactivate' => new DeactivateCampaignHandler( $this->campaigns, $this->event_bus ),
+			'open' => new OpenCampaignHandler( $this->campaigns, $this->event_bus ),
+			'close' => new CloseCampaignHandler( $this->campaigns, $this->event_bus ),
+			'set_target_amount' => new SetCampaignTargetAmountHandler( $this->campaigns, $this->event_bus ),
 		};
 		// phpcs:enable
 	}

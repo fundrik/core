@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases\FindDonationById;
 
-use DateTimeImmutable;
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
-use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
@@ -30,11 +27,9 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( Donation::class )]
-#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( Money::class )]
 #[UsesClass( UtcDateTime::class )]
 final class FindDonationByIdHandlerTest extends MockeryTestCase {
 
@@ -101,17 +96,5 @@ final class FindDonationByIdHandlerTest extends MockeryTestCase {
 		} catch ( FindDonationByIdException $exception ) {
 			$this->assertSame( $e, $exception->getPrevious() );
 		}
-	}
-
-	private function make_pending_donation(): Donation {
-
-		$factory = new DonationFactory();
-
-		return $factory->create_pending(
-			id: EntityId::create( 5_001 ),
-			campaign_id: EntityId::create( 901 ),
-			money: Money::create( 1_000, 'RUB' ),
-			created_at: new DateTimeImmutable( '2026-03-01T10:00:00+00:00' ),
-		);
 	}
 }

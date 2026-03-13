@@ -13,7 +13,7 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
  *
  * @since 0.1.0
  */
-final readonly class FindAllCampaignsHandler implements FindAllCampaignsUseCase {
+final readonly class FindAllCampaignsHandler {
 
 	/**
 	 * Constructor.

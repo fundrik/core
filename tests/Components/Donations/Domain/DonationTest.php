@@ -31,21 +31,12 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( InvalidUtcDateTimeException::class )]
 final class DonationTest extends FundrikTestCase {
 
-	private DonationFactory $factory;
-
-	protected function setUp(): void {
-
-		parent::setUp();
-
-		$this->factory = new DonationFactory();
-	}
-
 	#[Test]
 	public function create_pending_returns_expected_initial_state(): void {
 
 		$created_at = new DateTimeImmutable( '2026-02-26T10:00:00+00:00' );
 
-		$donation = $this->make_pending_donation( created_at: $created_at );
+		$donation = $this->make_pending_donation( id: 501, campaign_id: 901, created_at: $created_at );
 		$entity_id = EntityId::create( 501 );
 		$campaign_entity_id = EntityId::create( 901 );
 
@@ -226,7 +217,7 @@ final class DonationTest extends FundrikTestCase {
 		$this->expectException( InvalidDonationAmountException::class );
 		$this->expectExceptionMessage( 'Donation amount must be a positive integer in minor units. Given: 0.' );
 
-		$this->factory->create_pending(
+		( new DonationFactory() )->create_pending(
 			id: EntityId::create( 1 ),
 			campaign_id: EntityId::create( 2 ),
 			money: Money::create( 0, 'RUB' ),
@@ -433,13 +424,4 @@ final class DonationTest extends FundrikTestCase {
 		];
 	}
 
-	private function make_pending_donation( ?DateTimeImmutable $created_at = null ): Donation {
-
-		return $this->factory->create_pending(
-			id: EntityId::create( 501 ),
-			campaign_id: EntityId::create( 901 ),
-			money: Money::create( 1_000, 'RUB' ),
-			created_at: $created_at ?? new DateTimeImmutable( '2026-02-26T10:00:00+00:00' ),
-		);
-	}
 }

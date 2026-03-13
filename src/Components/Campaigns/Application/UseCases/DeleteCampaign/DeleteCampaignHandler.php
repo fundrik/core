@@ -19,7 +19,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
  *
  * @since 0.1.0
  */
-final readonly class DeleteCampaignHandler implements DeleteCampaignUseCase {
+final readonly class DeleteCampaignHandler {
 
 	/**
 	 * Constructor.

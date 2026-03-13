@@ -13,7 +13,7 @@ use Fundrik\Core\Components\Donations\Domain\Donation;
  *
  * @since 0.1.0
  */
-final readonly class FindAllDonationsHandler implements FindAllDonationsUseCase {
+final readonly class FindAllDonationsHandler {
 
 	/**
 	 * Constructor.

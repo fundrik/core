@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases\UpdateDonation;
 
-use DateTimeImmutable;
 use Fundrik\Core\Components\Donations\Application\Events\DonationUpdatedEvent;
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
-use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
@@ -36,11 +33,9 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( DonationUpdatedEvent::class )]
 #[UsesClass( Donation::class )]
-#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( Money::class )]
 #[UsesClass( UtcDateTime::class )]
 final class UpdateDonationHandlerTest extends MockeryTestCase {
 
@@ -139,23 +134,5 @@ final class UpdateDonationHandlerTest extends MockeryTestCase {
 				$exception->getMessage(),
 			);
 		}
-	}
-
-	private function make_captured_donation(): Donation {
-
-		$factory = new DonationFactory();
-		$created_at = new DateTimeImmutable( '2026-03-01T10:00:00+00:00' );
-		$captured_at = new DateTimeImmutable( '2026-03-01T10:10:00+00:00' );
-
-		return $factory->create(
-			id: EntityId::create( 5_001 ),
-			version: EntityVersion::initial(),
-			campaign_id: EntityId::create( 901 ),
-			money: Money::create( 1_000, 'RUB' ),
-			status: DonationStatus::Captured,
-			created_at: UtcDateTime::create( $created_at ),
-			captured_at: UtcDateTime::create( $captured_at ),
-			status_changed_at: UtcDateTime::create( $captured_at ),
-		);
 	}
 }

@@ -15,7 +15,6 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
-use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
@@ -45,7 +44,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
-#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
@@ -169,7 +167,7 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 	public function handle_throws_when_campaign_has_donations(): void {
 
 		$campaign_id = $this->make_campaign()->get_id();
-		$donation = $this->make_donation( $campaign_id );
+		$donation = $this->make_pending_donation( campaign_id: $campaign_id );
 
 		$this->donations
 			->shouldReceive( 'find_all_by_campaign_id' )
@@ -219,16 +217,5 @@ final class DeleteCampaignHandlerTest extends MockeryTestCase {
 			$this->assertSame( DeleteCampaignPreconditionReason::DonationsLookupFailed, $exception->get_reason() );
 			$this->assertSame( $e, $exception->getPrevious() );
 		}
-	}
-
-	private function make_donation( EntityId $campaign_id ): Donation {
-
-		$factory = new DonationFactory();
-
-		return $factory->create_pending(
-			id: EntityId::create( 5_001 ),
-			campaign_id: $campaign_id,
-			money: Money::create( 1_000, 'RUB' ),
-		);
 	}
 }

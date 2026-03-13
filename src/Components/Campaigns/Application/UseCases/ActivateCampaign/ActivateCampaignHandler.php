@@ -17,7 +17,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
  *
  * @since 0.1.0
  */
-final readonly class ActivateCampaignHandler extends AbstractCampaignMutationHandler implements ActivateCampaignUseCase {
+final readonly class ActivateCampaignHandler extends AbstractCampaignMutationHandler {
 
 	/**
 	 * Returns the exception class exposed by this mutation use case.

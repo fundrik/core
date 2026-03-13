@@ -22,7 +22,7 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
  *
  * @since 0.1.0
  */
-final readonly class SaveCampaignHandler implements SaveCampaignUseCase {
+final readonly class SaveCampaignHandler {
 
 	/**
 	 * Constructor.

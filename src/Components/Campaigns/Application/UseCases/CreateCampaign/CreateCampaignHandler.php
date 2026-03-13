@@ -17,7 +17,7 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
  *
  * @since 0.1.0
  */
-final readonly class CreateCampaignHandler implements CreateCampaignUseCase {
+final readonly class CreateCampaignHandler {
 
 	/**
 	 * Constructor.

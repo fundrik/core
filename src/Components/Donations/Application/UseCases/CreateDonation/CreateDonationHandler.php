@@ -19,7 +19,7 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
  *
  * @since 0.1.0
  */
-final readonly class CreateDonationHandler implements CreateDonationUseCase {
+final readonly class CreateDonationHandler {
 
 	/**
 	 * Constructor.

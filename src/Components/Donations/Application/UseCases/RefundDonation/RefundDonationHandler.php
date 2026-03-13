@@ -17,7 +17,7 @@ use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
  *
  * @since 0.1.0
  */
-final readonly class RefundDonationHandler extends AbstractDonationMutationHandler implements RefundDonationUseCase {
+final readonly class RefundDonationHandler extends AbstractDonationMutationHandler {
 
 	/**
 	 * Returns the exception class exposed by this mutation use case.

@@ -24,12 +24,9 @@ use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationExcep
 use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationPreconditionReason;
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdUseCase;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
-use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
@@ -62,7 +59,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CancelDonationException::class )]
 #[UsesClass( DonationMutationPreconditionReason::class )]
 #[UsesClass( DonationMutation::class )]
-#[UsesClass( FindDonationByIdException::class )]
 #[UsesClass( DonationApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( DonationAuthorizedEvent::class )]
@@ -71,7 +67,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationRefundedEvent::class )]
 #[UsesClass( DonationCanceledEvent::class )]
 #[UsesClass( Donation::class )]
-#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
@@ -79,7 +74,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( UtcDateTime::class )]
 final class DonationMutationHandlersTest extends MockeryTestCase {
 
-	private FindDonationByIdUseCase&MockInterface $find_donation_by_id;
 	private DonationRepositoryPort&MockInterface $donations;
 	private ApplicationEventBusPort&MockInterface $event_bus;
 
@@ -87,7 +81,6 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 
 		parent::setUp();
 
-		$this->find_donation_by_id = Mockery::mock( FindDonationByIdUseCase::class );
 		$this->donations = Mockery::mock( DonationRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 	}
@@ -104,8 +97,8 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 		$handler = $this->make_handler( $action );
 		$at = $this->make_action_timestamp();
 
-		$this->find_donation_by_id
-			->shouldReceive( 'handle' )
+		$this->donations
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
 			->andReturn( $donation );
@@ -146,13 +139,10 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 
 		$donation_id = EntityId::create( 5_001 );
 		$handler = $this->make_handler( 'authorize' );
-		$e = new FindDonationByIdException(
-			'Failed to retrieve donation "5001".',
-			previous: new FakeDonationRepositoryException(),
-		);
+		$e = new FakeDonationRepositoryException();
 
-		$this->find_donation_by_id
-			->shouldReceive( 'handle' )
+		$this->donations
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
 			->andThrow( $e );
@@ -186,8 +176,8 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 		$donation_id = EntityId::create( 5_001 );
 		$handler = $this->make_handler( $action );
 
-		$this->find_donation_by_id
-			->shouldReceive( 'handle' )
+		$this->donations
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
 			->andReturn( null );
@@ -224,8 +214,8 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 		$donation = $this->make_rejected_donation_for_action( $action );
 		$handler = $this->make_handler( $action );
 
-		$this->find_donation_by_id
-			->shouldReceive( 'handle' )
+		$this->donations
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
 			->andReturn( $donation );
@@ -259,8 +249,8 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 		$handler = $this->make_handler( 'authorize' );
 		$e = new FakeDonationRepositoryException();
 
-		$this->find_donation_by_id
-			->shouldReceive( 'handle' )
+		$this->donations
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
 			->andReturn( $donation );
@@ -308,8 +298,8 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 		$at = $this->make_action_timestamp();
 		$e = new FakeApplicationEventBusException();
 
-		$this->find_donation_by_id
-			->shouldReceive( 'handle' )
+		$this->donations
+			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
 			->andReturn( $donation );
@@ -387,11 +377,11 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 	private function make_handler( string $action ): object {
 
 		return match ( $action ) {
-			'authorize' => new AuthorizeDonationHandler( $this->find_donation_by_id, $this->donations, $this->event_bus ),
-			'capture' => new CaptureDonationHandler( $this->find_donation_by_id, $this->donations, $this->event_bus ),
-			'fail' => new FailDonationHandler( $this->find_donation_by_id, $this->donations, $this->event_bus ),
-			'refund' => new RefundDonationHandler( $this->find_donation_by_id, $this->donations, $this->event_bus ),
-			'cancel' => new CancelDonationHandler( $this->find_donation_by_id, $this->donations, $this->event_bus ),
+			'authorize' => new AuthorizeDonationHandler( $this->donations, $this->event_bus ),
+			'capture' => new CaptureDonationHandler( $this->donations, $this->event_bus ),
+			'fail' => new FailDonationHandler( $this->donations, $this->event_bus ),
+			'refund' => new RefundDonationHandler( $this->donations, $this->event_bus ),
+			'cancel' => new CancelDonationHandler( $this->donations, $this->event_bus ),
 		};
 	}
 
@@ -467,23 +457,6 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 		$this->assertSame( DonationStatus::Canceled, $donation->get_status() );
 		$this->assertTrue( $donation->get_status_changed_at()?->equals( $at ) ?? false );
 		$this->assertNull( $donation->get_captured_at() );
-	}
-
-	private function make_pending_donation(): Donation {
-
-		$factory = new DonationFactory();
-
-		return $factory->create_pending(
-			id: EntityId::create( 5_001 ),
-			campaign_id: EntityId::create( 901 ),
-			money: Money::create( 1_000, 'RUB' ),
-			created_at: new DateTimeImmutable( '2026-03-01T10:00:00+00:00' ),
-		);
-	}
-
-	private function make_captured_donation(): Donation {
-
-		return $this->make_pending_donation()->capture( $this->make_prior_timestamp() );
 	}
 
 	private function make_action_timestamp(): UtcDateTime {

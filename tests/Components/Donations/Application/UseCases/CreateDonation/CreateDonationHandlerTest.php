@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases\CreateDonation;
 
-use DateTimeImmutable;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
@@ -16,14 +13,11 @@ use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\Create
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationPreconditionReason;
 use Fundrik\Core\Components\Donations\Domain\Donation;
-use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
@@ -43,14 +37,9 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( DonationCreatedEvent::class )]
 #[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTarget::class )]
-#[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
-#[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
-#[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( Money::class )]
 #[UsesClass( UtcDateTime::class )]
 final class CreateDonationHandlerTest extends MockeryTestCase {
 
@@ -297,27 +286,8 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 		}
 	}
 
-	private function make_pending_donation(): Donation {
-
-		$factory = new DonationFactory();
-
-		return $factory->create_pending(
-			id: EntityId::create( 5_001 ),
-			campaign_id: EntityId::create( 901 ),
-			money: Money::create( 1_000, 'RUB' ),
-			created_at: new DateTimeImmutable( '2026-03-01T10:00:00+00:00' ),
-		);
-	}
-
 	private function make_donation_campaign( bool $is_active = true, bool $is_open = true ): Campaign {
 
-		return new Campaign(
-			id: EntityId::create( 901 ),
-			version: EntityVersion::initial(),
-			title: CampaignTitle::create( 'Campaign 901' ),
-			is_active: $is_active,
-			is_open: $is_open,
-			target: CampaignTarget::create( true, Money::create( 10_000, 'RUB' ) ),
-		);
+		return $this->make_campaign( 901, 'Campaign 901', $is_active, $is_open, true, 10_000 );
 	}
 }

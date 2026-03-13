@@ -7,8 +7,6 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases;
 use Fundrik\Core\Components\Donations\Application\Events\DonationApplicationEventInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdUseCase;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
@@ -39,12 +37,10 @@ abstract readonly class AbstractDonationMutationHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param FindDonationByIdUseCase $find_donation_by_id Retrieves donations for mutation use cases.
 	 * @param DonationRepositoryPort $donations Persists changed donations.
 	 * @param ApplicationEventBusPort $event_bus Publishes donation events.
 	 */
 	public function __construct(
-		private FindDonationByIdUseCase $find_donation_by_id,
 		private DonationRepositoryPort $donations,
 		private ApplicationEventBusPort $event_bus,
 	) {}
@@ -65,8 +61,8 @@ abstract readonly class AbstractDonationMutationHandler {
 	protected function require_donation( EntityId $donation_id, DonationMutation $mutation ): Donation {
 
 		try {
-			$donation = $this->find_donation_by_id->handle( $donation_id );
-		} catch ( FindDonationByIdException $e ) {
+			$donation = $this->donations->find_by_id( $donation_id );
+		} catch ( DonationRepositoryExceptionInterface $e ) {
 			throw $this->new_mutation_exception(
 				stage: UseCaseFailureStage::Precondition,
 				message: sprintf( 'Failed to retrieve donation "%s".', (string) $donation_id->get_value() ),

@@ -7,8 +7,6 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignApplicationEventInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdUseCase;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
@@ -39,12 +37,10 @@ abstract readonly class AbstractCampaignMutationHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param FindCampaignByIdUseCase $find_campaign_by_id Retrieves campaigns for mutation use cases.
 	 * @param CampaignRepositoryPort $campaigns Persists changed campaigns.
 	 * @param ApplicationEventBusPort $event_bus Publishes campaign events.
 	 */
 	public function __construct(
-		private FindCampaignByIdUseCase $find_campaign_by_id,
 		private CampaignRepositoryPort $campaigns,
 		private ApplicationEventBusPort $event_bus,
 	) {}
@@ -65,8 +61,8 @@ abstract readonly class AbstractCampaignMutationHandler {
 	protected function require_campaign( EntityId $campaign_id, CampaignMutation $mutation ): Campaign {
 
 		try {
-			$campaign = $this->find_campaign_by_id->handle( $campaign_id );
-		} catch ( FindCampaignByIdException $e ) {
+			$campaign = $this->campaigns->find_by_id( $campaign_id );
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
 			throw $this->new_mutation_exception(
 				stage: UseCaseFailureStage::Precondition,
 				message: sprintf( 'Failed to retrieve campaign "%s".', (string) $campaign_id->get_value() ),

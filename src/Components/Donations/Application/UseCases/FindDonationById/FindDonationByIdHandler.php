@@ -14,7 +14,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
  *
  * @since 0.1.0
  */
-final readonly class FindDonationByIdHandler implements FindDonationByIdUseCase {
+final readonly class FindDonationByIdHandler {
 
 	/**
 	 * Constructor.
