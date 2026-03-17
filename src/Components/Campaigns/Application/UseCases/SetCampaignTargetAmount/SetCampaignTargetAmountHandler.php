@@ -62,12 +62,7 @@ final readonly class SetCampaignTargetAmountHandler extends AbstractCampaignMuta
 		?CampaignMutationPreconditionReason $reason = null,
 	): SetCampaignTargetAmountException {
 
-		return new SetCampaignTargetAmountException(
-			stage: $stage,
-			message: $message,
-			previous: $previous,
-			reason: $reason,
-		);
+		return new SetCampaignTargetAmountException( $stage, $message, $previous, $reason );
 	}
 
 	/**

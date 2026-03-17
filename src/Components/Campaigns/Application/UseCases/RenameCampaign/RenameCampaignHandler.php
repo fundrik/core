@@ -62,7 +62,7 @@ final readonly class RenameCampaignHandler extends AbstractCampaignMutationHandl
 		?CampaignMutationPreconditionReason $reason = null,
 	): RenameCampaignException {
 
-		return new RenameCampaignException( stage: $stage, message: $message, previous: $previous, reason: $reason );
+		return new RenameCampaignException( $stage, $message, $previous, $reason );
 	}
 
 	/**

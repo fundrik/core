@@ -61,7 +61,7 @@ final readonly class CloseCampaignHandler extends AbstractCampaignMutationHandle
 		?CampaignMutationPreconditionReason $reason = null,
 	): CloseCampaignException {
 
-		return new CloseCampaignException( stage: $stage, message: $message, previous: $previous, reason: $reason );
+		return new CloseCampaignException( $stage, $message, $previous, $reason );
 	}
 
 	/**

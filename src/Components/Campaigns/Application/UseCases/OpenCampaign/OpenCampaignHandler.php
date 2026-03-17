@@ -61,7 +61,7 @@ final readonly class OpenCampaignHandler extends AbstractCampaignMutationHandler
 		?CampaignMutationPreconditionReason $reason = null,
 	): OpenCampaignException {
 
-		return new OpenCampaignException( stage: $stage, message: $message, previous: $previous, reason: $reason );
+		return new OpenCampaignException( $stage, $message, $previous, $reason );
 	}
 
 	/**

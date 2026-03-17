@@ -61,12 +61,7 @@ final readonly class DeactivateCampaignHandler extends AbstractCampaignMutationH
 		?CampaignMutationPreconditionReason $reason = null,
 	): DeactivateCampaignException {
 
-		return new DeactivateCampaignException(
-			stage: $stage,
-			message: $message,
-			previous: $previous,
-			reason: $reason,
-		);
+		return new DeactivateCampaignException( $stage, $message, $previous, $reason );
 	}
 
 	/**

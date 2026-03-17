@@ -22,19 +22,17 @@ class CampaignMutationException extends CampaignApplicationException {
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
-	 * @param int $code Exception code.
 	 * @param Throwable|null $previous Previous exception.
 	 * @param CampaignMutationPreconditionReason|null $reason Optional precondition failure reason.
 	 */
 	public function __construct(
 		private readonly UseCaseFailureStage $stage,
 		string $message = '',
-		int $code = 0,
 		?Throwable $previous = null,
 		private readonly ?CampaignMutationPreconditionReason $reason = null,
 	) {
 
-		parent::__construct( $message, $code, $previous );
+		parent::__construct( $message, 0, $previous );
 	}
 
 	/**
