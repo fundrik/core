@@ -44,7 +44,7 @@ final readonly class FindCampaignByIdHandler {
 			return $this->repository->find_by_id( $campaign_id );
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
 			throw new FindCampaignByIdException(
-				sprintf( 'Failed to retrieve campaign "%s" by ID.', (string) $campaign_id->get_value() ),
+				sprintf( 'Failed to retrieve campaign "%s".', (string) $campaign_id->get_value() ),
 				previous: $e,
 			);
 		}

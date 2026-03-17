@@ -7,11 +7,13 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaig
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignActivatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutation;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationPreconditionReason;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignDomainException;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Throwable;
 
-// phpcs:disable SlevomatCodingStandard.Files.LineLength.LineTooLong
 /**
  * Handles activating an existing campaign.
  *
@@ -20,17 +22,46 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 final readonly class ActivateCampaignHandler extends AbstractCampaignMutationHandler {
 
 	/**
-	 * Returns the exception class exposed by this mutation use case.
+	 * Creates the activate-campaign exception used when the campaign disappears before persistence.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string Mutation exception class.
+	 * @param EntityId $campaign_id Campaign ID.
+	 * @param Throwable $previous Previous repository exception.
 	 *
-	 * @phpstan-return class-string<ActivateCampaignException>
+	 * @return ActivateCampaignException Concrete activate-campaign exception.
 	 */
-	protected function mutation_exception_class(): string {
+	protected function new_not_found_mutation_exception(
+		EntityId $campaign_id,
+		Throwable $previous,
+	): ActivateCampaignException {
 
-		return ActivateCampaignException::class;
+		return new ActivateCampaignNotFoundException(
+			(string) $campaign_id->get_value(),
+			$previous,
+		);
+	}
+
+	/**
+	 * Creates the activate-campaign exception exposed by this use case.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
+	 * @param string $message Exception message.
+	 * @param Throwable|null $previous Previous exception.
+	 * @param CampaignMutationPreconditionReason|null $reason Optional precondition failure reason.
+	 *
+	 * @return ActivateCampaignException Concrete activate-campaign exception.
+	 */
+	protected function new_mutation_exception(
+		UseCaseFailureStage $stage,
+		string $message,
+		?Throwable $previous = null,
+		?CampaignMutationPreconditionReason $reason = null,
+	): ActivateCampaignException {
+
+		return new ActivateCampaignException( stage: $stage, message: $message, previous: $previous, reason: $reason );
 	}
 
 	/**
@@ -60,4 +91,3 @@ final readonly class ActivateCampaignHandler extends AbstractCampaignMutationHan
 		);
 	}
 }
-// phpcs:enable

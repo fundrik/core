@@ -97,6 +97,7 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 			$this->fail( 'Expected FindCampaignByIdException to be thrown.' );
 		} catch ( FindCampaignByIdException $exception ) {
 			$this->assertSame( $e, $exception->getPrevious() );
+			$this->assertSame( 'Failed to retrieve campaign "1".', $exception->getMessage() );
 		}
 	}
 }

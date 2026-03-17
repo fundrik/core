@@ -62,8 +62,8 @@ interface CampaignRepositoryPort {
 	 *
 	 * @return Campaign The persisted campaign snapshot.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When the insert fails, including when a
-	 *                                              campaign with the same ID already exists.
+	 * @throws CampaignAlreadyExistsExceptionInterface When a campaign with the same ID already exists.
+	 * @throws CampaignRepositoryExceptionInterface When the insert fails for another reason.
 	 */
 	public function insert( Campaign $campaign ): Campaign;
 
@@ -76,8 +76,8 @@ interface CampaignRepositoryPort {
 	 *
 	 * @return Campaign The persisted campaign snapshot.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When the update fails, including when the
-	 *                                              campaign does not exist.
+	 * @throws CampaignNotFoundExceptionInterface When the campaign does not exist.
+	 * @throws CampaignRepositoryExceptionInterface When the update fails for another reason.
 	 */
 	public function update( Campaign $campaign ): Campaign;
 
@@ -103,8 +103,8 @@ interface CampaignRepositoryPort {
 	 *
 	 * @param EntityId $id The campaign ID to delete.
 	 *
-	 * @throws CampaignRepositoryExceptionInterface When the delete fails, including when the
-	 *                                              campaign does not exist.
+	 * @throws CampaignNotFoundExceptionInterface When the campaign does not exist.
+	 * @throws CampaignRepositoryExceptionInterface When the delete fails for another reason.
 	 */
 	public function delete( EntityId $id ): void;
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignNotFoundExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
@@ -44,12 +45,13 @@ final readonly class DeleteCampaignHandler {
 	 *
 	 * @param EntityId $campaign_id The campaign ID to delete.
 	 *
-	 * @throws DeleteCampaignException When campaign deletion fails.
+	 * @throws DeleteCampaignNotFoundException When the campaign does not exist.
+	 * @throws DeleteCampaignException When campaign deletion fails for another reason.
 	 */
 	public function handle( EntityId $campaign_id ): void {
 
 		try {
-			$campaign_donations = $this->donations->find_all_by_campaign_id( $campaign_id );
+			$campaign_has_donations = $this->donations->exists_by_campaign_id( $campaign_id );
 		} catch ( DonationRepositoryExceptionInterface $e ) {
 			throw new DeleteCampaignException(
 				stage: UseCaseFailureStage::Precondition,
@@ -59,7 +61,7 @@ final readonly class DeleteCampaignHandler {
 			);
 		}
 
-		if ( count( $campaign_donations ) > 0 ) {
+		if ( $campaign_has_donations ) {
 			throw new DeleteCampaignException(
 				stage: UseCaseFailureStage::Precondition,
 				reason: DeleteCampaignPreconditionReason::HasDonations,
@@ -72,6 +74,11 @@ final readonly class DeleteCampaignHandler {
 
 		try {
 			$this->repository->delete( $campaign_id );
+		} catch ( CampaignNotFoundExceptionInterface $e ) {
+			throw new DeleteCampaignNotFoundException(
+				(string) $campaign_id->get_value(),
+				$e,
+			);
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
 			throw new DeleteCampaignException(
 				stage: UseCaseFailureStage::Persistence,

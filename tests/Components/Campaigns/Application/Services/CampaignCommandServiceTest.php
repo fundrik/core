@@ -349,10 +349,10 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$campaign_id = $this->make_campaign()->get_id();
 
 		$this->donation_repository
-			->shouldReceive( 'find_all_by_campaign_id' )
+			->shouldReceive( 'exists_by_campaign_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
-			->andReturn( [] );
+			->andReturn( false );
 
 		$this->campaign_repository
 			->shouldReceive( 'delete' )

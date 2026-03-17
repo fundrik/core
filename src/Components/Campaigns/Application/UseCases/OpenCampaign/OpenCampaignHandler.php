@@ -7,9 +7,12 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutation;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationPreconditionReason;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignDomainException;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Throwable;
 
 /**
  * Handles opening an existing campaign for donations.
@@ -19,17 +22,46 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 final readonly class OpenCampaignHandler extends AbstractCampaignMutationHandler {
 
 	/**
-	 * Returns the exception class exposed by this mutation use case.
+	 * Creates the open-campaign exception used when the campaign disappears before persistence.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string Mutation exception class.
+	 * @param EntityId $campaign_id Campaign ID.
+	 * @param Throwable $previous Previous repository exception.
 	 *
-	 * @phpstan-return class-string<OpenCampaignException>
+	 * @return OpenCampaignException Concrete open-campaign exception.
 	 */
-	protected function mutation_exception_class(): string {
+	protected function new_not_found_mutation_exception(
+		EntityId $campaign_id,
+		Throwable $previous,
+	): OpenCampaignException {
 
-		return OpenCampaignException::class;
+		return new OpenCampaignNotFoundException(
+			(string) $campaign_id->get_value(),
+			$previous,
+		);
+	}
+
+	/**
+	 * Creates the open-campaign exception exposed by this use case.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
+	 * @param string $message Exception message.
+	 * @param Throwable|null $previous Previous exception.
+	 * @param CampaignMutationPreconditionReason|null $reason Optional precondition failure reason.
+	 *
+	 * @return OpenCampaignException Concrete open-campaign exception.
+	 */
+	protected function new_mutation_exception(
+		UseCaseFailureStage $stage,
+		string $message,
+		?Throwable $previous = null,
+		?CampaignMutationPreconditionReason $reason = null,
+	): OpenCampaignException {
+
+		return new OpenCampaignException( stage: $stage, message: $message, previous: $previous, reason: $reason );
 	}
 
 	/**

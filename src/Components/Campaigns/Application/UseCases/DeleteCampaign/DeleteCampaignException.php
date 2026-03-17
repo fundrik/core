@@ -13,7 +13,7 @@ use Throwable;
  *
  * @since 0.1.0
  */
-final class DeleteCampaignException extends CampaignApplicationException {
+class DeleteCampaignException extends CampaignApplicationException {
 
 	/**
 	 * Constructor.

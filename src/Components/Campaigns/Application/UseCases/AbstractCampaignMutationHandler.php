@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignApplicationEventInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignNotFoundExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
@@ -22,15 +23,38 @@ use Throwable;
 abstract readonly class AbstractCampaignMutationHandler {
 
 	/**
-	 * Returns the exception class exposed by the concrete mutation use case.
+	 * Creates the concrete mutation exception exposed by the use case.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string Mutation exception class.
+	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
+	 * @param string $message Exception message.
+	 * @param Throwable|null $previous Previous exception.
+	 * @param CampaignMutationPreconditionReason|null $reason Optional precondition failure reason.
 	 *
-	 * @phpstan-return class-string<CampaignMutationException>
+	 * @return CampaignMutationException Concrete mutation exception.
 	 */
-	abstract protected function mutation_exception_class(): string;
+	abstract protected function new_mutation_exception(
+		UseCaseFailureStage $stage,
+		string $message,
+		?Throwable $previous = null,
+		?CampaignMutationPreconditionReason $reason = null,
+	): CampaignMutationException;
+
+	/**
+	 * Creates the concrete mutation exception used when the campaign disappears before persistence.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param EntityId $campaign_id Campaign ID.
+	 * @param Throwable $previous Previous repository exception.
+	 *
+	 * @return CampaignMutationException Concrete mutation exception.
+	 */
+	abstract protected function new_not_found_mutation_exception(
+		EntityId $campaign_id,
+		Throwable $previous,
+	): CampaignMutationException;
 
 	/**
 	 * Constructor.
@@ -136,6 +160,8 @@ abstract readonly class AbstractCampaignMutationHandler {
 
 		try {
 			$updated_campaign = $this->campaigns->update( $campaign );
+		} catch ( CampaignNotFoundExceptionInterface $e ) {
+			throw $this->new_not_found_mutation_exception( $campaign->get_id(), $e );
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
 			throw $this->new_mutation_exception(
 				stage: UseCaseFailureStage::Persistence,
@@ -164,35 +190,6 @@ abstract readonly class AbstractCampaignMutationHandler {
 		}
 
 		return $updated_campaign;
-	}
-
-	/**
-	 * Creates the mutation exception exposed by the concrete use case.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
-	 * @param string $message Exception message.
-	 * @param Throwable|null $previous Previous exception.
-	 * @param CampaignMutationPreconditionReason|null $reason Optional precondition failure reason.
-	 *
-	 * @return CampaignMutationException Concrete mutation exception.
-	 */
-	private function new_mutation_exception(
-		UseCaseFailureStage $stage,
-		string $message,
-		?Throwable $previous = null,
-		?CampaignMutationPreconditionReason $reason = null,
-	): CampaignMutationException {
-
-		$class = $this->mutation_exception_class();
-
-		return new $class(
-			stage: $stage,
-			message: $message,
-			previous: $previous,
-			reason: $reason,
-		);
 	}
 	// phpcs:enable
 }

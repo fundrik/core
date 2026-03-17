@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignNotFoundExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
@@ -42,12 +43,18 @@ final readonly class UpdateCampaignHandler {
 	 *
 	 * @return Campaign The persisted campaign snapshot.
 	 *
-	 * @throws UpdateCampaignException When campaign update fails.
+	 * @throws UpdateCampaignNotFoundException When the campaign does not exist.
+	 * @throws UpdateCampaignException When campaign update fails for another reason.
 	 */
 	public function handle( Campaign $campaign ): Campaign {
 
 		try {
 			$updated_campaign = $this->repository->update( $campaign );
+		} catch ( CampaignNotFoundExceptionInterface $e ) {
+			throw new UpdateCampaignNotFoundException(
+				(string) $campaign->get_id()->get_value(),
+				$e,
+			);
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
 			throw new UpdateCampaignException(
 				stage: UseCaseFailureStage::Persistence,

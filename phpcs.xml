@@ -44,6 +44,15 @@
 			<property name="excludedClasses" type="array">
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException"/>
 				<element value="Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignException"/>
 			</property>
 		</properties>
 	</rule>

@@ -9,6 +9,7 @@ use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplication
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignNotFoundException;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -19,6 +20,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
+use Fundrik\Core\Tests\Fixtures\FakeCampaignNotFoundException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -28,6 +30,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( UpdateCampaignHandler::class )]
+#[UsesClass( UpdateCampaignNotFoundException::class )]
 #[UsesClass( UpdateCampaignException::class )]
 #[UsesClass( UseCaseFailureStage::class )]
 #[UsesClass( CampaignApplicationException::class )]
@@ -83,6 +86,31 @@ final class UpdateCampaignHandlerTest extends MockeryTestCase {
 		$result = $this->handler->handle( $campaign );
 
 		$this->assertSame( $campaign, $result );
+	}
+
+	#[Test]
+	public function handle_throws_when_campaign_does_not_exist(): void {
+
+		$campaign = $this->make_campaign();
+		$e = new FakeCampaignNotFoundException();
+
+		$this->repository
+			->shouldReceive( 'update' )
+			->once()
+			->with( $this->identicalTo( $campaign ) )
+			->andThrow( $e );
+
+		$this->event_bus
+			->shouldNotReceive( 'publish' );
+
+		try {
+			$this->handler->handle( $campaign );
+			$this->fail( 'Expected UpdateCampaignNotFoundException to be thrown.' );
+		} catch ( UpdateCampaignNotFoundException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+			$this->assertSame( 'Cannot update campaign "1": campaign does not exist.', $exception->getMessage() );
+		}
 	}
 
 	#[Test]

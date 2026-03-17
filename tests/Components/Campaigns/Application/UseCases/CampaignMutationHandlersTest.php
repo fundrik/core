@@ -15,19 +15,25 @@ use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\Campa
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignNotFoundException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutation;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationPreconditionReason;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignNotFoundException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignNotFoundException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignNotFoundException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignNotFoundException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountNotFoundException;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -38,6 +44,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
+use Fundrik\Core\Tests\Fixtures\FakeCampaignNotFoundException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -56,11 +63,17 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[CoversClass( SetCampaignTargetAmountHandler::class )]
 #[UsesClass( CampaignMutationException::class )]
 #[UsesClass( RenameCampaignException::class )]
+#[UsesClass( RenameCampaignNotFoundException::class )]
 #[UsesClass( ActivateCampaignException::class )]
+#[UsesClass( ActivateCampaignNotFoundException::class )]
 #[UsesClass( DeactivateCampaignException::class )]
+#[UsesClass( DeactivateCampaignNotFoundException::class )]
 #[UsesClass( OpenCampaignException::class )]
+#[UsesClass( OpenCampaignNotFoundException::class )]
 #[UsesClass( CloseCampaignException::class )]
+#[UsesClass( CloseCampaignNotFoundException::class )]
 #[UsesClass( SetCampaignTargetAmountException::class )]
+#[UsesClass( SetCampaignTargetAmountNotFoundException::class )]
 #[UsesClass( CampaignMutationPreconditionReason::class )]
 #[UsesClass( CampaignMutation::class )]
 #[UsesClass( CampaignApplicationException::class )]
@@ -288,6 +301,56 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 	}
 
 	#[Test]
+	#[DataProvider( 'persistence_not_found_provider' )]
+	public function handle_throws_when_campaign_disappears_before_persist(
+		string $action,
+		string $phrase,
+		string $exception_class,
+	): void {
+
+		$campaign_id = EntityId::create( 1 );
+		$campaign = $this->make_campaign_for_action( $action );
+		$handler = $this->make_handler( $action );
+		$e = new FakeCampaignNotFoundException();
+
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
+			->once()
+			->with( $this->identicalTo( $campaign_id ) )
+			->andReturn( $campaign );
+
+		$this->campaigns
+			->shouldReceive( 'update' )
+			->once()
+			->withArgs(
+				function ( Campaign $updated_campaign ) use ( $action ): bool {
+
+					$this->assert_campaign_action_result( $action, $updated_campaign );
+
+					return true;
+				},
+			)
+			->andThrow( $e );
+
+		$this->event_bus
+			->shouldNotReceive( 'publish' );
+
+		try {
+			$this->invoke_handler( $handler, $action, $campaign_id );
+			$this->fail( 'Expected CampaignMutationException to be thrown.' );
+		} catch ( CampaignMutationException $exception ) {
+			$this->assertInstanceOf( $exception_class, $exception );
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertNull( $exception->get_reason() );
+			$this->assertSame(
+				sprintf( 'Cannot %s campaign "1": campaign does not exist.', $phrase ),
+				$exception->getMessage(),
+			);
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
+	}
+
+	#[Test]
 	#[DataProvider( 'event_publish_provider' )]
 	public function handle_wraps_event_publish_failure(
 		string $action,
@@ -377,6 +440,18 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 			'open' => [ 'open', 'opened', 'opened', OpenCampaignException::class ],
 			'close' => [ 'close', 'closed', 'closed', CloseCampaignException::class ],
 			'set_target_amount' => [ 'set_target_amount', 'target changed', 'updated', SetCampaignTargetAmountException::class ],
+		];
+	}
+
+	public static function persistence_not_found_provider(): array {
+
+		return [
+			'rename' => [ 'rename', 'rename', RenameCampaignNotFoundException::class ],
+			'activate' => [ 'activate', 'activate', ActivateCampaignNotFoundException::class ],
+			'deactivate' => [ 'deactivate', 'deactivate', DeactivateCampaignNotFoundException::class ],
+			'open' => [ 'open', 'open', OpenCampaignNotFoundException::class ],
+			'close' => [ 'close', 'close', CloseCampaignNotFoundException::class ],
+			'set_target_amount' => [ 'set_target_amount', 'set target amount for', SetCampaignTargetAmountNotFoundException::class ],
 		];
 	}
 

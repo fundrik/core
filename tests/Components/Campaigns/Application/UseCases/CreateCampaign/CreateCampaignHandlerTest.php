@@ -7,6 +7,7 @@ namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases\CreateCam
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignAlreadyExistsException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
@@ -19,6 +20,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
+use Fundrik\Core\Tests\Fixtures\FakeCampaignAlreadyExistsException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -28,6 +30,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( CreateCampaignHandler::class )]
+#[UsesClass( CreateCampaignAlreadyExistsException::class )]
 #[UsesClass( CreateCampaignException::class )]
 #[UsesClass( UseCaseFailureStage::class )]
 #[UsesClass( CampaignApplicationException::class )]
@@ -83,6 +86,31 @@ final class CreateCampaignHandlerTest extends MockeryTestCase {
 		$result = $this->handler->handle( $campaign );
 
 		$this->assertSame( $campaign, $result );
+	}
+
+	#[Test]
+	public function handle_throws_when_campaign_already_exists(): void {
+
+		$campaign = $this->make_campaign();
+		$e = new FakeCampaignAlreadyExistsException();
+
+		$this->repository
+			->shouldReceive( 'insert' )
+			->once()
+			->with( $this->identicalTo( $campaign ) )
+			->andThrow( $e );
+
+		$this->event_bus
+			->shouldNotReceive( 'publish' );
+
+		try {
+			$this->handler->handle( $campaign );
+			$this->fail( 'Expected CreateCampaignAlreadyExistsException to be thrown.' );
+		} catch ( CreateCampaignAlreadyExistsException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+			$this->assertSame( 'Cannot create campaign "1": campaign already exists.', $exception->getMessage() );
+		}
 	}
 
 	#[Test]

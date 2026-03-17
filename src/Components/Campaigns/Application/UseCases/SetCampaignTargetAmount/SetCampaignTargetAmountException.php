@@ -11,4 +11,4 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationExcep
  *
  * @since 0.1.0
  */
-final class SetCampaignTargetAmountException extends CampaignMutationException {}
+class SetCampaignTargetAmountException extends CampaignMutationException {}
