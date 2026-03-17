@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Application\UseCases;
 
 use Fundrik\Core\Components\Donations\Application\Events\DonationApplicationEventInterface;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationNotFoundExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
@@ -22,15 +23,38 @@ use Throwable;
 abstract readonly class AbstractDonationMutationHandler {
 
 	/**
-	 * Returns the exception class exposed by the concrete mutation use case.
+	 * Creates the concrete mutation exception exposed by the use case.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string Mutation exception class.
+	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
+	 * @param string $message Exception message.
+	 * @param Throwable|null $previous Previous exception.
+	 * @param DonationMutationPreconditionReason|null $reason Optional precondition failure reason.
 	 *
-	 * @phpstan-return class-string<DonationMutationException>
+	 * @return DonationMutationException Concrete mutation exception.
 	 */
-	abstract protected function mutation_exception_class(): string;
+	abstract protected function new_mutation_exception(
+		UseCaseFailureStage $stage,
+		string $message,
+		?Throwable $previous = null,
+		?DonationMutationPreconditionReason $reason = null,
+	): DonationMutationException;
+
+	/**
+	 * Creates the concrete mutation exception used when the donation disappears before persistence.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param EntityId $donation_id Donation ID.
+	 * @param Throwable $previous Previous repository exception.
+	 *
+	 * @return DonationMutationException Concrete mutation exception.
+	 */
+	abstract protected function new_not_found_mutation_exception(
+		EntityId $donation_id,
+		Throwable $previous,
+	): DonationMutationException;
 
 	/**
 	 * Constructor.
@@ -136,6 +160,8 @@ abstract readonly class AbstractDonationMutationHandler {
 
 		try {
 			$updated_donation = $this->donations->update( $donation );
+		} catch ( DonationNotFoundExceptionInterface $e ) {
+			throw $this->new_not_found_mutation_exception( $donation->get_id(), $e );
 		} catch ( DonationRepositoryExceptionInterface $e ) {
 			throw $this->new_mutation_exception(
 				stage: UseCaseFailureStage::Persistence,
@@ -164,35 +190,6 @@ abstract readonly class AbstractDonationMutationHandler {
 		}
 
 		return $updated_donation;
-	}
-
-	/**
-	 * Creates the mutation exception exposed by the concrete use case.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
-	 * @param string $message Exception message.
-	 * @param Throwable|null $previous Previous exception.
-	 * @param DonationMutationPreconditionReason|null $reason Optional precondition failure reason.
-	 *
-	 * @return DonationMutationException Concrete mutation exception.
-	 */
-	private function new_mutation_exception(
-		UseCaseFailureStage $stage,
-		string $message,
-		?Throwable $previous = null,
-		?DonationMutationPreconditionReason $reason = null,
-	): DonationMutationException {
-
-		$class = $this->mutation_exception_class();
-
-		return new $class(
-			stage: $stage,
-			message: $message,
-			previous: $previous,
-			reason: $reason,
-		);
 	}
 	// phpcs:enable
 }

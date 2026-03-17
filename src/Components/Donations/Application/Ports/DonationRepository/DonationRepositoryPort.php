@@ -56,6 +56,19 @@ interface DonationRepositoryPort {
 	public function find_all_by_campaign_id( EntityId $campaign_id ): array;
 
 	/**
+	 * Returns whether any donations exist for the specified campaign.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param EntityId $campaign_id The campaign ID to check.
+	 *
+	 * @return bool True when at least one donation exists for the campaign.
+	 *
+	 * @throws DonationRepositoryExceptionInterface When the existence check fails.
+	 */
+	public function exists_by_campaign_id( EntityId $campaign_id ): bool;
+
+	/**
 	 * Returns whether a donation exists in storage by its ID.
 	 *
 	 * @since 0.1.0
@@ -77,8 +90,8 @@ interface DonationRepositoryPort {
 	 *
 	 * @return Donation The persisted donation snapshot.
 	 *
-	 * @throws DonationRepositoryExceptionInterface When the insert fails, including when a
-	 *                                              donation with the same ID already exists.
+	 * @throws DonationAlreadyExistsExceptionInterface When a donation with the same ID already exists.
+	 * @throws DonationRepositoryExceptionInterface When the insert fails for another reason.
 	 */
 	public function insert( Donation $donation ): Donation;
 
@@ -91,8 +104,8 @@ interface DonationRepositoryPort {
 	 *
 	 * @return Donation The persisted donation snapshot.
 	 *
-	 * @throws DonationRepositoryExceptionInterface When the update fails, including when the
-	 *                                              donation does not exist.
+	 * @throws DonationNotFoundExceptionInterface When the donation does not exist.
+	 * @throws DonationRepositoryExceptionInterface When the update fails for another reason.
 	 */
 	public function update( Donation $donation ): Donation;
 }

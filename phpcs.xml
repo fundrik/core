@@ -43,7 +43,6 @@
 		<properties>
 			<property name="excludedClasses" type="array">
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException"/>
-				<element value="Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationException"/>
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignException"/>
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignException"/>
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignException"/>
@@ -53,6 +52,14 @@
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException"/>
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignException"/>
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationException"/>
 			</property>
 		</properties>
 	</rule>

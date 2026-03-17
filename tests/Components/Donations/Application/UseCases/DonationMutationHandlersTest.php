@@ -14,17 +14,22 @@ use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\Donat
 use Fundrik\Core\Components\Donations\Application\UseCases\AbstractDonationMutationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationNotFoundException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationNotFoundException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationNotFoundException;
 use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutation;
 use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationPreconditionReason;
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationNotFoundException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationNotFoundException;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
@@ -35,6 +40,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
+use Fundrik\Core\Tests\Fixtures\FakeDonationNotFoundException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -52,10 +58,15 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[CoversClass( CancelDonationHandler::class )]
 #[UsesClass( DonationMutationException::class )]
 #[UsesClass( AuthorizeDonationException::class )]
+#[UsesClass( AuthorizeDonationNotFoundException::class )]
 #[UsesClass( CaptureDonationException::class )]
+#[UsesClass( CaptureDonationNotFoundException::class )]
 #[UsesClass( FailDonationException::class )]
+#[UsesClass( FailDonationNotFoundException::class )]
 #[UsesClass( RefundDonationException::class )]
+#[UsesClass( RefundDonationNotFoundException::class )]
 #[UsesClass( CancelDonationException::class )]
+#[UsesClass( CancelDonationNotFoundException::class )]
 #[UsesClass( DonationMutationPreconditionReason::class )]
 #[UsesClass( DonationMutation::class )]
 #[UsesClass( DonationApplicationException::class )]
@@ -282,6 +293,56 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 	}
 
 	#[Test]
+	#[DataProvider( 'persistence_not_found_provider' )]
+	public function handle_throws_when_donation_disappears_before_persist(
+		string $action,
+		string $phrase,
+		string $exception_class,
+	): void {
+
+		$donation_id = EntityId::create( 5_001 );
+		$donation = $this->make_donation_for_action( $action );
+		$handler = $this->make_handler( $action );
+		$e = new FakeDonationNotFoundException();
+
+		$this->donations
+			->shouldReceive( 'find_by_id' )
+			->once()
+			->with( $this->identicalTo( $donation_id ) )
+			->andReturn( $donation );
+
+		$this->donations
+			->shouldReceive( 'update' )
+			->once()
+			->withArgs(
+				function ( Donation $updated_donation ) use ( $action ): bool {
+
+					$this->assert_donation_action_result( $action, $updated_donation );
+
+					return true;
+				},
+			)
+			->andThrow( $e );
+
+		$this->event_bus
+			->shouldNotReceive( 'publish' );
+
+		try {
+			$this->invoke_handler( $handler, $action, $donation_id );
+			$this->fail( 'Expected DonationMutationException to be thrown.' );
+		} catch ( DonationMutationException $exception ) {
+			$this->assertInstanceOf( $exception_class, $exception );
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertNull( $exception->get_reason() );
+			$this->assertSame(
+				sprintf( 'Cannot %s donation "5001": donation does not exist.', $phrase ),
+				$exception->getMessage(),
+			);
+			$this->assertSame( $e, $exception->getPrevious() );
+		}
+	}
+
+	#[Test]
 	#[DataProvider( 'event_publish_provider' )]
 	public function handle_wraps_event_publish_failure(
 		string $action,
@@ -368,6 +429,17 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 			'fail' => [ 'fail', 'failed', 'failed', FailDonationException::class ],
 			'refund' => [ 'refund', 'refunded', 'refunded', RefundDonationException::class ],
 			'cancel' => [ 'cancel', 'canceled', 'canceled', CancelDonationException::class ],
+		];
+	}
+
+	public static function persistence_not_found_provider(): array {
+
+		return [
+			'authorize' => [ 'authorize', 'authorize', AuthorizeDonationNotFoundException::class ],
+			'capture' => [ 'capture', 'capture', CaptureDonationNotFoundException::class ],
+			'fail' => [ 'fail', 'fail', FailDonationNotFoundException::class ],
+			'refund' => [ 'refund', 'refund', RefundDonationNotFoundException::class ],
+			'cancel' => [ 'cancel', 'cancel', CancelDonationNotFoundException::class ],
 		];
 	}
 

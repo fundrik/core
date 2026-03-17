@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation;
 
 use Fundrik\Core\Components\Donations\Application\Events\DonationUpdatedEvent;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationNotFoundExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
@@ -42,12 +43,18 @@ final readonly class UpdateDonationHandler {
 	 *
 	 * @return Donation The persisted donation snapshot.
 	 *
-	 * @throws UpdateDonationException When donation update fails.
+	 * @throws UpdateDonationNotFoundException When the donation does not exist.
+	 * @throws UpdateDonationException When donation update fails for another reason.
 	 */
 	public function handle( Donation $donation ): Donation {
 
 		try {
 			$updated_donation = $this->repository->update( $donation );
+		} catch ( DonationNotFoundExceptionInterface $e ) {
+			throw new UpdateDonationNotFoundException(
+				(string) $donation->get_id()->get_value(),
+				$e,
+			);
 		} catch ( DonationRepositoryExceptionInterface $e ) {
 			throw new UpdateDonationException(
 				stage: UseCaseFailureStage::Persistence,

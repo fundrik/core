@@ -11,4 +11,4 @@ use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationExcep
  *
  * @since 0.1.0
  */
-final class RefundDonationException extends DonationMutationException {}
+class RefundDonationException extends DonationMutationException {}

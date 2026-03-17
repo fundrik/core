@@ -7,6 +7,7 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationAlreadyExistsExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
@@ -36,7 +37,7 @@ final readonly class CreateDonationHandler {
 		private ApplicationEventBusPort $event_bus,
 	) {}
 
-	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
+	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength, SlevomatCodingStandard.Complexity.Cognitive.ComplexityTooHigh
 	/**
 	 * Creates a new donation.
 	 *
@@ -46,7 +47,8 @@ final readonly class CreateDonationHandler {
 	 *
 	 * @return Donation The persisted donation snapshot.
 	 *
-	 * @throws CreateDonationException When donation creation fails.
+	 * @throws CreateDonationAlreadyExistsException When the donation ID already exists.
+	 * @throws CreateDonationException When donation creation fails for another reason.
 	 */
 	public function handle( Donation $donation ): Donation {
 
@@ -93,6 +95,11 @@ final readonly class CreateDonationHandler {
 
 		try {
 			$created_donation = $this->repository->insert( $donation );
+		} catch ( DonationAlreadyExistsExceptionInterface $e ) {
+			throw new CreateDonationAlreadyExistsException(
+				(string) $donation_id->get_value(),
+				$e,
+			);
 		} catch ( DonationRepositoryExceptionInterface $e ) {
 			throw new CreateDonationException(
 				stage: UseCaseFailureStage::Persistence,

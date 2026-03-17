@@ -13,7 +13,7 @@ use Throwable;
  *
  * @since 0.1.0
  */
-final class UpdateDonationException extends DonationApplicationException {
+class UpdateDonationException extends DonationApplicationException {
 
 	/**
 	 * Constructor.
@@ -22,17 +22,15 @@ final class UpdateDonationException extends DonationApplicationException {
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
-	 * @param int $code Exception code.
 	 * @param Throwable|null $previous Previous exception.
 	 */
 	public function __construct(
 		private readonly UseCaseFailureStage $stage,
 		string $message = '',
-		int $code = 0,
 		?Throwable $previous = null,
 	) {
 
-		parent::__construct( $message, $code, $previous );
+		parent::__construct( $message, 0, $previous );
 	}
 
 	/**

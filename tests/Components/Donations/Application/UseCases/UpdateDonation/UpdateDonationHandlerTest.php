@@ -9,6 +9,7 @@ use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplication
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationNotFoundException;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
@@ -19,6 +20,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
+use Fundrik\Core\Tests\Fixtures\FakeDonationNotFoundException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -28,6 +30,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( UpdateDonationHandler::class )]
+#[UsesClass( UpdateDonationNotFoundException::class )]
 #[UsesClass( UpdateDonationException::class )]
 #[UsesClass( UseCaseFailureStage::class )]
 #[UsesClass( DonationApplicationException::class )]
@@ -82,6 +85,31 @@ final class UpdateDonationHandlerTest extends MockeryTestCase {
 		$result = $this->handler->handle( $donation );
 
 		$this->assertSame( $donation, $result );
+	}
+
+	#[Test]
+	public function handle_throws_when_donation_does_not_exist(): void {
+
+		$donation = $this->make_captured_donation();
+		$e = new FakeDonationNotFoundException();
+
+		$this->repository
+			->shouldReceive( 'update' )
+			->once()
+			->with( $this->identicalTo( $donation ) )
+			->andThrow( $e );
+
+		$this->event_bus
+			->shouldNotReceive( 'publish' );
+
+		try {
+			$this->handler->handle( $donation );
+			$this->fail( 'Expected UpdateDonationNotFoundException to be thrown.' );
+		} catch ( UpdateDonationNotFoundException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+			$this->assertSame( 'Cannot update donation "5001": donation does not exist.', $exception->getMessage() );
+		}
 	}
 
 	#[Test]

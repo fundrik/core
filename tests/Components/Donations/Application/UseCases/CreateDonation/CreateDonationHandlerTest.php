@@ -11,6 +11,7 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationAlreadyExistsException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationPreconditionReason;
@@ -25,6 +26,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\Fixtures\FakeApplicationEventBusException;
 use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
+use Fundrik\Core\Tests\Fixtures\FakeDonationAlreadyExistsException;
 use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -34,6 +36,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( CreateDonationHandler::class )]
+#[UsesClass( CreateDonationAlreadyExistsException::class )]
 #[UsesClass( CreateDonationException::class )]
 #[UsesClass( CreateDonationPreconditionReason::class )]
 #[UsesClass( UseCaseFailureStage::class )]
@@ -101,6 +104,38 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 		$result = $this->handler->handle( $donation );
 
 		$this->assertSame( $donation, $result );
+	}
+
+	#[Test]
+	public function handle_throws_when_donation_already_exists(): void {
+
+		$donation = $this->make_pending_donation();
+		$campaign = $this->make_donation_campaign();
+		$e = new FakeDonationAlreadyExistsException();
+
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
+			->once()
+			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->andReturn( $campaign );
+
+		$this->repository
+			->shouldReceive( 'insert' )
+			->once()
+			->with( $this->identicalTo( $donation ) )
+			->andThrow( $e );
+
+		$this->event_bus
+			->shouldNotReceive( 'publish' );
+
+		try {
+			$this->handler->handle( $donation );
+			$this->fail( 'Expected CreateDonationAlreadyExistsException to be thrown.' );
+		} catch ( CreateDonationAlreadyExistsException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
+			$this->assertSame( $e, $exception->getPrevious() );
+			$this->assertSame( 'Cannot create donation "5001": donation already exists.', $exception->getMessage() );
+		}
 	}
 
 	#[Test]
