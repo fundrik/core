@@ -6,42 +6,32 @@ namespace Fundrik\Core\Tests;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetailsMapper;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
-use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServiceFactory;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
-use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryServiceFactory;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindAllCampaigns\FindAllCampaignsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
+use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Donations\Application\Events\DonationUpdatedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
-use Fundrik\Core\Components\Donations\Application\Services\DonationCommandServiceFactory;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
-use Fundrik\Core\Components\Donations\Application\Services\DonationQueryServiceFactory;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindAllDonations\FindAllDonationsHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationsByCampaignId\FindDonationsByCampaignIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
@@ -59,41 +49,31 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( FundrikFactory::class )]
 #[UsesClass( Fundrik::class )]
+#[UsesClass( CampaignDetails::class )]
+#[UsesClass( CampaignDetailsMapper::class )]
 #[UsesClass( CampaignQueryService::class )]
 #[UsesClass( CampaignCommandService::class )]
-#[UsesClass( CampaignQueryServiceFactory::class )]
-#[UsesClass( CampaignCommandServiceFactory::class )]
 #[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( DonationQueryService::class )]
 #[UsesClass( DonationCommandService::class )]
-#[UsesClass( DonationQueryServiceFactory::class )]
-#[UsesClass( DonationCommandServiceFactory::class )]
 #[UsesClass( FindCampaignByIdHandler::class )]
-#[UsesClass( FindAllCampaignsHandler::class )]
 #[UsesClass( CreateCampaignHandler::class )]
-#[UsesClass( SaveCampaignHandler::class )]
-#[UsesClass( UpdateCampaignHandler::class )]
 #[UsesClass( RenameCampaignHandler::class )]
-#[UsesClass( ActivateCampaignHandler::class )]
-#[UsesClass( DeactivateCampaignHandler::class )]
 #[UsesClass( OpenCampaignHandler::class )]
 #[UsesClass( CloseCampaignHandler::class )]
-#[UsesClass( SetCampaignTargetAmountHandler::class )]
+#[UsesClass( ChangeCampaignTargetHandler::class )]
 #[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
-#[UsesClass( FindAllDonationsHandler::class )]
-#[UsesClass( FindDonationsByCampaignIdHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
 #[UsesClass( AuthorizeDonationHandler::class )]
 #[UsesClass( CaptureDonationHandler::class )]
 #[UsesClass( FailDonationHandler::class )]
 #[UsesClass( RefundDonationHandler::class )]
 #[UsesClass( CancelDonationHandler::class )]
-#[UsesClass( UpdateDonationHandler::class )]
 #[UsesClass( CampaignDeletedEvent::class )]
-#[UsesClass( DonationUpdatedEvent::class )]
+#[UsesClass( DonationAuthorizedEvent::class )]
 #[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTarget::class )]
+#[UsesClass( CampaignFactory::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
@@ -145,12 +125,16 @@ final class FundrikFactoryTest extends MockeryTestCase {
 		$this->campaign_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
 			->andReturn( $campaign );
 
-		$result = $this->fundrik->campaign_query()->find_by_id( $campaign_id );
+		$result = $this->fundrik->campaign_query()->find_by_id( $campaign_id->get_value() );
 
-		$this->assertSame( $campaign, $result );
+		$this->assertInstanceOf( CampaignDetails::class, $result );
+		$this->assertSame( $campaign_id->get_value(), $result->get_id() );
+		$this->assertSame( $campaign->get_title(), $result->get_title() );
 	}
 
 	#[Test]
@@ -161,13 +145,17 @@ final class FundrikFactoryTest extends MockeryTestCase {
 		$this->donation_repository
 			->shouldReceive( 'exists_by_campaign_id' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
 			->andReturn( false );
 
 		$this->campaign_repository
 			->shouldReceive( 'delete' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) );
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			);
 
 		$this->event_bus
 			->shouldReceive( 'publish' )
@@ -176,13 +164,13 @@ final class FundrikFactoryTest extends MockeryTestCase {
 				function ( object $event ) use ( $campaign_id ): bool {
 
 					$this->assertInstanceOf( CampaignDeletedEvent::class, $event );
-					$this->assertSame( $campaign_id, $event->get_campaign_id() );
+					$this->assertTrue( $event->get_campaign_id()->equals( $campaign_id ) );
 
 					return true;
 				},
 			);
 
-		$this->fundrik->campaign_command()->delete( $campaign_id );
+		$this->fundrik->campaign_command()->delete( $campaign_id->get_value() );
 	}
 
 	#[Test]
@@ -203,16 +191,29 @@ final class FundrikFactoryTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function create_wires_donation_command_to_injected_ports_for_update(): void {
+	public function create_wires_donation_command_to_injected_ports_for_authorize(): void {
 
+		$donation_id = EntityId::create( 5_001 );
 		$donation = $this->make_pending_donation( 5_001, 1_001 );
-		$donation_id = $donation->get_id();
+
+		$this->donation_repository
+			->shouldReceive( 'find_by_id' )
+			->once()
+			->with( $this->identicalTo( $donation_id ) )
+			->andReturn( $donation );
 
 		$this->donation_repository
 			->shouldReceive( 'update' )
 			->once()
-			->with( $this->identicalTo( $donation ) )
-			->andReturn( $donation );
+			->withArgs(
+				function ( Donation $authorized_donation ): bool {
+
+					$this->assertSame( 'authorized', $authorized_donation->get_status()->value );
+
+					return true;
+				},
+			)
+			->andReturnUsing( static fn ( Donation $authorized_donation ): Donation => $authorized_donation );
 
 		$this->event_bus
 			->shouldReceive( 'publish' )
@@ -220,15 +221,15 @@ final class FundrikFactoryTest extends MockeryTestCase {
 			->withArgs(
 				function ( object $event ) use ( $donation_id ): bool {
 
-					$this->assertInstanceOf( DonationUpdatedEvent::class, $event );
-					$this->assertSame( $donation_id, $event->get_donation_id() );
+					$this->assertInstanceOf( DonationAuthorizedEvent::class, $event );
+					$this->assertTrue( $event->get_donation_id()->equals( $donation_id ) );
 
 					return true;
 				},
 			);
 
-		$result = $this->fundrik->donation_command()->update( $donation );
+		$result = $this->fundrik->donation_command()->authorize( $donation_id );
 
-		$this->assertSame( $donation, $result );
+		$this->assertSame( 'authorized', $result->get_status()->value );
 	}
 }

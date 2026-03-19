@@ -8,7 +8,7 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Defines the outbound port for persisting and retrieving campaigns.
+ * Provides the outbound port for persisting and retrieving campaigns.
  *
  * @since 0.1.0
  */
@@ -26,19 +26,6 @@ interface CampaignRepositoryPort {
 	 * @throws CampaignRepositoryExceptionInterface When the lookup fails.
 	 */
 	public function find_by_id( EntityId $id ): ?Campaign;
-
-	/**
-	 * Retrieves all campaigns.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return array<int, Campaign> The list of campaigns.
-	 *
-	 * @phpstan-return list<Campaign>
-	 *
-	 * @throws CampaignRepositoryExceptionInterface When the lookup fails.
-	 */
-	public function find_all(): array;
 
 	/**
 	 * Returns whether a campaign exists in storage by its ID.
@@ -80,21 +67,6 @@ interface CampaignRepositoryPort {
 	 * @throws CampaignRepositoryExceptionInterface When the update fails for another reason.
 	 */
 	public function update( Campaign $campaign ): Campaign;
-
-	/**
-	 * Saves the given campaign by inserting or updating it.
-	 *
-	 * Implementations must apply insert-or-update semantics.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param Campaign $campaign The campaign to save.
-	 *
-	 * @return CampaignRepositorySaveOutcome Contains the result and the persisted campaign snapshot.
-	 *
-	 * @throws CampaignRepositoryExceptionInterface When the save fails.
-	 */
-	public function save( Campaign $campaign ): CampaignRepositorySaveOutcome;
 
 	/**
 	 * Removes a campaign from storage by its ID.

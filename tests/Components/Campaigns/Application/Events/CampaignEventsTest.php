@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\Events;
 
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignActivatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignApplicationEventInterface;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignClosedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeactivatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignRenamedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -22,11 +19,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass( CampaignCreatedEvent::class )]
-#[CoversClass( CampaignUpdatedEvent::class )]
 #[CoversClass( CampaignDeletedEvent::class )]
 #[CoversClass( CampaignRenamedEvent::class )]
-#[CoversClass( CampaignActivatedEvent::class )]
-#[CoversClass( CampaignDeactivatedEvent::class )]
 #[CoversClass( CampaignOpenedEvent::class )]
 #[CoversClass( CampaignClosedEvent::class )]
 #[CoversClass( CampaignTargetChangedEvent::class )]
@@ -60,11 +54,8 @@ final class CampaignEventsTest extends TestCase {
 
 		return [
 			'created' => [ CampaignCreatedEvent::class ],
-			'updated' => [ CampaignUpdatedEvent::class ],
 			'deleted' => [ CampaignDeletedEvent::class ],
 			'renamed' => [ CampaignRenamedEvent::class ],
-			'activated' => [ CampaignActivatedEvent::class ],
-			'deactivated' => [ CampaignDeactivatedEvent::class ],
 			'opened' => [ CampaignOpenedEvent::class ],
 			'closed' => [ CampaignClosedEvent::class ],
 			'target_changed' => [ CampaignTargetChangedEvent::class ],

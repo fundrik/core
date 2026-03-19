@@ -4,39 +4,35 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\Services;
 
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignActivatedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Commands\CreateCampaignCommand;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignClosedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeactivatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignRenamedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignUpdatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveOutcome;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositorySaveResult;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetailsMapper;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
-use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServiceFactory;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\ActivateCampaign\ActivateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign\DeactivateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\SetCampaignTargetAmount\SetCampaignTargetAmountHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
+use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidAmountException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -45,35 +41,27 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( CampaignCommandService::class )]
-#[UsesClass( CampaignCommandServiceFactory::class )]
+#[UsesClass( CreateCampaignCommand::class )]
+#[UsesClass( CampaignDetails::class )]
+#[UsesClass( CreateCampaignException::class )]
 #[UsesClass( CampaignCreatedEvent::class )]
-#[UsesClass( CampaignUpdatedEvent::class )]
 #[UsesClass( CampaignRenamedEvent::class )]
-#[UsesClass( CampaignActivatedEvent::class )]
-#[UsesClass( CampaignDeactivatedEvent::class )]
 #[UsesClass( CampaignOpenedEvent::class )]
 #[UsesClass( CampaignClosedEvent::class )]
 #[UsesClass( CampaignTargetChangedEvent::class )]
 #[UsesClass( CampaignDeletedEvent::class )]
-#[UsesClass( CampaignRepositorySaveOutcome::class )]
-#[UsesClass( CampaignRepositorySaveResult::class )]
 #[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( CreateCampaignHandler::class )]
-#[UsesClass( SaveCampaignHandler::class )]
-#[UsesClass( UpdateCampaignHandler::class )]
 #[UsesClass( RenameCampaignHandler::class )]
-#[UsesClass( ActivateCampaignHandler::class )]
-#[UsesClass( DeactivateCampaignHandler::class )]
 #[UsesClass( OpenCampaignHandler::class )]
 #[UsesClass( CloseCampaignHandler::class )]
-#[UsesClass( SetCampaignTargetAmountHandler::class )]
+#[UsesClass( ChangeCampaignTargetHandler::class )]
 #[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTarget::class )]
+#[UsesClass( CampaignFactory::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( Money::class )]
 final class CampaignCommandServiceTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $campaign_repository;
@@ -90,22 +78,51 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->donation_repository = Mockery::mock( DonationRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
-		$this->command = ( new CampaignCommandServiceFactory(
-			$this->campaign_repository,
-			$this->donation_repository,
-			$this->event_bus,
-		) )->create();
+		$this->command = new CampaignCommandService(
+			new CreateCampaignHandler( $this->campaign_repository, $this->event_bus ),
+			new CampaignFactory(),
+			new CampaignDetailsMapper(),
+			new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
+			new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
+			new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),
+			new ChangeCampaignTargetHandler( $this->campaign_repository, $this->event_bus ),
+			new DeleteCampaignHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
+		);
 	}
 
 	#[Test]
 	public function create_uses_injected_ports(): void {
 
-		$campaign = $this->make_campaign();
+		$campaign_id = EntityId::uuid7();
+		$campaign = $this->make_campaign(
+			id: $campaign_id->get_value(),
+			title: 'New Campaign',
+			is_open: false,
+			target_amount: 5_000,
+		);
+		$command = new CreateCampaignCommand(
+			id: $campaign_id,
+			title: 'New Campaign',
+			accepts_donations: false,
+			currency_code: 'RUB',
+			target_amount: 5_000,
+		);
 
 		$this->campaign_repository
 			->shouldReceive( 'insert' )
 			->once()
-			->with( $this->identicalTo( $campaign ) )
+			->withArgs(
+				function ( Campaign $created_campaign ) use ( $campaign_id ): bool {
+
+					$this->assertSame( $campaign_id->get_value(), $created_campaign->get_id()->get_value() );
+					$this->assertSame( 'New Campaign', $created_campaign->get_title() );
+					$this->assertFalse( $created_campaign->can_receive_donations() );
+					$this->assertSame( 'RUB', $created_campaign->get_target()->get_currency()->get_code() );
+					$this->assertSame( 5_000, $created_campaign->get_target()->get_amount()?->get_value() );
+
+					return true;
+				},
+			)
 			->andReturn( $campaign );
 
 		$this->event_bus
@@ -113,55 +130,40 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignCreatedEvent::class, $campaign->get_id() ) );
 
-		$result = $this->command->create( $campaign );
+		$result = $this->command->create( $command );
 
-		$this->assertSame( $campaign, $result );
+		$this->assertInstanceOf( CampaignDetails::class, $result );
+		$this->assertSame( $campaign_id->get_value(), $result->get_id() );
+		$this->assertSame( 'New Campaign', $result->get_title() );
+		$this->assertFalse( $result->can_receive_donations() );
+		$this->assertSame( 'RUB', $result->get_currency_code() );
+		$this->assertSame( 5_000, $result->get_target_amount() );
 	}
 
 	#[Test]
-	public function save_uses_injected_ports(): void {
+	public function create_proxies_invalid_id_message_from_entity_id(): void {
 
-		$campaign = $this->make_campaign();
-		$outcome = new CampaignRepositorySaveOutcome(
-			result: CampaignRepositorySaveResult::Updated,
-			campaign: $campaign,
+		$this->campaign_repository
+			->shouldNotReceive( 'insert' );
+
+		$command = new CreateCampaignCommand(
+			id: 'invalid-id',
+			title: 'New Campaign',
+			accepts_donations: false,
+			currency_code: 'RUB',
+			target_amount: null,
 		);
 
-		$this->campaign_repository
-			->shouldReceive( 'save' )
-			->once()
-			->with( $this->identicalTo( $campaign ) )
-			->andReturn( $outcome );
-
-		$this->event_bus
-			->shouldReceive( 'publish' )
-			->once()
-			->withArgs( $this->event_of_type( CampaignUpdatedEvent::class, $campaign->get_id() ) );
-
-		$result = $this->command->save( $campaign );
-
-		$this->assertSame( $outcome, $result );
-	}
-
-	#[Test]
-	public function update_uses_injected_ports(): void {
-
-		$campaign = $this->make_campaign();
-
-		$this->campaign_repository
-			->shouldReceive( 'update' )
-			->once()
-			->with( $this->identicalTo( $campaign ) )
-			->andReturn( $campaign );
-
-		$this->event_bus
-			->shouldReceive( 'publish' )
-			->once()
-			->withArgs( $this->event_of_type( CampaignUpdatedEvent::class, $campaign->get_id() ) );
-
-		$result = $this->command->update( $campaign );
-
-		$this->assertSame( $campaign, $result );
+		try {
+			$this->command->create( $command );
+			$this->fail( 'Expected CreateCampaignException to be thrown.' );
+		} catch ( CreateCampaignException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+			$this->assertSame(
+				'ID must be a positive integer or a valid UUID. Given: "invalid-id".',
+				$exception->getMessage(),
+			);
+		}
 	}
 
 	#[Test]
@@ -174,7 +176,9 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->campaign_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
 			->andReturn( $campaign );
 
 		$this->campaign_repository
@@ -195,65 +199,10 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignRenamedEvent::class, $campaign_id ) );
 
-		$result = $this->command->rename( $campaign_id, $new_title );
+		$result = $this->command->rename( $campaign_id->get_value(), $new_title );
 
+		$this->assertInstanceOf( CampaignDetails::class, $result );
 		$this->assertSame( $new_title, $result->get_title() );
-	}
-
-	#[Test]
-	public function activate_uses_injected_ports(): void {
-
-		$campaign = $this->make_campaign( is_active: false );
-		$campaign_id = $campaign->get_id();
-
-		$this->campaign_repository
-			->shouldReceive( 'find_by_id' )
-			->once()
-			->with( $this->identicalTo( $campaign_id ) )
-			->andReturn( $campaign );
-
-		$this->campaign_repository
-			->shouldReceive( 'update' )
-			->once()
-			->withArgs( static fn ( Campaign $updated_campaign ): bool => $updated_campaign->is_active() )
-			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
-
-		$this->event_bus
-			->shouldReceive( 'publish' )
-			->once()
-			->withArgs( $this->event_of_type( CampaignActivatedEvent::class, $campaign_id ) );
-
-		$result = $this->command->activate( $campaign_id );
-
-		$this->assertTrue( $result->is_active() );
-	}
-
-	#[Test]
-	public function deactivate_uses_injected_ports(): void {
-
-		$campaign = $this->make_campaign( is_active: true );
-		$campaign_id = $campaign->get_id();
-
-		$this->campaign_repository
-			->shouldReceive( 'find_by_id' )
-			->once()
-			->with( $this->identicalTo( $campaign_id ) )
-			->andReturn( $campaign );
-
-		$this->campaign_repository
-			->shouldReceive( 'update' )
-			->once()
-			->withArgs( static fn ( Campaign $updated_campaign ): bool => ! $updated_campaign->is_active() )
-			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
-
-		$this->event_bus
-			->shouldReceive( 'publish' )
-			->once()
-			->withArgs( $this->event_of_type( CampaignDeactivatedEvent::class, $campaign_id ) );
-
-		$result = $this->command->deactivate( $campaign_id );
-
-		$this->assertFalse( $result->is_active() );
 	}
 
 	#[Test]
@@ -265,13 +214,15 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->campaign_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
 			->andReturn( $campaign );
 
 		$this->campaign_repository
 			->shouldReceive( 'update' )
 			->once()
-			->withArgs( static fn ( Campaign $updated_campaign ): bool => $updated_campaign->is_open() )
+			->withArgs( static fn ( Campaign $updated_campaign ): bool => $updated_campaign->can_receive_donations() )
 			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
 
 		$this->event_bus
@@ -279,9 +230,10 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignOpenedEvent::class, $campaign_id ) );
 
-		$result = $this->command->open( $campaign_id );
+		$result = $this->command->open( $campaign_id->get_value() );
 
-		$this->assertTrue( $result->is_open() );
+		$this->assertInstanceOf( CampaignDetails::class, $result );
+		$this->assertTrue( $result->can_receive_donations() );
 	}
 
 	#[Test]
@@ -293,13 +245,15 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->campaign_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
 			->andReturn( $campaign );
 
 		$this->campaign_repository
 			->shouldReceive( 'update' )
 			->once()
-			->withArgs( static fn ( Campaign $updated_campaign ): bool => ! $updated_campaign->is_open() )
+			->withArgs( static fn ( Campaign $updated_campaign ): bool => ! $updated_campaign->can_receive_donations() )
 			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
 
 		$this->event_bus
@@ -307,29 +261,31 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignClosedEvent::class, $campaign_id ) );
 
-		$result = $this->command->close( $campaign_id );
+		$result = $this->command->close( $campaign_id->get_value() );
 
-		$this->assertFalse( $result->is_open() );
+		$this->assertInstanceOf( CampaignDetails::class, $result );
+		$this->assertFalse( $result->can_receive_donations() );
 	}
 
 	#[Test]
-	public function set_target_amount_uses_injected_ports(): void {
+	public function change_target_amount_uses_injected_ports(): void {
 
-		$campaign = $this->make_campaign( has_target: true, target_amount: 100 );
+		$campaign = $this->make_campaign( target_amount: 100 );
 		$campaign_id = $campaign->get_id();
-		$amount = 50_000;
 
 		$this->campaign_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
 			->andReturn( $campaign );
 
 		$this->campaign_repository
 			->shouldReceive( 'update' )
 			->once()
 			->withArgs(
-				static fn ( Campaign $updated_campaign ): bool => $updated_campaign->get_target_money()->get_amount_minor() === 50_000,
+				static fn ( Campaign $updated_campaign ): bool => $updated_campaign->get_target()->get_amount()?->get_value() === 50_000,
 			)
 			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
 
@@ -338,9 +294,64 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignTargetChangedEvent::class, $campaign_id ) );
 
-		$result = $this->command->set_target_amount( $campaign_id, $amount );
+		$result = $this->command->change_target_amount( $campaign_id->get_value(), 50_000 );
 
-		$this->assertSame( $amount, $result->get_target_money()->get_amount_minor() );
+		$this->assertInstanceOf( CampaignDetails::class, $result );
+		$this->assertSame( 'RUB', $result->get_currency_code() );
+		$this->assertSame( 50_000, $result->get_target_amount() );
+	}
+
+	#[Test]
+	public function change_target_amount_accepts_null_to_clear_existing_target(): void {
+
+		$campaign = $this->make_campaign( target_amount: 100 );
+		$campaign_id = $campaign->get_id();
+
+		$this->campaign_repository
+			->shouldReceive( 'find_by_id' )
+			->once()
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
+			->andReturn( $campaign );
+
+		$this->campaign_repository
+			->shouldReceive( 'update' )
+			->once()
+			->withArgs(
+				static fn ( Campaign $updated_campaign ): bool => $updated_campaign->get_target()->get_amount() === null,
+			)
+			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
+
+		$this->event_bus
+			->shouldReceive( 'publish' )
+			->once()
+			->withArgs( $this->event_of_type( CampaignTargetChangedEvent::class, $campaign_id ) );
+
+		$result = $this->command->change_target_amount( $campaign_id->get_value(), null );
+
+		$this->assertInstanceOf( CampaignDetails::class, $result );
+		$this->assertFalse( $result->has_target() );
+		$this->assertSame( 'RUB', $result->get_currency_code() );
+		$this->assertNull( $result->get_target_amount() );
+	}
+
+	#[Test]
+	public function change_target_amount_wraps_invalid_amount_input(): void {
+
+		$campaign_id = EntityId::create( 101 );
+
+		$this->campaign_repository
+			->shouldNotReceive( 'find_by_id' );
+
+		try {
+			$this->command->change_target_amount( $campaign_id->get_value(), 0 );
+			$this->fail( 'Expected ChangeCampaignTargetException to be thrown.' );
+		} catch ( ChangeCampaignTargetException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+			$this->assertSame( 'Amount must be a positive integer. Given: 0.', $exception->getMessage() );
+			$this->assertInstanceOf( InvalidAmountException::class, $exception->getPrevious() );
+		}
 	}
 
 	#[Test]
@@ -351,20 +362,24 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->donation_repository
 			->shouldReceive( 'exists_by_campaign_id' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
 			->andReturn( false );
 
 		$this->campaign_repository
 			->shouldReceive( 'delete' )
 			->once()
-			->with( $this->identicalTo( $campaign_id ) );
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			);
 
 		$this->event_bus
 			->shouldReceive( 'publish' )
 			->once()
 			->withArgs( $this->event_of_type( CampaignDeletedEvent::class, $campaign_id ) );
 
-		$this->command->delete( $campaign_id );
+		$this->command->delete( $campaign_id->get_value() );
 
 		$this->assertTrue( true );
 	}

@@ -5,109 +5,168 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Domain;
 
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTargetException;
-use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\Amount;
+use Fundrik\Core\Components\Shared\Domain\Currency;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidAmountException;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidCurrencyCodeException;
 
 /**
- * Represents the fundraising target of a campaign.
- *
- * Enforces the following invariants:
- * - If targeting is enabled, the target amount must be a positive integer.
- * - If targeting is disabled, the target amount must be exactly zero.
+ * Represents campaign targeting in the campaign currency.
  *
  * @since 0.1.0
  */
 final readonly class CampaignTarget {
 
 	/**
-	 * Private constructor, use factory method.
+	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param bool $is_enabled Whether targeting is enabled.
-	 * @param Money $amount The target amount, must be >= 0 when targeting is enabled.
+	 * @param Currency $currency Campaign currency.
+	 * @param Amount|null $amount Target amount, if configured.
 	 */
 	private function __construct(
-		private bool $is_enabled,
-		private Money $amount,
+		private Currency $currency,
+		private ?Amount $amount,
 	) {}
 
 	/**
-	 * Creates a campaign target value object.
-	 *
-	 * Validates consistency between enablement flag and amount:
-	 * - If enabled, amount must be positive.
-	 * - If disabled, amount must be zero.
+	 * Creates a campaign target from primitive values.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param bool $is_enabled Whether targeting is enabled.
-	 * @param Money $amount The fundraising target amount.
+	 * @param string $currency_code Campaign currency code.
+	 * @param int|null $target_amount Target amount, if configured.
 	 *
-	 * @return self The campaign target value object.
+	 * @return self Campaign target.
 	 *
-	 * @throws InvalidCampaignTargetException When the target amount violates the enablement rules.
+	 * @throws InvalidCampaignTargetException When the target amount is invalid.
 	 */
-	public static function create( bool $is_enabled, Money $amount ): self {
+	public static function create( string $currency_code, ?int $target_amount ): self {
 
-		if ( $is_enabled && $amount->get_amount_minor() <= 0 ) {
+		$currency = self::create_currency( $currency_code );
 
-			throw new InvalidCampaignTargetException(
-				sprintf(
-					'Target amount must be positive when targeting is enabled. Given: %d.',
-					$amount->get_amount_minor(),
-				),
-			);
+		if ( $target_amount === null ) {
+			return new self( $currency, null );
 		}
 
-		if ( ! $is_enabled && $amount->get_amount_minor() !== 0 ) {
-
-			throw new InvalidCampaignTargetException(
-				sprintf(
-					'Target amount must be zero when targeting is disabled. Given: %d.',
-					$amount->get_amount_minor(),
-				),
-			);
-		}
-
-		return new self( $is_enabled, $amount );
+		return new self( $currency, self::create_amount( $target_amount ) );
 	}
 
 	/**
-	 * Returns whether targeting is enabled.
+	 * Returns the campaign currency.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return bool True if targeting is enabled.
+	 * @return Currency Campaign currency.
 	 */
-	public function is_enabled(): bool {
+	public function get_currency(): Currency {
 
-		return $this->is_enabled;
+		return $this->currency;
 	}
 
 	/**
-	 * Returns the target amount as money value object.
+	 * Returns whether the target amount is configured.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return Money The campaign target amount.
+	 * @return bool True when the target amount is configured.
 	 */
-	public function get_money(): Money {
+	public function has_amount(): bool {
+
+		return $this->amount !== null;
+	}
+
+	/**
+	 * Returns the target amount.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return Amount|null Target amount, if configured.
+	 */
+	public function get_amount(): ?Amount {
 
 		return $this->amount;
 	}
 
 	/**
-	 * Checks whether this target is equal to another.
+	 * Returns a copy with the same currency and a new amount.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param self $other The target to compare with.
+	 * @param Amount|null $target_amount Target amount, or null to clear it.
 	 *
-	 * @return bool True if the two target objects are equal.
+	 * @return self Updated campaign target.
+	 */
+	public function with_amount( ?Amount $target_amount ): self {
+
+		return new self( $this->currency, $target_amount );
+	}
+
+	/**
+	 * Checks whether the target equals another target.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param self $other Other campaign target.
+	 *
+	 * @return bool True when currency code and amount are equal.
 	 */
 	public function equals( self $other ): bool {
 
-		return $this->is_enabled === $other->is_enabled
-			&& $this->amount->equals( $other->amount );
+		return $this->currency->equals( $other->currency )
+			&& (
+				( $this->amount === null && $other->amount === null )
+				|| ( $this->amount !== null && $other->amount !== null && $this->amount->equals( $other->amount ) )
+			);
+	}
+
+	/**
+	 * Creates a validated campaign currency value object.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $currency_code Campaign currency code.
+	 *
+	 * @return Currency Campaign currency.
+	 *
+	 * @throws InvalidCampaignTargetException When the campaign currency code is invalid.
+	 */
+	private static function create_currency( string $currency_code ): Currency {
+
+		try {
+			return Currency::create( $currency_code );
+		} catch ( InvalidCurrencyCodeException $e ) {
+			throw new InvalidCampaignTargetException(
+				sprintf(
+					'Campaign currency code must be a valid ISO 4217 code. Given: "%s".',
+					strtoupper( trim( $currency_code ) ),
+				),
+				previous: $e,
+			);
+		}
+	}
+
+	/**
+	 * Creates a validated target amount value object.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param int $target_amount Target amount.
+	 *
+	 * @return Amount Target amount.
+	 *
+	 * @throws InvalidCampaignTargetException When the target amount is invalid.
+	 */
+	private static function create_amount( int $target_amount ): Amount {
+
+		try {
+			return Amount::create( $target_amount );
+		} catch ( InvalidAmountException $e ) {
+			throw new InvalidCampaignTargetException(
+				sprintf( 'Target amount must be positive. Given: %d.', $target_amount ),
+				previous: $e,
+			);
+		}
 	}
 }

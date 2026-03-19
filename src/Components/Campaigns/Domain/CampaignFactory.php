@@ -11,9 +11,6 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionException;
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyAmountException;
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyCurrencyException;
-use Fundrik\Core\Components\Shared\Domain\Money;
 
 /**
  * Creates Campaign entities.
@@ -30,9 +27,8 @@ final readonly class CampaignFactory {
 	 * @param EntityId $id The campaign ID.
 	 * @param EntityVersion $version The campaign version.
 	 * @param CampaignTitle $title The campaign title.
-	 * @param bool $is_active Whether the campaign is active.
 	 * @param bool $is_open Whether the campaign is open.
-	 * @param CampaignTarget $target The campaign target.
+	 * @param CampaignTarget $target Campaign target.
 	 *
 	 * @return Campaign The built campaign entity.
 	 */
@@ -40,49 +36,36 @@ final readonly class CampaignFactory {
 		EntityId $id,
 		EntityVersion $version,
 		CampaignTitle $title,
-		bool $is_active,
 		bool $is_open,
 		CampaignTarget $target,
 	): Campaign {
 
-		return new Campaign(
-			id: $id,
-			version: $version,
-			title: $title,
-			is_active: $is_active,
-			is_open: $is_open,
-			target: $target,
-		);
+		return new Campaign( $id, $version, $title, $is_open, $target );
 	}
 
-	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	/**
 	 * Creates a campaign from primitive values.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string $id The campaign ID.
+	 * @param int|string|EntityId $id The campaign ID.
 	 * @param int $version The campaign version.
 	 * @param string $title The campaign title.
-	 * @param bool $is_active Whether the campaign is active.
 	 * @param bool $is_open Whether the campaign is open.
-	 * @param bool $has_target Whether targeting is enabled.
-	 * @param int $target_amount The target amount in minor units.
-	 * @param string $target_currency The target currency (ISO 4217).
+	 * @param string $currency_code The campaign currency code (ISO 4217).
+	 * @param int|null $target_amount The target amount, if configured.
 	 *
 	 * @return Campaign The built campaign entity.
 	 *
 	 * @throws CampaignFactoryException When creating campaign from primitives fails.
 	 */
 	public function create_from_primitives(
-		int|string $id,
+		int|string|EntityId $id,
 		int $version,
 		string $title,
-		bool $is_active,
 		bool $is_open,
-		bool $has_target,
-		int $target_amount,
-		string $target_currency,
+		string $currency_code,
+		?int $target_amount,
 	): Campaign {
 
 		try {
@@ -91,24 +74,20 @@ final readonly class CampaignFactory {
 				id: EntityId::create( $id ),
 				version: EntityVersion::create( $version ),
 				title: CampaignTitle::create( $title ),
-				is_active: $is_active,
 				is_open: $is_open,
-				target: CampaignTarget::create( $has_target, Money::create( $target_amount, $target_currency ) ),
+				target: CampaignTarget::create( $currency_code, $target_amount ),
 			);
 
 		} catch (
 			InvalidEntityIdException
 			| InvalidEntityVersionException
 			| InvalidCampaignTitleException
-			| InvalidCampaignTargetException
-			| InvalidMoneyAmountException
-			| InvalidMoneyCurrencyException $e
+			| InvalidCampaignTargetException $e
 		) {
 
-			throw new CampaignFactoryException( 'Failed to create campaign from primitives.', previous: $e );
+			throw new CampaignFactoryException( $e->getMessage(), previous: $e );
 		}
 	}
-	// phpcs:enable
 
 	/**
 	 * Creates a new campaign with the initial version.
@@ -117,28 +96,14 @@ final readonly class CampaignFactory {
 	 *
 	 * @param EntityId $id The campaign ID.
 	 * @param CampaignTitle $title The campaign title.
-	 * @param bool $is_active Whether the campaign is active.
 	 * @param bool $is_open Whether the campaign is open.
-	 * @param CampaignTarget $target The campaign target.
+	 * @param CampaignTarget $target Campaign target.
 	 *
 	 * @return Campaign The built campaign entity.
 	 */
-	public function create_new(
-		EntityId $id,
-		CampaignTitle $title,
-		bool $is_active,
-		bool $is_open,
-		CampaignTarget $target,
-	): Campaign {
+	public function create_new( EntityId $id, CampaignTitle $title, bool $is_open, CampaignTarget $target ): Campaign {
 
-		return new Campaign(
-			id: $id,
-			version: EntityVersion::initial(),
-			title: $title,
-			is_active: $is_active,
-			is_open: $is_open,
-			target: $target,
-		);
+		return new Campaign( $id, EntityVersion::initial(), $title, $is_open, $target );
 	}
 
 	/**
@@ -146,37 +111,31 @@ final readonly class CampaignFactory {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string $id The campaign ID.
+	 * @param int|string|EntityId $id The campaign ID.
 	 * @param string $title The campaign title.
-	 * @param bool $is_active Whether the campaign is active.
 	 * @param bool $is_open Whether the campaign is open.
-	 * @param bool $has_target Whether targeting is enabled.
-	 * @param int $target_amount The target amount in minor units.
-	 * @param string $target_currency The target currency (ISO 4217).
+	 * @param string $currency_code The campaign currency code (ISO 4217).
+	 * @param int|null $target_amount The target amount, if configured.
 	 *
 	 * @return Campaign The built campaign entity.
 	 *
 	 * @throws CampaignFactoryException When creating campaign from primitives fails.
 	 */
 	public function create_new_from_primitives(
-		int|string $id,
+		int|string|EntityId $id,
 		string $title,
-		bool $is_active,
 		bool $is_open,
-		bool $has_target,
-		int $target_amount,
-		string $target_currency,
+		string $currency_code,
+		?int $target_amount,
 	): Campaign {
 
 		return $this->create_from_primitives(
-			id: $id,
-			version: EntityVersion::initial()->get_value(),
-			title: $title,
-			is_active: $is_active,
-			is_open: $is_open,
-			has_target: $has_target,
-			target_amount: $target_amount,
-			target_currency: $target_currency,
+			$id,
+			EntityVersion::initial()->get_value(),
+			$title,
+			$is_open,
+			$currency_code,
+			$target_amount,
 		);
 	}
 }

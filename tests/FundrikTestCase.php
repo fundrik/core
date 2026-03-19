@@ -23,19 +23,17 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 	protected function make_campaign(
 		int|string $id = 1,
 		string $title = 'Test Campaign',
-		bool $is_active = true,
 		bool $is_open = true,
-		bool $has_target = true,
-		int $target_amount = 100,
+		string $currency_code = 'RUB',
+		?int $target_amount = 100,
 	): Campaign {
 
 		return new Campaign(
 			id: EntityId::create( $id ),
 			version: EntityVersion::initial(),
 			title: CampaignTitle::create( $title ),
-			is_active: $is_active,
 			is_open: $is_open,
-			target: CampaignTarget::create( $has_target, Money::create( $target_amount, 'RUB' ) ),
+			target: CampaignTarget::create( $currency_code, $target_amount ),
 		);
 	}
 

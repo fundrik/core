@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Domain;
 
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignChangeException;
-use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTargetException;
-use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTitleException;
+use Fundrik\Core\Components\Shared\Domain\Amount;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\Money;
 
 /**
  * Represents a fundraising campaign.
@@ -26,15 +24,13 @@ final readonly class Campaign {
 	 * @param EntityId $id The campaign ID.
 	 * @param EntityVersion $version The campaign version.
 	 * @param CampaignTitle $title The campaign title.
-	 * @param bool $is_active Whether the campaign is active.
 	 * @param bool $is_open Whether the campaign is open for donations.
-	 * @param CampaignTarget $target The campaign target.
+	 * @param CampaignTarget $target Campaign target.
 	 */
 	public function __construct(
 		private EntityId $id,
 		private EntityVersion $version,
 		private CampaignTitle $title,
-		private bool $is_active,
 		private bool $is_open,
 		private CampaignTarget $target,
 	) {}
@@ -76,39 +72,15 @@ final readonly class Campaign {
 	}
 
 	/**
-	 * Returns whether the campaign is active.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool True if the campaign is active.
-	 */
-	public function is_active(): bool {
-
-		return $this->is_active;
-	}
-
-	/**
-	 * Returns whether the campaign is open for donations.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool True if the campaign is currently open.
-	 */
-	public function is_open(): bool {
-
-		return $this->is_open;
-	}
-
-	/**
 	 * Returns whether the campaign can receive new donations.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return bool True when the campaign is active and open for donations.
+	 * @return bool True when the campaign is open for donations.
 	 */
 	public function can_receive_donations(): bool {
 
-		return $this->is_active && $this->is_open;
+		return $this->is_open;
 	}
 
 	/**
@@ -120,19 +92,19 @@ final readonly class Campaign {
 	 */
 	public function has_target(): bool {
 
-		return $this->target->is_enabled();
+		return $this->target->has_amount();
 	}
 
 	/**
-	 * Returns the campaign target money value object.
+	 * Returns the campaign target value object.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return Money The campaign target money.
+	 * @return CampaignTarget Campaign target value object.
 	 */
-	public function get_target_money(): Money {
+	public function get_target(): CampaignTarget {
 
-		return $this->target->get_money();
+		return $this->target;
 	}
 
 	/**
@@ -140,18 +112,13 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string|CampaignTitle $new_title The new title.
+	 * @param CampaignTitle $new_title The new title.
 	 *
 	 * @return self The campaign with updated title.
 	 *
-	 * @throws InvalidCampaignTitleException When provided title string is invalid.
 	 * @throws CampaignChangeException When the title matches the current one.
 	 */
-	public function rename( string|CampaignTitle $new_title ): self {
-
-		if ( is_string( $new_title ) ) {
-			$new_title = CampaignTitle::create( $new_title );
-		}
+	public function rename( CampaignTitle $new_title ): self {
 
 		if ( $new_title->equals( $this->title ) ) {
 
@@ -163,43 +130,7 @@ final readonly class Campaign {
 			);
 		}
 
-		return new self( $this->id, $this->version, $new_title, $this->is_active, $this->is_open, $this->target );
-	}
-
-	/**
-	 * Activates the campaign.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return self The campaign in active state.
-	 *
-	 * @throws CampaignChangeException When the campaign is already active.
-	 */
-	public function activate(): self {
-
-		if ( $this->is_active ) {
-			throw new CampaignChangeException( 'Cannot activate campaign: already active.' );
-		}
-
-		return new self( $this->id, $this->version, $this->title, true, $this->is_open, $this->target );
-	}
-
-	/**
-	 * Deactivates the campaign.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return self The campaign in inactive state.
-	 *
-	 * @throws CampaignChangeException When the campaign is already inactive.
-	 */
-	public function deactivate(): self {
-
-		if ( ! $this->is_active ) {
-			throw new CampaignChangeException( 'Cannot deactivate campaign: already inactive.' );
-		}
-
-		return new self( $this->id, $this->version, $this->title, false, $this->is_open, $this->target );
+		return new self( $this->id, $this->version, $new_title, $this->is_open, $this->target );
 	}
 
 	/**
@@ -217,7 +148,7 @@ final readonly class Campaign {
 			throw new CampaignChangeException( 'Cannot open campaign: already open.' );
 		}
 
-		return new self( $this->id, $this->version, $this->title, $this->is_active, true, $this->target );
+		return new self( $this->id, $this->version, $this->title, true, $this->target );
 	}
 
 	/**
@@ -235,92 +166,28 @@ final readonly class Campaign {
 			throw new CampaignChangeException( 'Cannot close campaign: already closed.' );
 		}
 
-		return new self( $this->id, $this->version, $this->title, $this->is_active, false, $this->target );
+		return new self( $this->id, $this->version, $this->title, false, $this->target );
 	}
 
 	/**
-	 * Enables targeting with the specified amount.
+	 * Changes the campaign target amount.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|CampaignTarget $amount The positive target amount in minor currency units
-	 *                                   or enabled target value object.
+	 * @param Amount|null $target_amount The new campaign target amount.
 	 *
-	 * @return self The campaign with targeting enabled and amount set.
+	 * @return self The campaign with updated targeting.
 	 *
-	 * @throws InvalidCampaignTargetException When the amount is invalid.
-	 * @throws CampaignChangeException When targeting is already enabled with the same amount.
-	 */
-	public function enable_target( int|CampaignTarget $amount ): self {
-
-		if ( $amount instanceof CampaignTarget ) {
-
-			if ( ! $amount->is_enabled() ) {
-				throw new InvalidCampaignTargetException( 'Target must be enabled when calling enable_target().' );
-			}
-
-			$new = $amount;
-			$amount = $new->get_money()->get_amount_minor();
-
-		} else {
-			$new = CampaignTarget::create( true, Money::create( $amount, $this->target->get_money()->get_currency() ) );
-		}
-
-		if ( $new->equals( $this->target ) ) {
-
-			throw new CampaignChangeException(
-				sprintf( 'Target amount must be different from the current one. Given: %d.', $amount ),
-			);
-		}
-
-		return new self( $this->id, $this->version, $this->title, $this->is_active, $this->is_open, $new );
-	}
-
-	/**
-	 * Disables targeting (amount becomes zero).
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return self The campaign with targeting disabled.
-	 *
-	 * @throws CampaignChangeException When targeting is already disabled.
-	 */
-	public function disable_target(): self {
-
-		if ( ! $this->target->is_enabled() ) {
-			throw new CampaignChangeException( 'Cannot disable target: already disabled.' );
-		}
-
-		$new = CampaignTarget::create( false, Money::create( 0, $this->target->get_money()->get_currency() ), );
-
-		return new self( $this->id, $this->version, $this->title, $this->is_active, $this->is_open, $new );
-	}
-
-	/**
-	 * Sets the target amount.
-	 *
-	 * Amount 0 disables targeting, positive amount enables or updates it.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param int|CampaignTarget $amount The desired target amount in minor currency units
-	 *                                   (0 to disable; >0 to enable/update) or target value object.
-	 *
-	 * @return self The campaign with updated targeting state.
-	 *
-	 * @throws InvalidCampaignTargetException When the amount is invalid (e.g., negative).
 	 * @throws CampaignChangeException When the operation would not change the current state.
 	 */
-	public function set_target_amount( int|CampaignTarget $amount ): self {
+	public function change_target_amount( ?Amount $target_amount ): self {
 
-		if ( $amount instanceof CampaignTarget ) {
-			return $amount->is_enabled() ? $this->enable_target( $amount ) : $this->disable_target();
+		$updated_target = $this->target->with_amount( $target_amount );
+
+		if ( $updated_target->equals( $this->target ) ) {
+			throw new CampaignChangeException( 'Target amount must be different from the current one.' );
 		}
 
-		if ( $amount === 0 ) {
-			return $this->disable_target();
-		}
-
-		return $this->enable_target( $amount );
+		return new self( $this->id, $this->version, $this->title, $this->is_open, $updated_target );
 	}
 }

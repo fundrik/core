@@ -71,11 +71,11 @@ final readonly class RenameCampaignHandler extends AbstractCampaignMutationHandl
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
-	 * @param string|CampaignTitle $new_title New campaign title.
+	 * @param CampaignTitle $new_title New campaign title.
 	 *
 	 * @return Campaign Persisted campaign snapshot.
 	 */
-	public function handle( EntityId $campaign_id, string|CampaignTitle $new_title ): Campaign {
+	public function handle( EntityId $campaign_id, CampaignTitle $new_title ): Campaign {
 
 		$mutation = CampaignMutation::Rename;
 		$campaign = $this->require_campaign( $campaign_id, $mutation );

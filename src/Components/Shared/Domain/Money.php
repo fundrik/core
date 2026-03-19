@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Shared\Domain;
 
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyAmountException;
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyCurrencyException;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidAmountException;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidCurrencyCodeException;
 
 /**
- * Represents money in minor currency units.
+ * Represents money with amount and currency.
  *
  * @since 0.1.0
  */
 final readonly class Money {
 
 	/**
-	 * Private constructor, use factory method.
+	 * Constructor.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $amount_minor The non-negative amount in minor units.
-	 * @param string $currency The uppercase ISO 4217 currency code.
+	 * @param Amount $amount Positive amount.
+	 * @param Currency $currency Currency.
 	 */
 	private function __construct(
-		private int $amount_minor,
-		private string $currency,
+		private Amount $amount,
+		private Currency $currency,
 	) {}
 
 	/**
@@ -32,53 +32,42 @@ final readonly class Money {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $amount_minor The non-negative amount in minor units.
-	 * @param string $currency The ISO 4217 currency code.
+	 * @param int $amount Amount value.
+	 * @param string $currency_code Currency code.
 	 *
 	 * @return self The money value object.
 	 *
-	 * @throws InvalidMoneyAmountException When amount is negative.
-	 * @throws InvalidMoneyCurrencyException When currency is not a valid ISO 4217 code.
+	 * @throws InvalidAmountException When amount is not positive.
+	 * @throws InvalidCurrencyCodeException When currency code is not a valid ISO 4217 code.
 	 */
-	public static function create( int $amount_minor, string $currency ): self {
+	public static function create( int $amount, string $currency_code ): self {
 
-		if ( $amount_minor < 0 ) {
-			throw new InvalidMoneyAmountException(
-				sprintf( 'Money amount must be zero or positive integer in minor units. Given: %d.', $amount_minor ),
-			);
-		}
-
-		$currency = strtoupper( trim( $currency ) );
-
-		if ( preg_match( '/^[A-Z]{3}$/', $currency ) !== 1 ) {
-			throw new InvalidMoneyCurrencyException(
-				sprintf( 'Money currency must be a valid ISO 4217 code. Given: "%s".', $currency ),
-			);
-		}
-
-		return new self( $amount_minor, $currency );
+		return new self(
+			Amount::create( $amount ),
+			Currency::create( $currency_code ),
+		);
 	}
 
 	/**
-	 * Returns money amount in minor units.
+	 * Returns the money amount value object.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int The non-negative amount.
+	 * @return Amount Money amount.
 	 */
-	public function get_amount_minor(): int {
+	public function get_amount(): Amount {
 
-		return $this->amount_minor;
+		return $this->amount;
 	}
 
 	/**
-	 * Returns money currency.
+	 * Returns the money currency value object.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string The ISO 4217 currency code.
+	 * @return Currency Money currency.
 	 */
-	public function get_currency(): string {
+	public function get_currency(): Currency {
 
 		return $this->currency;
 	}
@@ -94,7 +83,7 @@ final readonly class Money {
 	 */
 	public function equals( self $other ): bool {
 
-		return $this->amount_minor === $other->amount_minor
-			&& $this->currency === $other->currency;
+		return $this->amount->equals( $other->amount )
+			&& $this->currency->equals( $other->currency );
 	}
 }

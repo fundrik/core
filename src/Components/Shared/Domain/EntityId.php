@@ -33,19 +33,58 @@ final readonly class EntityId {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string $value The ID to validate.
+	 * @param int|string|self $value The ID to validate.
 	 *
 	 * @return self A valid EntityId instance.
 	 *
 	 * @throws InvalidEntityIdException When the ID is neither a positive integer nor a valid UUID.
 	 */
-	public static function create( int|string $value ): self {
+	public static function create( int|string|self $value ): self {
 
-		if ( is_int( $value ) ) {
-			return self::from_int( $value );
+		if ( $value instanceof self ) {
+			return $value;
 		}
 
-		return self::from_uuid( $value );
+		try {
+
+			if ( is_int( $value ) ) {
+				return self::from_int( $value );
+			}
+
+			return self::from_uuid( $value );
+		} catch ( InvalidEntityIdException $e ) {
+			throw new InvalidEntityIdException(
+				sprintf(
+					'ID must be a positive integer or a valid UUID. Given: %s.',
+					is_int( $value ) ? (string) $value : sprintf( '"%s"', $value ),
+				),
+				previous: $e,
+			);
+		}
+	}
+
+	/**
+	 * Generates a UUIDv4 entity identifier.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return self A valid UUIDv4 entity identifier.
+	 */
+	public static function uuid4(): self {
+
+		return new self( Uuid::uuid4()->toString() );
+	}
+
+	/**
+	 * Generates a UUIDv7 entity identifier.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return self A valid UUIDv7 entity identifier.
+	 */
+	public static function uuid7(): self {
+
+		return new self( Uuid::uuid7()->toString() );
 	}
 
 	/**
@@ -74,7 +113,7 @@ final readonly class EntityId {
 	public function get_as_int(): int {
 
 		if ( ! is_int( $this->value ) ) {
-			throw new InvalidEntityIdException( 'EntityId must be an integer.' );
+			throw new InvalidEntityIdException( 'ID must be an integer.' );
 		}
 
 		return $this->value;
@@ -92,7 +131,7 @@ final readonly class EntityId {
 	public function get_as_uuid(): string {
 
 		if ( ! is_string( $this->value ) ) {
-			throw new InvalidEntityIdException( 'EntityId must be a UUID string.' );
+			throw new InvalidEntityIdException( 'ID must be a UUID string.' );
 		}
 
 		return $this->value;
@@ -127,7 +166,7 @@ final readonly class EntityId {
 
 		if ( $value <= 0 ) {
 			throw new InvalidEntityIdException(
-				sprintf( 'EntityId must be a positive integer. Given: %d.', $value ),
+				sprintf( 'ID must be a positive integer. Given: %d.', $value ),
 			);
 		}
 
@@ -152,7 +191,7 @@ final readonly class EntityId {
 		} catch ( InvalidUuidStringException $e ) {
 
 			throw new InvalidEntityIdException(
-				message: sprintf( 'EntityId must be a valid UUID. Given: "%s".', $uuid ),
+				message: sprintf( 'ID must be a valid UUID. Given: "%s".', $uuid ),
 				previous: $e,
 			);
 		}

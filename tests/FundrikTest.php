@@ -5,32 +5,28 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests;
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetailsMapper;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
-use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServiceFactory;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
-use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryServiceFactory;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindAllCampaigns\FindAllCampaignsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\SaveCampaign\SaveCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\UpdateCampaign\UpdateCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
-use Fundrik\Core\Components\Donations\Application\Services\DonationCommandServiceFactory;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
-use Fundrik\Core\Components\Donations\Application\Services\DonationQueryServiceFactory;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindAllDonations\FindAllDonationsHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationsByCampaignId\FindDonationsByCampaignIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Fundrik;
 use Mockery;
@@ -42,29 +38,25 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[CoversClass( Fundrik::class )]
 #[UsesClass( CampaignQueryService::class )]
 #[UsesClass( CampaignCommandService::class )]
-#[UsesClass( CampaignQueryServiceFactory::class )]
-#[UsesClass( CampaignCommandServiceFactory::class )]
+#[UsesClass( CampaignDetailsMapper::class )]
 #[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( DonationQueryService::class )]
 #[UsesClass( DonationCommandService::class )]
-#[UsesClass( DonationQueryServiceFactory::class )]
-#[UsesClass( DonationCommandServiceFactory::class )]
 #[UsesClass( FindCampaignByIdHandler::class )]
-#[UsesClass( FindAllCampaignsHandler::class )]
 #[UsesClass( CreateCampaignHandler::class )]
-#[UsesClass( SaveCampaignHandler::class )]
-#[UsesClass( UpdateCampaignHandler::class )]
+#[UsesClass( RenameCampaignHandler::class )]
+#[UsesClass( OpenCampaignHandler::class )]
+#[UsesClass( CloseCampaignHandler::class )]
+#[UsesClass( ChangeCampaignTargetHandler::class )]
 #[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
-#[UsesClass( FindAllDonationsHandler::class )]
-#[UsesClass( FindDonationsByCampaignIdHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
 #[UsesClass( AuthorizeDonationHandler::class )]
 #[UsesClass( CaptureDonationHandler::class )]
 #[UsesClass( FailDonationHandler::class )]
 #[UsesClass( RefundDonationHandler::class )]
 #[UsesClass( CancelDonationHandler::class )]
-#[UsesClass( UpdateDonationHandler::class )]
+#[UsesClass( CampaignFactory::class )]
 final class FundrikTest extends MockeryTestCase {
 
 	private CampaignRepositoryPort&MockInterface $campaign_repository;
@@ -81,18 +73,31 @@ final class FundrikTest extends MockeryTestCase {
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
 		$this->fundrik = new Fundrik(
-			campaign_query: ( new CampaignQueryServiceFactory( $this->campaign_repository ) )->create(),
-			campaign_command: ( new CampaignCommandServiceFactory(
-				$this->campaign_repository,
-				$this->donation_repository,
-				$this->event_bus,
-			) )->create(),
-			donation_query: ( new DonationQueryServiceFactory( $this->donation_repository ) )->create(),
-			donation_command: ( new DonationCommandServiceFactory(
-				$this->campaign_repository,
-				$this->donation_repository,
-				$this->event_bus,
-			) )->create(),
+			new CampaignQueryService(
+				new FindCampaignByIdHandler( $this->campaign_repository ),
+				new CampaignDetailsMapper(),
+			),
+			new CampaignCommandService(
+				new CreateCampaignHandler( $this->campaign_repository, $this->event_bus ),
+				new CampaignFactory(),
+				new CampaignDetailsMapper(),
+				new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
+				new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
+				new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),
+				new ChangeCampaignTargetHandler( $this->campaign_repository, $this->event_bus ),
+				new DeleteCampaignHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
+			),
+			new DonationQueryService(
+				new FindDonationByIdHandler( $this->donation_repository ),
+			),
+			new DonationCommandService(
+				new CreateDonationHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
+				new AuthorizeDonationHandler( $this->donation_repository, $this->event_bus ),
+				new CaptureDonationHandler( $this->donation_repository, $this->event_bus ),
+				new FailDonationHandler( $this->donation_repository, $this->event_bus ),
+				new RefundDonationHandler( $this->donation_repository, $this->event_bus ),
+				new CancelDonationHandler( $this->donation_repository, $this->event_bus ),
+			),
 		);
 	}
 

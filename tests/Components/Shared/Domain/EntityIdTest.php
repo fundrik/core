@@ -26,7 +26,7 @@ final class EntityIdTest extends FundrikTestCase {
 	public function throws_when_negative_int_provided(): void {
 
 		$this->expectException( InvalidEntityIdException::class );
-		$this->expectExceptionMessage( 'EntityId must be a positive integer. Given: -123.' );
+		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: -123.' );
 
 		EntityId::create( -123 );
 	}
@@ -35,7 +35,7 @@ final class EntityIdTest extends FundrikTestCase {
 	public function throws_when_zero_provided(): void {
 
 		$this->expectException( InvalidEntityIdException::class );
-		$this->expectExceptionMessage( 'EntityId must be a positive integer. Given: 0.' );
+		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: 0.' );
 
 		EntityId::create( 0 );
 	}
@@ -52,10 +52,18 @@ final class EntityIdTest extends FundrikTestCase {
 	}
 
 	#[Test]
+	public function returns_same_instance_when_created_from_entity_id(): void {
+
+		$entity_id = EntityId::create( 123 );
+
+		$this->assertSame( $entity_id, EntityId::create( $entity_id ) );
+	}
+
+	#[Test]
 	public function throws_when_invalid_uuid_provided(): void {
 
 		$this->expectException( InvalidEntityIdException::class );
-		$this->expectExceptionMessage( 'EntityId must be a valid UUID. Given: "invalid-uuid".' );
+		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: "invalid-uuid".' );
 
 		EntityId::create( 'invalid-uuid' );
 	}
@@ -113,7 +121,7 @@ final class EntityIdTest extends FundrikTestCase {
 		$uuid_id = EntityId::create( '0196930b-f2ef-7ec8-b685-cffc19cbf0e3' );
 
 		$this->expectException( InvalidEntityIdException::class );
-		$this->expectExceptionMessage( 'EntityId must be an integer.' );
+		$this->expectExceptionMessage( 'ID must be an integer.' );
 
 		$uuid_id->get_as_int();
 	}
@@ -124,7 +132,7 @@ final class EntityIdTest extends FundrikTestCase {
 		$int_id = EntityId::create( 10 );
 
 		$this->expectException( InvalidEntityIdException::class );
-		$this->expectExceptionMessage( 'EntityId must be a UUID string.' );
+		$this->expectExceptionMessage( 'ID must be a UUID string.' );
 
 		$int_id->get_as_uuid();
 	}
@@ -146,5 +154,27 @@ final class EntityIdTest extends FundrikTestCase {
 		$id2 = EntityId::create( 2 );
 
 		$this->assertFalse( $id1->equals( $id2 ) );
+	}
+
+	#[Test]
+	public function generates_uuid4_entity_id(): void {
+
+		$id = EntityId::uuid4();
+
+		$this->assertMatchesRegularExpression(
+			'/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',
+			$id->get_as_uuid(),
+		);
+	}
+
+	#[Test]
+	public function generates_uuid7_entity_id(): void {
+
+		$id = EntityId::uuid7();
+
+		$this->assertMatchesRegularExpression(
+			'/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',
+			$id->get_as_uuid(),
+		);
 	}
 }

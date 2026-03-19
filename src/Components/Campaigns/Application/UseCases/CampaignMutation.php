@@ -17,16 +17,6 @@ enum CampaignMutation: string {
 	case Rename = 'rename';
 
 	/**
-	 * Campaign activation mutation.
-	 */
-	case Activate = 'activate';
-
-	/**
-	 * Campaign deactivation mutation.
-	 */
-	case Deactivate = 'deactivate';
-
-	/**
 	 * Campaign open mutation.
 	 */
 	case Open = 'open';
@@ -39,7 +29,7 @@ enum CampaignMutation: string {
 	/**
 	 * Campaign target mutation.
 	 */
-	case SetTargetAmount = 'set_target_amount';
+	case ChangeTarget = 'change_target';
 
 	/**
 	 * Returns the infinitive phrase used in failure messages.
@@ -51,7 +41,7 @@ enum CampaignMutation: string {
 	public function infinitive(): string {
 
 		return match ( $this ) {
-			self::SetTargetAmount => 'set target amount for',
+			self::ChangeTarget => 'change target for',
 			default => $this->value,
 		};
 	}
@@ -67,11 +57,9 @@ enum CampaignMutation: string {
 
 		return match ( $this ) {
 			self::Rename => 'renamed',
-			self::Activate => 'activated',
-			self::Deactivate => 'deactivated',
 			self::Open => 'opened',
 			self::Close => 'closed',
-			self::SetTargetAmount => 'target changed',
+			self::ChangeTarget => 'target changed',
 		};
 	}
 
@@ -85,7 +73,7 @@ enum CampaignMutation: string {
 	public function past_participle(): string {
 
 		return match ( $this ) {
-			self::SetTargetAmount => 'updated',
+			self::ChangeTarget => 'updated',
 			default => $this->event_label(),
 		};
 	}

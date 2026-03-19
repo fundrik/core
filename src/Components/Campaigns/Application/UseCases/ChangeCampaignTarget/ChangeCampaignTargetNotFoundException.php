@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Campaigns\Application\UseCases\DeactivateCampaign;
+namespace Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget;
 
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Throwable;
 
 /**
- * Thrown when deactivate-campaign targets a campaign that no longer exists.
+ * Thrown when change-campaign-target targets a campaign that no longer exists.
  *
  * @since 0.1.0
  */
-final class DeactivateCampaignNotFoundException extends DeactivateCampaignException {
+final class ChangeCampaignTargetNotFoundException extends ChangeCampaignTargetException {
 
 	/**
 	 * Constructor.
@@ -27,7 +27,7 @@ final class DeactivateCampaignNotFoundException extends DeactivateCampaignExcept
 		parent::__construct(
 			stage: UseCaseFailureStage::Persistence,
 			message: sprintf(
-				'Cannot deactivate campaign "%s": campaign does not exist.',
+				'Cannot change target for campaign "%s": campaign does not exist.',
 				$campaign_id,
 			),
 			previous: $previous,
