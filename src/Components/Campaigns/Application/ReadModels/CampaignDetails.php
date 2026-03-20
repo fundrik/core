@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\ReadModels;
 
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
+
 /**
  * Represents campaign details exposed by the public read API.
  *
@@ -21,6 +23,8 @@ final readonly class CampaignDetails {
 	 * @param bool $can_receive_donations Whether the campaign accepts donations.
 	 * @param string $currency_code Campaign currency code.
 	 * @param int|null $target_amount Target amount, if configured.
+	 * @param UtcDateTime $created_at Creation timestamp.
+	 * @param UtcDateTime|null $updated_at Update timestamp, null otherwise.
 	 */
 	public function __construct(
 		private int|string $id,
@@ -28,6 +32,8 @@ final readonly class CampaignDetails {
 		private bool $can_receive_donations,
 		private string $currency_code,
 		private ?int $target_amount,
+		private UtcDateTime $created_at,
+		private ?UtcDateTime $updated_at = null,
 	) {}
 
 	/**
@@ -100,5 +106,29 @@ final readonly class CampaignDetails {
 	public function get_target_amount(): ?int {
 
 		return $this->target_amount;
+	}
+
+	/**
+	 * Returns the creation timestamp.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return UtcDateTime Creation timestamp.
+	 */
+	public function get_created_at(): UtcDateTime {
+
+		return $this->created_at;
+	}
+
+	/**
+	 * Returns the last update timestamp.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return UtcDateTime|null Update timestamp, null otherwise.
+	 */
+	public function get_updated_at(): ?UtcDateTime {
+
+		return $this->updated_at;
 	}
 }

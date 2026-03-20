@@ -12,8 +12,6 @@ use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignRenamedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetailsMapper;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException;
@@ -42,7 +40,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( CampaignCommandService::class )]
 #[UsesClass( CreateCampaignCommand::class )]
-#[UsesClass( CampaignDetails::class )]
 #[UsesClass( CreateCampaignException::class )]
 #[UsesClass( CampaignCreatedEvent::class )]
 #[UsesClass( CampaignRenamedEvent::class )]
@@ -81,7 +78,6 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->command = new CampaignCommandService(
 			new CreateCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new CampaignFactory(),
-			new CampaignDetailsMapper(),
 			new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),
@@ -130,14 +126,9 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignCreatedEvent::class, $campaign->get_id() ) );
 
-		$result = $this->command->create( $command );
+		$this->command->create( $command );
 
-		$this->assertInstanceOf( CampaignDetails::class, $result );
-		$this->assertSame( $campaign_id->get_value(), $result->get_id() );
-		$this->assertSame( 'New Campaign', $result->get_title() );
-		$this->assertFalse( $result->can_receive_donations() );
-		$this->assertSame( 'RUB', $result->get_currency_code() );
-		$this->assertSame( 5_000, $result->get_target_amount() );
+		$this->assertTrue( true );
 	}
 
 	#[Test]
@@ -199,10 +190,9 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignRenamedEvent::class, $campaign_id ) );
 
-		$result = $this->command->rename( $campaign_id->get_value(), $new_title );
+		$this->command->rename( $campaign_id->get_value(), $new_title );
 
-		$this->assertInstanceOf( CampaignDetails::class, $result );
-		$this->assertSame( $new_title, $result->get_title() );
+		$this->assertTrue( true );
 	}
 
 	#[Test]
@@ -230,10 +220,9 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignOpenedEvent::class, $campaign_id ) );
 
-		$result = $this->command->open( $campaign_id->get_value() );
+		$this->command->open( $campaign_id->get_value() );
 
-		$this->assertInstanceOf( CampaignDetails::class, $result );
-		$this->assertTrue( $result->can_receive_donations() );
+		$this->assertTrue( true );
 	}
 
 	#[Test]
@@ -261,10 +250,9 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignClosedEvent::class, $campaign_id ) );
 
-		$result = $this->command->close( $campaign_id->get_value() );
+		$this->command->close( $campaign_id->get_value() );
 
-		$this->assertInstanceOf( CampaignDetails::class, $result );
-		$this->assertFalse( $result->can_receive_donations() );
+		$this->assertTrue( true );
 	}
 
 	#[Test]
@@ -294,11 +282,9 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignTargetChangedEvent::class, $campaign_id ) );
 
-		$result = $this->command->change_target_amount( $campaign_id->get_value(), 50_000 );
+		$this->command->change_target_amount( $campaign_id->get_value(), 50_000 );
 
-		$this->assertInstanceOf( CampaignDetails::class, $result );
-		$this->assertSame( 'RUB', $result->get_currency_code() );
-		$this->assertSame( 50_000, $result->get_target_amount() );
+		$this->assertTrue( true );
 	}
 
 	#[Test]
@@ -328,12 +314,9 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( CampaignTargetChangedEvent::class, $campaign_id ) );
 
-		$result = $this->command->change_target_amount( $campaign_id->get_value(), null );
+		$this->command->change_target_amount( $campaign_id->get_value(), null );
 
-		$this->assertInstanceOf( CampaignDetails::class, $result );
-		$this->assertFalse( $result->has_target() );
-		$this->assertSame( 'RUB', $result->get_currency_code() );
-		$this->assertNull( $result->get_target_amount() );
+		$this->assertTrue( true );
 	}
 
 	#[Test]

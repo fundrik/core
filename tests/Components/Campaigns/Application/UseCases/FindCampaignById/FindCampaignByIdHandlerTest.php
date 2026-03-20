@@ -5,16 +5,13 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases\FindCampaignById;
 
 use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadPort;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
-use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
+use Fundrik\Core\Tests\Fixtures\FakeCampaignDetailsReadException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -26,14 +23,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FindCampaignByIdException::class )]
 #[UsesClass( CampaignApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
-#[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTitle::class )]
-#[UsesClass( EntityVersion::class )]
+#[UsesClass( CampaignDetails::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( Money::class )]
 final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 
-	private CampaignRepositoryPort&MockInterface $repository;
+	private CampaignDetailsReadPort&MockInterface $campaign_details_read;
 
 	private FindCampaignByIdHandler $handler;
 
@@ -41,26 +35,26 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 
 		parent::setUp();
 
-		$this->repository = Mockery::mock( CampaignRepositoryPort::class );
+		$this->campaign_details_read = Mockery::mock( CampaignDetailsReadPort::class );
 
-		$this->handler = new FindCampaignByIdHandler( $this->repository );
+		$this->handler = new FindCampaignByIdHandler( $this->campaign_details_read );
 	}
 
 	#[Test]
-	public function handle_returns_campaign(): void {
+	public function handle_returns_campaign_details(): void {
 
-		$campaign = $this->make_campaign();
-		$campaign_id = $campaign->get_id();
+		$details = $this->make_campaign_details();
+		$campaign_id = EntityId::create( $details->get_id() );
 
-		$this->repository
+		$this->campaign_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
-			->andReturn( $campaign );
+			->andReturn( $details );
 
 		$result = $this->handler->handle( $campaign_id );
 
-		$this->assertSame( $campaign, $result );
+		$this->assertSame( $details, $result );
 	}
 
 	#[Test]
@@ -68,7 +62,7 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 
 		$campaign_id = $this->make_campaign()->get_id();
 
-		$this->repository
+		$this->campaign_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
@@ -80,12 +74,12 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function handle_throws_repository_exception(): void {
+	public function handle_throws_view_exception(): void {
 
 		$campaign_id = $this->make_campaign()->get_id();
-		$e = new FakeCampaignRepositoryException();
+		$e = new FakeCampaignDetailsReadException();
 
-		$this->repository
+		$this->campaign_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->andThrow( $e );

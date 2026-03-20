@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core;
 
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadPort;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetailsMapper;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
@@ -42,11 +42,13 @@ final readonly class FundrikFactory {
 	 *
 	 * @since 0.1.0
 	 *
+	 * @param CampaignDetailsReadPort $campaign_details_read Campaign details read port.
 	 * @param CampaignRepositoryPort $campaign_repository Provides campaign persistence.
 	 * @param DonationRepositoryPort $donation_repository Provides donation persistence.
 	 * @param ApplicationEventBusPort $event_bus Publishes application events.
 	 */
 	public function __construct(
+		private CampaignDetailsReadPort $campaign_details_read,
 		private CampaignRepositoryPort $campaign_repository,
 		private DonationRepositoryPort $donation_repository,
 		private ApplicationEventBusPort $event_bus,
@@ -79,8 +81,7 @@ final readonly class FundrikFactory {
 	private function create_campaign_query_service(): CampaignQueryService {
 
 		return new CampaignQueryService(
-			new FindCampaignByIdHandler( $this->campaign_repository ),
-			new CampaignDetailsMapper(),
+			new FindCampaignByIdHandler( $this->campaign_details_read ),
 		);
 	}
 
@@ -96,7 +97,6 @@ final readonly class FundrikFactory {
 		return new CampaignCommandService(
 			new CreateCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new CampaignFactory(),
-			new CampaignDetailsMapper(),
 			new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),

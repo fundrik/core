@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests;
 
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadPort;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetailsMapper;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
@@ -40,7 +40,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[CoversClass( Fundrik::class )]
 #[UsesClass( CampaignQueryService::class )]
 #[UsesClass( CampaignCommandService::class )]
-#[UsesClass( CampaignDetailsMapper::class )]
 #[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( DonationQueryService::class )]
 #[UsesClass( DonationCommandService::class )]
@@ -63,6 +62,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationFactory::class )]
 final class FundrikTest extends MockeryTestCase {
 
+	private CampaignDetailsReadPort&MockInterface $campaign_details_read;
 	private CampaignRepositoryPort&MockInterface $campaign_repository;
 	private DonationRepositoryPort&MockInterface $donation_repository;
 	private ApplicationEventBusPort&MockInterface $event_bus;
@@ -72,19 +72,18 @@ final class FundrikTest extends MockeryTestCase {
 
 		parent::setUp();
 
+		$this->campaign_details_read = Mockery::mock( CampaignDetailsReadPort::class );
 		$this->campaign_repository = Mockery::mock( CampaignRepositoryPort::class );
 		$this->donation_repository = Mockery::mock( DonationRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
 		$this->fundrik = new Fundrik(
 			new CampaignQueryService(
-				new FindCampaignByIdHandler( $this->campaign_repository ),
-				new CampaignDetailsMapper(),
+				new FindCampaignByIdHandler( $this->campaign_details_read ),
 			),
 			new CampaignCommandService(
 				new CreateCampaignHandler( $this->campaign_repository, $this->event_bus ),
 				new CampaignFactory(),
-				new CampaignDetailsMapper(),
 				new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
 				new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
 				new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),

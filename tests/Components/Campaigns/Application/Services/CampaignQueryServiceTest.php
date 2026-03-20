@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\Services;
 
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadPort;
 use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetailsMapper;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
-use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -23,16 +19,12 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( CampaignQueryService::class )]
 #[UsesClass( CampaignDetails::class )]
-#[UsesClass( CampaignDetailsMapper::class )]
 #[UsesClass( FindCampaignByIdException::class )]
 #[UsesClass( FindCampaignByIdHandler::class )]
-#[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTitle::class )]
-#[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 final class CampaignQueryServiceTest extends MockeryTestCase {
 
-	private CampaignRepositoryPort&MockInterface $campaign_repository;
+	private CampaignDetailsReadPort&MockInterface $campaign_details_read;
 
 	private CampaignQueryService $query;
 
@@ -40,50 +32,51 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 
 		parent::setUp();
 
-		$this->campaign_repository = Mockery::mock( CampaignRepositoryPort::class );
+		$this->campaign_details_read = Mockery::mock( CampaignDetailsReadPort::class );
 		$this->query = new CampaignQueryService(
-			new FindCampaignByIdHandler( $this->campaign_repository ),
-			new CampaignDetailsMapper(),
+			new FindCampaignByIdHandler( $this->campaign_details_read ),
 		);
 	}
 
 	#[Test]
-	public function find_by_id_uses_injected_campaign_repository(): void {
+	public function find_by_id_uses_injected_campaign_details_read_port(): void {
 
-		$campaign = $this->make_campaign();
-		$campaign_id = $campaign->get_id();
+		$details = $this->make_campaign_details();
+		$campaign_id = EntityId::create( $details->get_id() );
 
-		$this->campaign_repository
+		$this->campaign_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->withArgs(
 				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
 			)
-			->andReturn( $campaign );
+			->andReturn( $details );
 
 		$result = $this->query->find_by_id( $campaign_id->get_value() );
 
 		$this->assertInstanceOf( CampaignDetails::class, $result );
-		$this->assertSame( $campaign_id->get_value(), $result->get_id() );
-		$this->assertSame( $campaign->get_title(), $result->get_title() );
-		$this->assertSame( $campaign->can_receive_donations(), $result->can_receive_donations() );
-		$this->assertSame( $campaign->get_target()->get_currency()->get_code(), $result->get_currency_code() );
-		$this->assertSame( $campaign->get_target()->get_amount()?->get_value(), $result->get_target_amount() );
+		$this->assertSame( $details->get_id(), $result->get_id() );
+		$this->assertSame( $details->get_title(), $result->get_title() );
+		$this->assertSame( $details->can_receive_donations(), $result->can_receive_donations() );
+		$this->assertSame( $details->get_currency_code(), $result->get_currency_code() );
+		$this->assertSame( $details->get_target_amount(), $result->get_target_amount() );
+		$this->assertSame( $details->get_created_at(), $result->get_created_at() );
+		$this->assertSame( $details->get_updated_at(), $result->get_updated_at() );
 	}
 
 	#[Test]
 	public function find_by_id_accepts_entity_id(): void {
 
-		$campaign = $this->make_campaign();
-		$campaign_id = $campaign->get_id();
+		$details = $this->make_campaign_details();
+		$campaign_id = EntityId::create( $details->get_id() );
 
-		$this->campaign_repository
+		$this->campaign_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->withArgs(
 				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id === $campaign_id,
 			)
-			->andReturn( $campaign );
+			->andReturn( $details );
 
 		$result = $this->query->find_by_id( $campaign_id );
 
@@ -94,7 +87,7 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 	#[Test]
 	public function find_by_id_wraps_invalid_campaign_id_input(): void {
 
-		$this->campaign_repository
+		$this->campaign_details_read
 			->shouldNotReceive( 'find_by_id' );
 
 		try {

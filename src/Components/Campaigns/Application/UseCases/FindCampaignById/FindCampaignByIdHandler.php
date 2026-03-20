@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById;
 
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Domain\Campaign;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadPort;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
@@ -21,10 +21,10 @@ final readonly class FindCampaignByIdHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param CampaignRepositoryPort $repository Retrieves campaigns from storage.
+	 * @param CampaignDetailsReadPort $campaign_details_read Campaign details read port.
 	 */
 	public function __construct(
-		private CampaignRepositoryPort $repository,
+		private CampaignDetailsReadPort $campaign_details_read,
 	) {}
 
 	/**
@@ -34,15 +34,15 @@ final readonly class FindCampaignByIdHandler {
 	 *
 	 * @param EntityId $campaign_id Campaign ID to retrieve.
 	 *
-	 * @return Campaign|null Campaign if found, null otherwise.
+	 * @return CampaignDetails|null Campaign details if found, null otherwise.
 	 *
 	 * @throws FindCampaignByIdException When retrieving the campaign fails.
 	 */
-	public function handle( EntityId $campaign_id ): ?Campaign {
+	public function handle( EntityId $campaign_id ): ?CampaignDetails {
 
 		try {
-			return $this->repository->find_by_id( $campaign_id );
-		} catch ( CampaignRepositoryExceptionInterface $e ) {
+			return $this->campaign_details_read->find_by_id( $campaign_id );
+		} catch ( CampaignDetailsReadExceptionInterface $e ) {
 			throw new FindCampaignByIdException(
 				sprintf( 'Failed to retrieve campaign "%s".', (string) $campaign_id->get_value() ),
 				previous: $e,

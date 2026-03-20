@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests;
 
+use DateTimeImmutable;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -12,9 +14,42 @@ use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 abstract class FundrikTestCase extends PHPUnitTestCase {
+
+	/**
+	 * Returns valid campaign details for tests with optional field overrides.
+	 */
+	protected function make_campaign_details(
+		int|string $id = 1,
+		string $title = 'Test Campaign',
+		bool $can_receive_donations = true,
+		string $currency_code = 'RUB',
+		?int $target_amount = 100,
+		?UtcDateTime $created_at = null,
+		?UtcDateTime $updated_at = null,
+	): CampaignDetails {
+
+		return new CampaignDetails(
+			id: $id,
+			title: $title,
+			can_receive_donations: $can_receive_donations,
+			currency_code: $currency_code,
+			target_amount: $target_amount,
+			created_at: $created_at ?? $this->make_utc_date_time( '2026-03-01T10:00:00+00:00' ),
+			updated_at: $updated_at,
+		);
+	}
+
+	/**
+	 * Returns a UTC timestamp for tests.
+	 */
+	protected function make_utc_date_time( string $value ): UtcDateTime {
+
+		return UtcDateTime::create( new DateTimeImmutable( $value ) );
+	}
 
 	/**
 	 * Returns a valid campaign for tests with optional field overrides.

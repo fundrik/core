@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\Services;
 
 use Fundrik\Core\Components\Campaigns\Application\Commands\CreateCampaignCommand;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetailsMapper;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignException;
@@ -44,7 +42,6 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param CreateCampaignHandler $create_campaign Creates new campaigns.
 	 * @param CampaignFactory $campaign_factory Creates campaigns from public input.
-	 * @param CampaignDetailsMapper $campaign_details_mapper Maps domain campaigns to public details.
 	 * @param RenameCampaignHandler $rename_campaign Renames campaigns.
 	 * @param OpenCampaignHandler $open_campaign Opens campaigns for donations.
 	 * @param CloseCampaignHandler $close_campaign Closes campaigns for donations.
@@ -54,7 +51,6 @@ final readonly class CampaignCommandService {
 	public function __construct(
 		private CreateCampaignHandler $create_campaign,
 		private CampaignFactory $campaign_factory,
-		private CampaignDetailsMapper $campaign_details_mapper,
 		private RenameCampaignHandler $rename_campaign,
 		private OpenCampaignHandler $open_campaign,
 		private CloseCampaignHandler $close_campaign,
@@ -70,11 +66,9 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param CreateCampaignCommand $command Public campaign creation input.
 	 *
-	 * @return CampaignDetails Persisted campaign details.
-	 *
 	 * @throws CreateCampaignException When campaign creation fails.
 	 */
-	public function create( CreateCampaignCommand $command ): CampaignDetails {
+	public function create( CreateCampaignCommand $command ): void {
 
 		try {
 			$campaign = $this->campaign_factory->create_new_from_primitives(
@@ -92,7 +86,7 @@ final readonly class CampaignCommandService {
 			);
 		}
 
-		return $this->campaign_details_mapper->map( $this->create_campaign->handle( $campaign ) );
+		$this->create_campaign->handle( $campaign );
 	}
 
 	/**
@@ -103,21 +97,14 @@ final readonly class CampaignCommandService {
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 * @param string $new_title New campaign title.
 	 *
-	 * @return CampaignDetails Persisted campaign details.
-	 *
 	 * @throws RenameCampaignException When renaming fails.
 	 */
-	public function rename( int|string|EntityId $campaign_id, string $new_title ): CampaignDetails {
+	public function rename( int|string|EntityId $campaign_id, string $new_title ): void {
+
+		$entity_id = $this->require_campaign_id( $campaign_id, RenameCampaignException::class );
 
 		try {
-			$entity_id = EntityId::create( $campaign_id );
 			$title = CampaignTitle::create( $new_title );
-		} catch ( InvalidEntityIdException $e ) {
-			throw new RenameCampaignException(
-				stage: UseCaseFailureStage::Precondition,
-				message: $e->getMessage(),
-				previous: $e,
-			);
 		} catch ( InvalidCampaignTitleException $e ) {
 			throw new RenameCampaignException(
 				stage: UseCaseFailureStage::Precondition,
@@ -126,9 +113,7 @@ final readonly class CampaignCommandService {
 			);
 		}
 
-		return $this->campaign_details_mapper->map(
-			$this->rename_campaign->handle( $entity_id, $title ),
-		);
+		$this->rename_campaign->handle( $entity_id, $title );
 	}
 
 	/**
@@ -138,25 +123,13 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
-	 * @return CampaignDetails Persisted campaign details.
-	 *
 	 * @throws OpenCampaignException When opening fails.
 	 */
-	public function open( int|string|EntityId $campaign_id ): CampaignDetails {
+	public function open( int|string|EntityId $campaign_id ): void {
 
-		try {
-			$entity_id = EntityId::create( $campaign_id );
-		} catch ( InvalidEntityIdException $e ) {
-			throw new OpenCampaignException(
-				stage: UseCaseFailureStage::Precondition,
-				message: $e->getMessage(),
-				previous: $e,
-			);
-		}
+		$entity_id = $this->require_campaign_id( $campaign_id, OpenCampaignException::class );
 
-		return $this->campaign_details_mapper->map(
-			$this->open_campaign->handle( $entity_id ),
-		);
+		$this->open_campaign->handle( $entity_id );
 	}
 
 	/**
@@ -166,25 +139,13 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
-	 * @return CampaignDetails Persisted campaign details.
-	 *
 	 * @throws CloseCampaignException When closing fails.
 	 */
-	public function close( int|string|EntityId $campaign_id ): CampaignDetails {
+	public function close( int|string|EntityId $campaign_id ): void {
 
-		try {
-			$entity_id = EntityId::create( $campaign_id );
-		} catch ( InvalidEntityIdException $e ) {
-			throw new CloseCampaignException(
-				stage: UseCaseFailureStage::Precondition,
-				message: $e->getMessage(),
-				previous: $e,
-			);
-		}
+		$entity_id = $this->require_campaign_id( $campaign_id, CloseCampaignException::class );
 
-		return $this->campaign_details_mapper->map(
-			$this->close_campaign->handle( $entity_id ),
-		);
+		$this->close_campaign->handle( $entity_id );
 	}
 
 	/**
@@ -195,21 +156,14 @@ final readonly class CampaignCommandService {
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 * @param int|null $target_amount Desired target amount, or null to clear it.
 	 *
-	 * @return CampaignDetails Persisted campaign details.
-	 *
 	 * @throws ChangeCampaignTargetException When changing the target amount fails.
 	 */
-	public function change_target_amount( int|string|EntityId $campaign_id, ?int $target_amount ): CampaignDetails {
+	public function change_target_amount( int|string|EntityId $campaign_id, ?int $target_amount ): void {
+
+		$entity_id = $this->require_campaign_id( $campaign_id, ChangeCampaignTargetException::class );
 
 		try {
-			$entity_id = EntityId::create( $campaign_id );
 			$amount = $target_amount === null ? null : Amount::create( $target_amount );
-		} catch ( InvalidEntityIdException $e ) {
-			throw new ChangeCampaignTargetException(
-				stage: UseCaseFailureStage::Precondition,
-				message: $e->getMessage(),
-				previous: $e,
-			);
 		} catch ( InvalidAmountException $e ) {
 			throw new ChangeCampaignTargetException(
 				stage: UseCaseFailureStage::Precondition,
@@ -218,9 +172,7 @@ final readonly class CampaignCommandService {
 			);
 		}
 
-		return $this->campaign_details_mapper->map(
-			$this->change_target->handle( $entity_id, $amount ),
-		);
+		$this->change_target->handle( $entity_id, $amount );
 	}
 
 	/**
@@ -234,10 +186,34 @@ final readonly class CampaignCommandService {
 	 */
 	public function delete( int|string|EntityId $campaign_id ): void {
 
+		$this->delete_campaign->handle(
+			$this->require_campaign_id( $campaign_id, DeleteCampaignException::class ),
+		);
+	}
+
+	/**
+	 * Creates a validated campaign ID.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param int|string|EntityId $campaign_id Campaign ID input.
+	 * @param string $exception_class Exception class to throw on validation failure.
+	 *
+	 * @return EntityId Campaign ID.
+	 *
+	 * @throws CreateCampaignException When create-campaign ID validation fails.
+	 * @throws RenameCampaignException When rename-campaign ID validation fails.
+	 * @throws OpenCampaignException When open-campaign ID validation fails.
+	 * @throws CloseCampaignException When close-campaign ID validation fails.
+	 * @throws ChangeCampaignTargetException When target-change ID validation fails.
+	 * @throws DeleteCampaignException When delete-campaign ID validation fails.
+	 */
+	private function require_campaign_id( int|string|EntityId $campaign_id, string $exception_class ): EntityId {
+
 		try {
-			$this->delete_campaign->handle( EntityId::create( $campaign_id ) );
+			return EntityId::create( $campaign_id );
 		} catch ( InvalidEntityIdException $e ) {
-			throw new DeleteCampaignException(
+			throw new $exception_class(
 				stage: UseCaseFailureStage::Precondition,
 				message: $e->getMessage(),
 				previous: $e,
