@@ -32,9 +32,9 @@ final readonly class FindDonationByIdHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $donation_id The donation ID to retrieve.
+	 * @param EntityId $donation_id Donation ID to retrieve.
 	 *
-	 * @return Donation|null The donation if found, null otherwise.
+	 * @return Donation|null Donation if found, null otherwise.
 	 *
 	 * @throws FindDonationByIdException When donation retrieval fails.
 	 */

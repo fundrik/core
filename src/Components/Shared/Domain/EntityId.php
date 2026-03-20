@@ -9,9 +9,7 @@ use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 
 /**
- * Represents a identifier for a domain entity.
- *
- * Accepts either a positive integer or a valid UUID.
+ * Represents a domain entity identifier as a positive integer or valid UUID.
  *
  * @since 0.1.0
  */
@@ -22,7 +20,7 @@ final readonly class EntityId {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string $value The validated ID.
+	 * @param int|string $value Validated ID.
 	 */
 	private function __construct(
 		private int|string $value,
@@ -33,7 +31,7 @@ final readonly class EntityId {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string|self $value The ID to validate.
+	 * @param int|string|self $value ID to validate.
 	 *
 	 * @return self A valid EntityId instance.
 	 *
@@ -88,13 +86,11 @@ final readonly class EntityId {
 	}
 
 	/**
-	 * Returns the value of this EntityId.
-	 *
-	 * Can be either a positive integer or a UUID string, depending on how the ID was created.
+	 * Returns the raw entity identifier value.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int|string The raw identifier value.
+	 * @return int|string Raw identifier value.
 	 */
 	public function get_value(): int|string {
 
@@ -106,7 +102,7 @@ final readonly class EntityId {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int The positive integer ID value.
+	 * @return int Positive integer ID value.
 	 *
 	 * @throws InvalidEntityIdException When the EntityId holds a UUID instead of an integer.
 	 */
@@ -124,7 +120,7 @@ final readonly class EntityId {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string The canonical UUID string.
+	 * @return string Canonical UUID string.
 	 *
 	 * @throws InvalidEntityIdException When the EntityId holds an integer instead of a UUID.
 	 */
@@ -142,9 +138,9 @@ final readonly class EntityId {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param self $other The EntityId to compare with.
+	 * @param self $other EntityId to compare with.
 	 *
-	 * @return bool True if the two EntityId objects are equal.
+	 * @return bool True when the two EntityId objects are equal.
 	 */
 	public function equals( self $other ): bool {
 
@@ -156,7 +152,7 @@ final readonly class EntityId {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $value The positive integer ID.
+	 * @param int $value Positive integer ID.
 	 *
 	 * @return self A valid EntityId instance.
 	 *
@@ -178,7 +174,7 @@ final readonly class EntityId {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $uuid The valid UUID.
+	 * @param string $uuid Valid UUID.
 	 *
 	 * @return self A valid EntityId instance.
 	 *

@@ -19,8 +19,8 @@ final class CreateDonationAlreadyExistsException extends CreateDonationException
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $donation_id The existing donation identifier.
-	 * @param Throwable|null $previous The underlying repository exception.
+	 * @param string $donation_id Existing donation identifier.
+	 * @param Throwable|null $previous Underlying repository exception.
 	 */
 	public function __construct( string $donation_id, ?Throwable $previous = null ) {
 

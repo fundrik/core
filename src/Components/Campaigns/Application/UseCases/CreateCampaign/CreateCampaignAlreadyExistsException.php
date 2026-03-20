@@ -19,8 +19,8 @@ final class CreateCampaignAlreadyExistsException extends CreateCampaignException
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $campaign_id The existing campaign identifier.
-	 * @param Throwable|null $previous The underlying repository exception.
+	 * @param string $campaign_id Existing campaign identifier.
+	 * @param Throwable|null $previous Underlying repository exception.
 	 */
 	public function __construct( string $campaign_id, ?Throwable $previous = null ) {
 

@@ -18,7 +18,7 @@ interface ApplicationEventBusPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param ApplicationEventInterface $event The event to publish.
+	 * @param ApplicationEventInterface $event Event to publish.
 	 *
 	 * @throws ApplicationEventBusExceptionInterface When publishing the event fails.
 	 */

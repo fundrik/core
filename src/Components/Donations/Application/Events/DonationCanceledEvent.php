@@ -18,7 +18,7 @@ final readonly class DonationCanceledEvent implements DonationApplicationEventIn
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $donation_id The donation ID.
+	 * @param EntityId $donation_id Donation ID.
 	 */
 	public function __construct(
 		private EntityId $donation_id,
@@ -29,7 +29,7 @@ final readonly class DonationCanceledEvent implements DonationApplicationEventIn
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return EntityId The donation ID.
+	 * @return EntityId Donation ID.
 	 */
 	public function get_donation_id(): EntityId {
 

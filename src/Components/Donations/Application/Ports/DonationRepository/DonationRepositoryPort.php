@@ -19,9 +19,9 @@ interface DonationRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The donation ID to retrieve.
+	 * @param EntityId $id Donation ID to retrieve.
 	 *
-	 * @return Donation|null The donation if found, null otherwise.
+	 * @return Donation|null Donation if found, null otherwise.
 	 *
 	 * @throws DonationRepositoryExceptionInterface When the lookup fails.
 	 */
@@ -32,7 +32,7 @@ interface DonationRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $campaign_id The campaign ID to check.
+	 * @param EntityId $campaign_id Campaign ID to check.
 	 *
 	 * @return bool True when at least one donation exists for the campaign.
 	 *
@@ -45,9 +45,9 @@ interface DonationRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The donation ID to check.
+	 * @param EntityId $id Donation ID to check.
 	 *
-	 * @return bool True if the donation exists.
+	 * @return bool True when the donation exists.
 	 *
 	 * @throws DonationRepositoryExceptionInterface When the existence check fails.
 	 */
@@ -58,9 +58,9 @@ interface DonationRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Donation $donation The donation to insert.
+	 * @param Donation $donation Donation to insert.
 	 *
-	 * @return Donation The persisted donation snapshot.
+	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws DonationAlreadyExistsExceptionInterface When a donation with the same ID already exists.
 	 * @throws DonationRepositoryExceptionInterface When the insert fails for another reason.
@@ -72,9 +72,9 @@ interface DonationRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Donation $donation The donation to update.
+	 * @param Donation $donation Donation to update.
 	 *
-	 * @return Donation The persisted donation snapshot.
+	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws DonationNotFoundExceptionInterface When the donation does not exist.
 	 * @throws DonationRepositoryExceptionInterface When the update fails for another reason.

@@ -43,7 +43,7 @@ final readonly class DeleteCampaignHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $campaign_id The campaign ID to delete.
+	 * @param EntityId $campaign_id Campaign ID to delete.
 	 *
 	 * @throws DeleteCampaignNotFoundException When the campaign does not exist.
 	 * @throws DeleteCampaignException When campaign deletion fails for another reason.

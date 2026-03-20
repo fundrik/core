@@ -19,9 +19,9 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The campaign ID to retrieve.
+	 * @param EntityId $id Campaign ID to retrieve.
 	 *
-	 * @return Campaign|null The campaign if found, null otherwise.
+	 * @return Campaign|null Campaign if found, null otherwise.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the lookup fails.
 	 */
@@ -32,9 +32,9 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The campaign ID to check.
+	 * @param EntityId $id Campaign ID to check.
 	 *
-	 * @return bool True if the campaign exists.
+	 * @return bool True when the campaign exists.
 	 *
 	 * @throws CampaignRepositoryExceptionInterface When the existence check fails.
 	 */
@@ -45,9 +45,9 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Campaign $campaign The campaign to insert.
+	 * @param Campaign $campaign Campaign to insert.
 	 *
-	 * @return Campaign The persisted campaign snapshot.
+	 * @return Campaign Persisted campaign snapshot.
 	 *
 	 * @throws CampaignAlreadyExistsExceptionInterface When a campaign with the same ID already exists.
 	 * @throws CampaignRepositoryExceptionInterface When the insert fails for another reason.
@@ -59,9 +59,9 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Campaign $campaign The campaign to update.
+	 * @param Campaign $campaign Campaign to update.
 	 *
-	 * @return Campaign The persisted campaign snapshot.
+	 * @return Campaign Persisted campaign snapshot.
 	 *
 	 * @throws CampaignNotFoundExceptionInterface When the campaign does not exist.
 	 * @throws CampaignRepositoryExceptionInterface When the update fails for another reason.
@@ -73,7 +73,7 @@ interface CampaignRepositoryPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The campaign ID to delete.
+	 * @param EntityId $id Campaign ID to delete.
 	 *
 	 * @throws CampaignNotFoundExceptionInterface When the campaign does not exist.
 	 * @throws CampaignRepositoryExceptionInterface When the delete fails for another reason.

@@ -7,9 +7,7 @@ namespace Fundrik\Core\Components\Campaigns\Domain;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTitleException;
 
 /**
- * Represents the title of a fundraising campaign.
- *
- * Validates that the title is non-empty.
+ * Represents a non-empty fundraising campaign title.
  *
  * @since 0.1.0
  */
@@ -20,7 +18,7 @@ final readonly class CampaignTitle {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $value The validated campaign title.
+	 * @param string $value Validated campaign title.
 	 */
 	private function __construct(
 		private string $value,
@@ -31,9 +29,9 @@ final readonly class CampaignTitle {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $value The raw input title.
+	 * @param string $value Raw input title.
 	 *
-	 * @return self The campaign title value object.
+	 * @return self Campaign title value object.
 	 *
 	 * @throws InvalidCampaignTitleException When the title is empty or consists only of whitespace.
 	 */
@@ -51,7 +49,7 @@ final readonly class CampaignTitle {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string The campaign title.
+	 * @return string Campaign title.
 	 */
 	public function get_value(): string {
 
@@ -63,9 +61,9 @@ final readonly class CampaignTitle {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param self $other The title to compare with.
+	 * @param self $other Title to compare with.
 	 *
-	 * @return bool True if the two title objects are equal.
+	 * @return bool True when the two title objects are equal.
 	 */
 	public function equals( self $other ): bool {
 

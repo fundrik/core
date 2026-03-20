@@ -18,7 +18,7 @@ final readonly class CampaignTargetChangedEvent implements CampaignApplicationEv
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $campaign_id The campaign ID.
+	 * @param EntityId $campaign_id Campaign ID.
 	 */
 	public function __construct(
 		private EntityId $campaign_id,
@@ -29,7 +29,7 @@ final readonly class CampaignTargetChangedEvent implements CampaignApplicationEv
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return EntityId The campaign ID.
+	 * @return EntityId Campaign ID.
 	 */
 	public function get_campaign_id(): EntityId {
 

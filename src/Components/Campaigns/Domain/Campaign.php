@@ -21,9 +21,9 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The campaign ID.
-	 * @param EntityVersion $version The campaign version.
-	 * @param CampaignTitle $title The campaign title.
+	 * @param EntityId $id Campaign ID.
+	 * @param EntityVersion $version Campaign version.
+	 * @param CampaignTitle $title Campaign title.
 	 * @param bool $is_open Whether the campaign is open for donations.
 	 * @param CampaignTarget $target Campaign target.
 	 */
@@ -40,7 +40,7 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return EntityId The campaign ID value object.
+	 * @return EntityId Campaign ID value object.
 	 */
 	public function get_id(): EntityId {
 
@@ -52,7 +52,7 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return EntityVersion The campaign version value object.
+	 * @return EntityVersion Campaign version value object.
 	 */
 	public function get_version(): EntityVersion {
 
@@ -64,7 +64,7 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string The campaign title string.
+	 * @return string Campaign title string.
 	 */
 	public function get_title(): string {
 
@@ -88,7 +88,7 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return bool True if the campaign has a target.
+	 * @return bool True when the campaign has a target.
 	 */
 	public function has_target(): bool {
 
@@ -112,9 +112,9 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param CampaignTitle $new_title The new title.
+	 * @param CampaignTitle $new_title New title.
 	 *
-	 * @return self The campaign with updated title.
+	 * @return self Campaign with updated title.
 	 *
 	 * @throws CampaignChangeException When the title matches the current one.
 	 */
@@ -138,7 +138,7 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self The campaign in open state.
+	 * @return self Campaign in open state.
 	 *
 	 * @throws CampaignChangeException When the campaign is already open.
 	 */
@@ -156,7 +156,7 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self The campaign in closed state.
+	 * @return self Campaign in closed state.
 	 *
 	 * @throws CampaignChangeException When the campaign is already closed.
 	 */
@@ -174,9 +174,9 @@ final readonly class Campaign {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Amount|null $target_amount The new campaign target amount.
+	 * @param Amount|null $target_amount New campaign target amount.
 	 *
-	 * @return self The campaign with updated targeting.
+	 * @return self Campaign with updated targeting.
 	 *
 	 * @throws CampaignChangeException When the operation would not change the current state.
 	 */

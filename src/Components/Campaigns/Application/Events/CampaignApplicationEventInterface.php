@@ -19,7 +19,7 @@ interface CampaignApplicationEventInterface extends ApplicationEventInterface {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return EntityId The campaign ID.
+	 * @return EntityId Campaign ID.
 	 */
 	public function get_campaign_id(): EntityId;
 }

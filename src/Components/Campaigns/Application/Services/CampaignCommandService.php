@@ -70,7 +70,7 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param CreateCampaignCommand $command Public campaign creation input.
 	 *
-	 * @return CampaignDetails The persisted campaign details.
+	 * @return CampaignDetails Persisted campaign details.
 	 *
 	 * @throws CreateCampaignException When campaign creation fails.
 	 */
@@ -103,7 +103,7 @@ final readonly class CampaignCommandService {
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 * @param string $new_title New campaign title.
 	 *
-	 * @return CampaignDetails The persisted campaign details.
+	 * @return CampaignDetails Persisted campaign details.
 	 *
 	 * @throws RenameCampaignException When renaming fails.
 	 */
@@ -138,7 +138,7 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
-	 * @return CampaignDetails The persisted campaign details.
+	 * @return CampaignDetails Persisted campaign details.
 	 *
 	 * @throws OpenCampaignException When opening fails.
 	 */
@@ -166,7 +166,7 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
-	 * @return CampaignDetails The persisted campaign details.
+	 * @return CampaignDetails Persisted campaign details.
 	 *
 	 * @throws CloseCampaignException When closing fails.
 	 */
@@ -195,7 +195,7 @@ final readonly class CampaignCommandService {
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 * @param int|null $target_amount Desired target amount, or null to clear it.
 	 *
-	 * @return CampaignDetails The persisted campaign details.
+	 * @return CampaignDetails Persisted campaign details.
 	 *
 	 * @throws ChangeCampaignTargetException When changing the target amount fails.
 	 */
@@ -228,7 +228,7 @@ final readonly class CampaignCommandService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string|EntityId $campaign_id The campaign ID to delete.
+	 * @param int|string|EntityId $campaign_id Campaign ID to delete.
 	 *
 	 * @throws DeleteCampaignException When deletion fails.
 	 */

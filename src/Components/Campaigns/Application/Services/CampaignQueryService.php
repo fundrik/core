@@ -36,9 +36,9 @@ final readonly class CampaignQueryService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string|EntityId $campaign_id The campaign ID to retrieve.
+	 * @param int|string|EntityId $campaign_id Campaign ID to retrieve.
 	 *
-	 * @return CampaignDetails|null The campaign details if found, null otherwise.
+	 * @return CampaignDetails|null Campaign details if found, null otherwise.
 	 *
 	 * @throws FindCampaignByIdException When campaign retrieval fails.
 	 */

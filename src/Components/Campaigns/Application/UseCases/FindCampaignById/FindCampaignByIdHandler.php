@@ -32,9 +32,9 @@ final readonly class FindCampaignByIdHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $campaign_id The campaign ID to retrieve.
+	 * @param EntityId $campaign_id Campaign ID to retrieve.
 	 *
-	 * @return Campaign|null The campaign if found, null otherwise.
+	 * @return Campaign|null Campaign if found, null otherwise.
 	 *
 	 * @throws FindCampaignByIdException When retrieving the campaign fails.
 	 */

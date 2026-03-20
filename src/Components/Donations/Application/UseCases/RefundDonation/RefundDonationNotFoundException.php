@@ -19,8 +19,8 @@ final class RefundDonationNotFoundException extends RefundDonationException {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $donation_id The missing donation identifier.
-	 * @param Throwable|null $previous The underlying repository exception.
+	 * @param string $donation_id Missing donation identifier.
+	 * @param Throwable|null $previous Underlying repository exception.
 	 */
 	public function __construct( string $donation_id, ?Throwable $previous = null ) {
 

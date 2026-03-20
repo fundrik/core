@@ -24,13 +24,13 @@ final readonly class CampaignFactory {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The campaign ID.
-	 * @param EntityVersion $version The campaign version.
-	 * @param CampaignTitle $title The campaign title.
+	 * @param EntityId $id Campaign ID.
+	 * @param EntityVersion $version Campaign version.
+	 * @param CampaignTitle $title Campaign title.
 	 * @param bool $is_open Whether the campaign is open.
 	 * @param CampaignTarget $target Campaign target.
 	 *
-	 * @return Campaign The built campaign entity.
+	 * @return Campaign Built campaign entity.
 	 */
 	public function create(
 		EntityId $id,
@@ -48,14 +48,14 @@ final readonly class CampaignFactory {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string|EntityId $id The campaign ID.
-	 * @param int $version The campaign version.
-	 * @param string $title The campaign title.
+	 * @param int|string|EntityId $id Campaign ID.
+	 * @param int $version Campaign version.
+	 * @param string $title Campaign title.
 	 * @param bool $is_open Whether the campaign is open.
-	 * @param string $currency_code The campaign currency code (ISO 4217).
-	 * @param int|null $target_amount The target amount, if configured.
+	 * @param string $currency_code Campaign currency code (ISO 4217).
+	 * @param int|null $target_amount Target amount, if configured.
 	 *
-	 * @return Campaign The built campaign entity.
+	 * @return Campaign Built campaign entity.
 	 *
 	 * @throws CampaignFactoryException When creating campaign from primitives fails.
 	 */
@@ -94,12 +94,12 @@ final readonly class CampaignFactory {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $id The campaign ID.
-	 * @param CampaignTitle $title The campaign title.
+	 * @param EntityId $id Campaign ID.
+	 * @param CampaignTitle $title Campaign title.
 	 * @param bool $is_open Whether the campaign is open.
 	 * @param CampaignTarget $target Campaign target.
 	 *
-	 * @return Campaign The built campaign entity.
+	 * @return Campaign Built campaign entity.
 	 */
 	public function create_new( EntityId $id, CampaignTitle $title, bool $is_open, CampaignTarget $target ): Campaign {
 
@@ -111,13 +111,13 @@ final readonly class CampaignFactory {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string|EntityId $id The campaign ID.
-	 * @param string $title The campaign title.
+	 * @param int|string|EntityId $id Campaign ID.
+	 * @param string $title Campaign title.
 	 * @param bool $is_open Whether the campaign is open.
-	 * @param string $currency_code The campaign currency code (ISO 4217).
-	 * @param int|null $target_amount The target amount, if configured.
+	 * @param string $currency_code Campaign currency code (ISO 4217).
+	 * @param int|null $target_amount Target amount, if configured.
 	 *
-	 * @return Campaign The built campaign entity.
+	 * @return Campaign Built campaign entity.
 	 *
 	 * @throws CampaignFactoryException When creating campaign from primitives fails.
 	 */

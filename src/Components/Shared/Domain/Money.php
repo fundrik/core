@@ -35,7 +35,7 @@ final readonly class Money {
 	 * @param int $amount Amount value.
 	 * @param string $currency_code Currency code.
 	 *
-	 * @return self The money value object.
+	 * @return self Money value object.
 	 *
 	 * @throws InvalidAmountException When amount is not positive.
 	 * @throws InvalidCurrencyCodeException When currency code is not a valid ISO 4217 code.
@@ -77,7 +77,7 @@ final readonly class Money {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param self $other The money value to compare with.
+	 * @param self $other Money value to compare with.
 	 *
 	 * @return bool True when amount and currency are equal.
 	 */

@@ -44,9 +44,9 @@ final readonly class CreateDonationHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Donation $donation The donation to create.
+	 * @param Donation $donation Donation to create.
 	 *
-	 * @return Donation The persisted donation snapshot.
+	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws CreateDonationAlreadyExistsException When the donation ID already exists.
 	 * @throws CreateDonationException When donation creation fails for another reason.

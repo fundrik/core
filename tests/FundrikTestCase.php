@@ -17,8 +17,7 @@ use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 abstract class FundrikTestCase extends PHPUnitTestCase {
 
 	/**
-	 * Returns a valid Campaign for use in tests.
-	 * Allows overriding fields to simulate variations.
+	 * Returns a valid campaign for tests with optional field overrides.
 	 */
 	protected function make_campaign(
 		int|string $id = 1,
@@ -38,8 +37,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 	}
 
 	/**
-	 * Returns a valid pending Donation for use in tests.
-	 * Allows overriding key fields to simulate variations.
+	 * Returns a valid pending donation for tests with optional field overrides.
 	 */
 	protected function make_pending_donation(
 		int|string $id = 5_001,
@@ -58,8 +56,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 	}
 
 	/**
-	 * Returns a valid captured Donation for use in tests.
-	 * Allows overriding key fields to simulate variations.
+	 * Returns a valid captured donation for tests with optional field overrides.
 	 */
 	protected function make_captured_donation(
 		int|string $id = 5_001,

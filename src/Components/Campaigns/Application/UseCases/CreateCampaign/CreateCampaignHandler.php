@@ -39,9 +39,9 @@ final readonly class CreateCampaignHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Campaign $campaign The campaign to create.
+	 * @param Campaign $campaign Campaign to create.
 	 *
-	 * @return Campaign The persisted campaign snapshot.
+	 * @return Campaign Persisted campaign snapshot.
 	 *
 	 * @throws CreateCampaignAlreadyExistsException When the campaign ID already exists.
 	 * @throws CreateCampaignException When campaign creation fails for another reason.

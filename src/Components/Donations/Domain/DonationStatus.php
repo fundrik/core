@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Donations\Domain;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
 
 /**
- * Defines the internal donation status dictionary.
+ * Represents the internal donation status.
  *
  * @since 0.1.0
  */
