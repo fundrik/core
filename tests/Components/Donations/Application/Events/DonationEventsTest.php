@@ -11,7 +11,6 @@ use Fundrik\Core\Components\Donations\Application\Events\DonationCapturedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationFailedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationRefundedEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationUpdatedEvent;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -20,7 +19,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass( DonationCreatedEvent::class )]
-#[CoversClass( DonationUpdatedEvent::class )]
 #[CoversClass( DonationAuthorizedEvent::class )]
 #[CoversClass( DonationCapturedEvent::class )]
 #[CoversClass( DonationFailedEvent::class )]
@@ -56,7 +54,6 @@ final class DonationEventsTest extends TestCase {
 
 		return [
 			'created' => [ DonationCreatedEvent::class ],
-			'updated' => [ DonationUpdatedEvent::class ],
 			'authorized' => [ DonationAuthorizedEvent::class ],
 			'captured' => [ DonationCapturedEvent::class ],
 			'failed' => [ DonationFailedEvent::class ],

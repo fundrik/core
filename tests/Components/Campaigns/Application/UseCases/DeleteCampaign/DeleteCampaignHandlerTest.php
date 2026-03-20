@@ -12,7 +12,6 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\Delete
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignNotFoundException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignPreconditionReason;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
@@ -44,7 +43,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( CampaignDeletedEvent::class )]
 #[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]

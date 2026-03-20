@@ -8,9 +8,9 @@ use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
-use Fundrik\Core\Components\Donations\Domain\Exceptions\InvalidDonationAmountException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidAmountException;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\FundrikTestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -37,8 +37,8 @@ final class DonationTest extends FundrikTestCase {
 		$this->assertSame( 1, $donation->get_version()->get_value() );
 		$this->assertSame( 901, $donation->get_campaign_id()->get_value() );
 		$this->assertTrue( $campaign_entity_id->equals( $donation->get_campaign_id() ) );
-		$this->assertSame( 1_000, $donation->get_money()->get_amount_minor() );
-		$this->assertSame( 'RUB', $donation->get_money()->get_currency() );
+		$this->assertSame( 1_000, $donation->get_money()->get_amount()->get_value() );
+		$this->assertSame( 'RUB', $donation->get_money()->get_currency()->get_code() );
 		$this->assertSame( DonationStatus::Pending, $donation->get_status() );
 	}
 
@@ -136,10 +136,10 @@ final class DonationTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function throws_when_donation_amount_is_zero(): void {
+	public function throws_when_money_amount_is_not_positive(): void {
 
-		$this->expectException( InvalidDonationAmountException::class );
-		$this->expectExceptionMessage( 'Donation amount must be a positive integer in minor units. Given: 0.' );
+		$this->expectException( InvalidAmountException::class );
+		$this->expectExceptionMessage( 'Amount must be a positive integer. Given: 0.' );
 
 		( new DonationFactory() )->create_pending(
 			id: EntityId::create( 1 ),

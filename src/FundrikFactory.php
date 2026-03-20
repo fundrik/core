@@ -17,6 +17,7 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCamp
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
@@ -26,6 +27,7 @@ use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\Create
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
 /**
@@ -114,6 +116,7 @@ final readonly class FundrikFactory {
 
 		return new DonationQueryService(
 			new FindDonationByIdHandler( $this->donation_repository ),
+			new DonationDetailsMapper(),
 		);
 	}
 
@@ -128,6 +131,8 @@ final readonly class FundrikFactory {
 
 		return new DonationCommandService(
 			new CreateDonationHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
+			new DonationFactory(),
+			new DonationDetailsMapper(),
 			new AuthorizeDonationHandler( $this->donation_repository, $this->event_bus ),
 			new CaptureDonationHandler( $this->donation_repository, $this->event_bus ),
 			new FailDonationHandler( $this->donation_repository, $this->event_bus ),

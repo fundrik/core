@@ -6,26 +6,26 @@ namespace Fundrik\Core\Tests\Components\Donations\Application\Services;
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
+use Fundrik\Core\Components\Donations\Application\Commands\CreateDonationCommand;
 use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCanceledEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCapturedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationFailedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationRefundedEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationUpdatedEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
-use Fundrik\Core\Components\Donations\Application\Services\DonationCommandServiceFactory;
 use Fundrik\Core\Components\Donations\Application\UseCases\AbstractDonationMutationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
@@ -42,17 +42,17 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( DonationCommandService::class )]
-#[UsesClass( DonationCommandServiceFactory::class )]
 #[UsesClass( DonationCreatedEvent::class )]
-#[UsesClass( DonationUpdatedEvent::class )]
 #[UsesClass( DonationAuthorizedEvent::class )]
 #[UsesClass( DonationCapturedEvent::class )]
 #[UsesClass( DonationFailedEvent::class )]
 #[UsesClass( DonationRefundedEvent::class )]
 #[UsesClass( DonationCanceledEvent::class )]
+#[UsesClass( CreateDonationCommand::class )]
+#[UsesClass( DonationDetails::class )]
+#[UsesClass( DonationDetailsMapper::class )]
 #[UsesClass( AbstractDonationMutationHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
-#[UsesClass( UpdateDonationHandler::class )]
 #[UsesClass( AuthorizeDonationHandler::class )]
 #[UsesClass( CaptureDonationHandler::class )]
 #[UsesClass( FailDonationHandler::class )]
@@ -62,7 +62,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
@@ -83,60 +82,62 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 		$this->donation_repository = Mockery::mock( DonationRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
-		$this->command = ( new DonationCommandServiceFactory(
-			$this->campaign_repository,
-			$this->donation_repository,
-			$this->event_bus,
-		) )->create();
+		$this->command = new DonationCommandService(
+			new CreateDonationHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
+			new DonationFactory(),
+			new DonationDetailsMapper(),
+			new AuthorizeDonationHandler( $this->donation_repository, $this->event_bus ),
+			new CaptureDonationHandler( $this->donation_repository, $this->event_bus ),
+			new FailDonationHandler( $this->donation_repository, $this->event_bus ),
+			new RefundDonationHandler( $this->donation_repository, $this->event_bus ),
+			new CancelDonationHandler( $this->donation_repository, $this->event_bus ),
+		);
 	}
 
 	#[Test]
 	public function create_uses_injected_ports(): void {
 
-		$campaign = $this->make_campaign( 901, 'Campaign 901', true, true, true, 10_000 );
-		$donation = $this->make_pending_donation( 5_001, 901 );
+		$campaign = $this->make_campaign( 901, 'Campaign 901', true, 'RUB', 10_000 );
+		$command = new CreateDonationCommand( id: 5_001, campaign_id: 901, amount: 1_000, currency_code: 'RUB' );
 
 		$this->campaign_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->withArgs(
+				static fn ( EntityId $campaign_id ): bool => $campaign_id->equals( EntityId::create( 901 ) ),
+			)
 			->andReturn( $campaign );
 
 		$this->donation_repository
 			->shouldReceive( 'insert' )
 			->once()
-			->with( $this->identicalTo( $donation ) )
-			->andReturn( $donation );
+			->withArgs(
+				function ( Donation $donation ): bool {
+
+					$this->assertSame( 5_001, $donation->get_id()->get_value() );
+					$this->assertSame( 901, $donation->get_campaign_id()->get_value() );
+					$this->assertSame( 1_000, $donation->get_money()->get_amount()->get_value() );
+					$this->assertSame( 'RUB', $donation->get_money()->get_currency()->get_code() );
+					$this->assertSame( DonationStatus::Pending, $donation->get_status() );
+
+					return true;
+				},
+			)
+			->andReturnUsing( static fn ( Donation $donation ): Donation => $donation );
 
 		$this->event_bus
 			->shouldReceive( 'publish' )
 			->once()
-			->withArgs( $this->event_of_type( DonationCreatedEvent::class, $donation->get_id() ) );
+			->withArgs( $this->event_of_type( DonationCreatedEvent::class, EntityId::create( 5_001 ) ) );
 
-		$result = $this->command->create( $donation );
+		$result = $this->command->create( $command );
 
-		$this->assertSame( $donation, $result );
-	}
-
-	#[Test]
-	public function update_uses_injected_ports(): void {
-
-		$donation = $this->make_pending_donation( 5_001, 901 );
-
-		$this->donation_repository
-			->shouldReceive( 'update' )
-			->once()
-			->with( $this->identicalTo( $donation ) )
-			->andReturn( $donation );
-
-		$this->event_bus
-			->shouldReceive( 'publish' )
-			->once()
-			->withArgs( $this->event_of_type( DonationUpdatedEvent::class, $donation->get_id() ) );
-
-		$result = $this->command->update( $donation );
-
-		$this->assertSame( $donation, $result );
+		$this->assertInstanceOf( DonationDetails::class, $result );
+		$this->assertSame( 5_001, $result->get_id() );
+		$this->assertSame( 901, $result->get_campaign_id() );
+		$this->assertSame( 1_000, $result->get_amount() );
+		$this->assertSame( 'RUB', $result->get_currency_code() );
+		$this->assertSame( DonationStatus::Pending->value, $result->get_status() );
 	}
 
 	#[Test]
@@ -156,7 +157,9 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 		$this->donation_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_donation_id ): bool => $actual_donation_id->equals( $donation_id ),
+			)
 			->andReturn( $donation );
 
 		$this->donation_repository
@@ -177,9 +180,11 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( $event_class, $donation_id ) );
 
-		$result = $this->command->{$method}( $donation_id );
+		$result = $this->command->{$method}( $donation_id->get_value() );
 
-		$this->assertSame( $expected_status, $result->get_status()->value );
+		$this->assertInstanceOf( DonationDetails::class, $result );
+		$this->assertSame( $expected_status, $result->get_status() );
+		$this->assertSame( $donation_id->get_value(), $result->get_id() );
 	}
 
 	public static function mutation_provider(): array {
@@ -191,6 +196,15 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 			'refund' => [ 'refund', DonationRefundedEvent::class, 'refunded', 'captured' ],
 			'cancel' => [ 'cancel', DonationCanceledEvent::class, 'canceled', 'pending' ],
 		];
+	}
+
+	#[Test]
+	public function authorize_throws_precondition_exception_for_invalid_donation_id(): void {
+
+		$this->expectException( AuthorizeDonationException::class );
+		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: -1.' );
+
+		$this->command->authorize( -1 );
 	}
 
 	private function event_of_type( string $event_class, EntityId $donation_id ): callable {

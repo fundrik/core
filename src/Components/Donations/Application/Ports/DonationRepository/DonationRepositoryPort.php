@@ -28,34 +28,6 @@ interface DonationRepositoryPort {
 	public function find_by_id( EntityId $id ): ?Donation;
 
 	/**
-	 * Retrieves all donations.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return array<int, Donation> The list of donations.
-	 *
-	 * @phpstan-return list<Donation>
-	 *
-	 * @throws DonationRepositoryExceptionInterface When the lookup fails.
-	 */
-	public function find_all(): array;
-
-	/**
-	 * Retrieves all donations for the specified campaign.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param EntityId $campaign_id The campaign ID to filter by.
-	 *
-	 * @return array<int, Donation> The list of campaign donations.
-	 *
-	 * @phpstan-return list<Donation>
-	 *
-	 * @throws DonationRepositoryExceptionInterface When the lookup fails.
-	 */
-	public function find_all_by_campaign_id( EntityId $campaign_id ): array;
-
-	/**
 	 * Returns whether any donations exist for the specified campaign.
 	 *
 	 * @since 0.1.0

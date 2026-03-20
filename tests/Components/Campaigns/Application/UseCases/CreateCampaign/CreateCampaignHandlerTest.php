@@ -11,7 +11,6 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\Create
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
@@ -37,7 +36,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( CampaignCreatedEvent::class )]
 #[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]

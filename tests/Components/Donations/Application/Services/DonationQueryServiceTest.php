@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Donations\Application\Services;
 
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
-use Fundrik\Core\Components\Donations\Application\Services\DonationQueryServiceFactory;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindAllDonations\FindAllDonationsHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationsByCampaignId\FindDonationsByCampaignIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
@@ -24,10 +24,9 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( DonationQueryService::class )]
-#[UsesClass( DonationQueryServiceFactory::class )]
+#[UsesClass( DonationDetails::class )]
+#[UsesClass( DonationDetailsMapper::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
-#[UsesClass( FindAllDonationsHandler::class )]
-#[UsesClass( FindDonationsByCampaignIdHandler::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
@@ -45,7 +44,10 @@ final class DonationQueryServiceTest extends MockeryTestCase {
 		parent::setUp();
 
 		$this->donation_repository = Mockery::mock( DonationRepositoryPort::class );
-		$this->query = ( new DonationQueryServiceFactory( $this->donation_repository ) )->create();
+		$this->query = new DonationQueryService(
+			new FindDonationByIdHandler( $this->donation_repository ),
+			new DonationDetailsMapper(),
+		);
 	}
 
 	#[Test]
@@ -57,49 +59,27 @@ final class DonationQueryServiceTest extends MockeryTestCase {
 		$this->donation_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_donation_id ): bool => $actual_donation_id->equals( $donation_id ),
+			)
 			->andReturn( $donation );
 
-		$result = $this->query->find_by_id( $donation_id );
+		$result = $this->query->find_by_id( $donation_id->get_value() );
 
-		$this->assertSame( $donation, $result );
+		$this->assertInstanceOf( DonationDetails::class, $result );
+		$this->assertSame( $donation_id->get_value(), $result->get_id() );
+		$this->assertSame( $donation->get_campaign_id()->get_value(), $result->get_campaign_id() );
+		$this->assertSame( $donation->get_money()->get_amount()->get_value(), $result->get_amount() );
+		$this->assertSame( $donation->get_money()->get_currency()->get_code(), $result->get_currency_code() );
+		$this->assertSame( $donation->get_status()->value, $result->get_status() );
 	}
 
 	#[Test]
-	public function find_all_uses_injected_donation_repository(): void {
+	public function find_by_id_throws_when_donation_id_is_invalid(): void {
 
-		$donations = [
-			$this->make_pending_donation( 5_001, 901 ),
-			$this->make_pending_donation( 5_002, 902 ),
-		];
+		$this->expectException( FindDonationByIdException::class );
+		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: -1.' );
 
-		$this->donation_repository
-			->shouldReceive( 'find_all' )
-			->once()
-			->andReturn( $donations );
-
-		$result = $this->query->find_all();
-
-		$this->assertSame( $donations, $result );
-	}
-
-	#[Test]
-	public function find_by_campaign_id_uses_injected_donation_repository(): void {
-
-		$campaign_id = EntityId::create( 901 );
-		$donations = [
-			$this->make_pending_donation( 5_001, 901 ),
-			$this->make_pending_donation( 5_002, 901 ),
-		];
-
-		$this->donation_repository
-			->shouldReceive( 'find_all_by_campaign_id' )
-			->once()
-			->with( $this->identicalTo( $campaign_id ) )
-			->andReturn( $donations );
-
-		$result = $this->query->find_by_campaign_id( $campaign_id );
-
-		$this->assertSame( $donations, $result );
+		$this->query->find_by_id( -1 );
 	}
 }

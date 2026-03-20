@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\Services;
 
+use Fundrik\Core\Components\Donations\Application\Commands\CreateDonationCommand;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationException;
@@ -16,10 +19,11 @@ use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDona
 use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationException;
-use Fundrik\Core\Components\Donations\Application\UseCases\UpdateDonation\UpdateDonationHandler;
-use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationFactoryException;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 
 /**
  * Provides the public entry point for donation write operations.
@@ -34,7 +38,8 @@ final readonly class DonationCommandService {
 	 * @since 0.1.0
 	 *
 	 * @param CreateDonationHandler $create_donation Creates new donations.
-	 * @param UpdateDonationHandler $update_donation Updates existing donation snapshots.
+	 * @param DonationFactory $donation_factory Creates donations from public input.
+	 * @param DonationDetailsMapper $donation_details_mapper Maps domain donations to public details.
 	 * @param AuthorizeDonationHandler $authorize_donation Authorizes donations.
 	 * @param CaptureDonationHandler $capture_donation Captures donations.
 	 * @param FailDonationHandler $fail_donation Marks donations as failed.
@@ -43,7 +48,8 @@ final readonly class DonationCommandService {
 	 */
 	public function __construct(
 		private CreateDonationHandler $create_donation,
-		private UpdateDonationHandler $update_donation,
+		private DonationFactory $donation_factory,
+		private DonationDetailsMapper $donation_details_mapper,
 		private AuthorizeDonationHandler $authorize_donation,
 		private CaptureDonationHandler $capture_donation,
 		private FailDonationHandler $fail_donation,
@@ -56,31 +62,30 @@ final readonly class DonationCommandService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Donation $donation Donation to create.
+	 * @param CreateDonationCommand $command Public donation creation input.
 	 *
-	 * @return Donation Persisted donation snapshot.
+	 * @return DonationDetails Persisted donation details.
 	 *
 	 * @throws CreateDonationException When creation fails.
 	 */
-	public function create( Donation $donation ): Donation {
+	public function create( CreateDonationCommand $command ): DonationDetails {
 
-		return $this->create_donation->handle( $donation );
-	}
+		try {
+			$donation = $this->donation_factory->create_pending_from_primitives(
+				id: $command->get_id(),
+				campaign_id: $command->get_campaign_id(),
+				amount: $command->get_amount(),
+				currency_code: $command->get_currency_code(),
+			);
+		} catch ( DonationFactoryException $e ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
 
-	/**
-	 * Updates an existing donation snapshot.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param Donation $donation Donation to update.
-	 *
-	 * @return Donation Persisted donation snapshot.
-	 *
-	 * @throws UpdateDonationException When update fails.
-	 */
-	public function update( Donation $donation ): Donation {
-
-		return $this->update_donation->handle( $donation );
+		return $this->donation_details_mapper->map( $this->create_donation->handle( $donation ) );
 	}
 
 	/**
@@ -88,15 +93,27 @@ final readonly class DonationCommandService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $donation_id Donation ID.
+	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return Donation Persisted donation snapshot.
+	 * @return DonationDetails Persisted donation details.
 	 *
 	 * @throws AuthorizeDonationException When authorization fails.
 	 */
-	public function authorize( EntityId $donation_id ): Donation {
+	public function authorize( int|string|EntityId $donation_id ): DonationDetails {
 
-		return $this->authorize_donation->handle( $donation_id );
+		try {
+			$entity_id = EntityId::create( $donation_id );
+		} catch ( InvalidEntityIdException $e ) {
+			throw new AuthorizeDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
+
+		return $this->donation_details_mapper->map(
+			$this->authorize_donation->handle( $entity_id ),
+		);
 	}
 
 	/**
@@ -104,15 +121,27 @@ final readonly class DonationCommandService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $donation_id Donation ID.
+	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return Donation Persisted donation snapshot.
+	 * @return DonationDetails Persisted donation details.
 	 *
 	 * @throws CaptureDonationException When capture fails.
 	 */
-	public function capture( EntityId $donation_id ): Donation {
+	public function capture( int|string|EntityId $donation_id ): DonationDetails {
 
-		return $this->capture_donation->handle( $donation_id );
+		try {
+			$entity_id = EntityId::create( $donation_id );
+		} catch ( InvalidEntityIdException $e ) {
+			throw new CaptureDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
+
+		return $this->donation_details_mapper->map(
+			$this->capture_donation->handle( $entity_id ),
+		);
 	}
 
 	/**
@@ -120,15 +149,27 @@ final readonly class DonationCommandService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $donation_id Donation ID.
+	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return Donation Persisted donation snapshot.
+	 * @return DonationDetails Persisted donation details.
 	 *
 	 * @throws FailDonationException When failure marking fails.
 	 */
-	public function fail( EntityId $donation_id ): Donation {
+	public function fail( int|string|EntityId $donation_id ): DonationDetails {
 
-		return $this->fail_donation->handle( $donation_id );
+		try {
+			$entity_id = EntityId::create( $donation_id );
+		} catch ( InvalidEntityIdException $e ) {
+			throw new FailDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
+
+		return $this->donation_details_mapper->map(
+			$this->fail_donation->handle( $entity_id ),
+		);
 	}
 
 	/**
@@ -136,15 +177,27 @@ final readonly class DonationCommandService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $donation_id Donation ID.
+	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return Donation Persisted donation snapshot.
+	 * @return DonationDetails Persisted donation details.
 	 *
 	 * @throws RefundDonationException When refund fails.
 	 */
-	public function refund( EntityId $donation_id ): Donation {
+	public function refund( int|string|EntityId $donation_id ): DonationDetails {
 
-		return $this->refund_donation->handle( $donation_id );
+		try {
+			$entity_id = EntityId::create( $donation_id );
+		} catch ( InvalidEntityIdException $e ) {
+			throw new RefundDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
+
+		return $this->donation_details_mapper->map(
+			$this->refund_donation->handle( $entity_id ),
+		);
 	}
 
 	/**
@@ -152,14 +205,26 @@ final readonly class DonationCommandService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param EntityId $donation_id Donation ID.
+	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return Donation Persisted donation snapshot.
+	 * @return DonationDetails Persisted donation details.
 	 *
 	 * @throws CancelDonationException When cancellation fails.
 	 */
-	public function cancel( EntityId $donation_id ): Donation {
+	public function cancel( int|string|EntityId $donation_id ): DonationDetails {
 
-		return $this->cancel_donation->handle( $donation_id );
+		try {
+			$entity_id = EntityId::create( $donation_id );
+		} catch ( InvalidEntityIdException $e ) {
+			throw new CancelDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
+
+		return $this->donation_details_mapper->map(
+			$this->cancel_donation->handle( $entity_id ),
+		);
 	}
 }

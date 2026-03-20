@@ -6,7 +6,6 @@ namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases\CreateDon
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
@@ -44,7 +43,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( DonationCreatedEvent::class )]
 #[UsesClass( Campaign::class )]
-#[UsesClass( CampaignTarget::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
@@ -235,6 +233,33 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	}
 
 	#[Test]
+	public function handle_throws_when_donation_status_is_not_pending(): void {
+
+		$donation = $this->make_pending_donation()->authorize();
+
+		$this->campaigns
+			->shouldNotReceive( 'find_by_id' );
+
+		$this->repository
+			->shouldNotReceive( 'insert' );
+
+		$this->event_bus
+			->shouldNotReceive( 'publish' );
+
+		try {
+			$this->handler->handle( $donation );
+			$this->fail( 'Expected CreateDonationException to be thrown.' );
+		} catch ( CreateDonationException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+			$this->assertSame( CreateDonationPreconditionReason::DonationStatusMustBePending, $exception->get_reason() );
+			$this->assertSame(
+				'Cannot create donation "5001": donation status must be pending. Given: "authorized".',
+				$exception->getMessage(),
+			);
+		}
+	}
+
+	#[Test]
 	public function handle_throws_when_campaign_does_not_exist(): void {
 
 		$donation = $this->make_pending_donation();
@@ -262,10 +287,10 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function handle_throws_when_campaign_cannot_receive_donations_because_it_is_inactive(): void {
+	public function handle_throws_when_campaign_cannot_receive_donations_because_it_is_closed(): void {
 
 		$donation = $this->make_pending_donation();
-		$campaign = $this->make_donation_campaign( is_active: false, is_open: true );
+		$campaign = $this->make_donation_campaign( is_open: false );
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
@@ -296,10 +321,10 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function handle_throws_when_campaign_cannot_receive_donations_because_it_is_closed(): void {
+	public function handle_throws_when_donation_currency_does_not_match_campaign_currency(): void {
 
-		$donation = $this->make_pending_donation();
-		$campaign = $this->make_donation_campaign( is_active: true, is_open: false );
+		$donation = $this->make_pending_donation( currency: 'USD' );
+		$campaign = $this->make_donation_campaign( currency_code: 'RUB' );
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
@@ -318,19 +343,16 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 			$this->fail( 'Expected CreateDonationException to be thrown.' );
 		} catch ( CreateDonationException $exception ) {
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+			$this->assertSame( CreateDonationPreconditionReason::CampaignCurrencyMismatch, $exception->get_reason() );
 			$this->assertSame(
-				CreateDonationPreconditionReason::CampaignCannotReceiveDonations,
-				$exception->get_reason(),
-			);
-			$this->assertSame(
-				'Cannot create donation "5001": campaign "901" cannot receive donations.',
+				'Cannot create donation "5001": campaign "901" uses currency "RUB". Given: "USD".',
 				$exception->getMessage(),
 			);
 		}
 	}
 
-	private function make_donation_campaign( bool $is_active = true, bool $is_open = true ): Campaign {
+	private function make_donation_campaign( bool $is_open = true, string $currency_code = 'RUB' ): Campaign {
 
-		return $this->make_campaign( 901, 'Campaign 901', $is_active, $is_open, true, 10_000 );
+		return $this->make_campaign( 901, 'Campaign 901', $is_open, $currency_code, 10_000 );
 	}
 }

@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Domain;
 
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationFactoryException;
-use Fundrik\Core\Components\Donations\Domain\Exceptions\InvalidDonationAmountException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidAmountException;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidCurrencyCodeException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionException;
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyAmountException;
-use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidMoneyCurrencyException;
 use Fundrik\Core\Components\Shared\Domain\Money;
 use ValueError;
 
@@ -51,11 +50,11 @@ final readonly class DonationFactory {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string $id Donation ID.
+	 * @param int|string|EntityId $id Donation ID.
 	 * @param int $version Donation version.
-	 * @param int|string $campaign_id Campaign ID.
-	 * @param int $amount_minor Donation amount in minor units.
-	 * @param string $currency Donation currency (ISO 4217).
+	 * @param int|string|EntityId $campaign_id Campaign ID.
+	 * @param int $amount Donation amount.
+	 * @param string $currency_code Donation currency code (ISO 4217).
 	 * @param string $status Donation status value.
 	 *
 	 * @return Donation Donation entity.
@@ -63,11 +62,11 @@ final readonly class DonationFactory {
 	 * @throws DonationFactoryException When creating donation from primitives fails.
 	 */
 	public function create_from_primitives(
-		int|string $id,
+		int|string|EntityId $id,
 		int $version,
-		int|string $campaign_id,
-		int $amount_minor,
-		string $currency,
+		int|string|EntityId $campaign_id,
+		int $amount,
+		string $currency_code,
 		string $status,
 	): Donation {
 
@@ -77,20 +76,41 @@ final readonly class DonationFactory {
 				id: EntityId::create( $id ),
 				version: EntityVersion::create( $version ),
 				campaign_id: EntityId::create( $campaign_id ),
-				money: Money::create( $amount_minor, $currency ),
-				status: DonationStatus::from( $status ),
+				money: Money::create( $amount, $currency_code ),
+				status: $this->create_status( $status ),
 			);
 
 		} catch (
 			InvalidEntityIdException
 			| InvalidEntityVersionException
-			| InvalidMoneyAmountException
-			| InvalidMoneyCurrencyException
-			| InvalidDonationAmountException
-			| ValueError $e
+			| InvalidAmountException
+			| InvalidCurrencyCodeException $e
 		) {
 
-			throw new DonationFactoryException( 'Failed to create donation from primitives.', previous: $e );
+			throw new DonationFactoryException( $e->getMessage(), previous: $e );
+		}
+	}
+
+	/**
+	 * Creates a validated donation status.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $status Donation status value.
+	 *
+	 * @return DonationStatus Donation status.
+	 *
+	 * @throws DonationFactoryException When the donation status is invalid.
+	 */
+	private function create_status( string $status ): DonationStatus {
+
+		try {
+			return DonationStatus::from( $status );
+		} catch ( ValueError $e ) {
+			throw new DonationFactoryException(
+				sprintf( 'Donation status must be valid. Given: "%s".', $status ),
+				previous: $e,
+			);
 		}
 	}
 
@@ -105,7 +125,7 @@ final readonly class DonationFactory {
 	 *
 	 * @return Donation Pending donation.
 	 */
-	public function create_pending( EntityId $id, EntityId $campaign_id, Money $money, ): Donation {
+	public function create_pending( EntityId $id, EntityId $campaign_id, Money $money ): Donation {
 
 		return $this->create(
 			id: $id,
@@ -121,20 +141,20 @@ final readonly class DonationFactory {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string $id Donation ID.
-	 * @param int|string $campaign_id Campaign ID.
-	 * @param int $amount_minor Donation amount in minor units.
-	 * @param string $currency Donation currency (ISO 4217).
+	 * @param int|string|EntityId $id Donation ID.
+	 * @param int|string|EntityId $campaign_id Campaign ID.
+	 * @param int $amount Donation amount.
+	 * @param string $currency_code Donation currency code (ISO 4217).
 	 *
 	 * @return Donation Pending donation.
 	 *
 	 * @throws DonationFactoryException When creating donation from primitives fails.
 	 */
 	public function create_pending_from_primitives(
-		int|string $id,
-		int|string $campaign_id,
-		int $amount_minor,
-		string $currency,
+		int|string|EntityId $id,
+		int|string|EntityId $campaign_id,
+		int $amount,
+		string $currency_code,
 	): Donation {
 
 		try {
@@ -142,17 +162,16 @@ final readonly class DonationFactory {
 			return $this->create_pending(
 				id: EntityId::create( $id ),
 				campaign_id: EntityId::create( $campaign_id ),
-				money: Money::create( $amount_minor, $currency ),
+				money: Money::create( $amount, $currency_code ),
 			);
 
 		} catch (
 			InvalidEntityIdException
-			| InvalidMoneyAmountException
-			| InvalidMoneyCurrencyException
-			| InvalidDonationAmountException $e
+			| InvalidAmountException
+			| InvalidCurrencyCodeException $e
 		) {
 
-			throw new DonationFactoryException( 'Failed to create pending donation from primitives.', previous: $e );
+			throw new DonationFactoryException( $e->getMessage(), previous: $e );
 		}
 	}
 }

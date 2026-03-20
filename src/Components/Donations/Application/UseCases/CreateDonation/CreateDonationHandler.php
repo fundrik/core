@@ -11,6 +11,7 @@ use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\Donat
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
@@ -55,6 +56,18 @@ final readonly class CreateDonationHandler {
 		$campaign_id = $donation->get_campaign_id();
 		$donation_id = $donation->get_id();
 
+		if ( $donation->get_status() !== DonationStatus::Pending ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: CreateDonationPreconditionReason::DonationStatusMustBePending,
+				message: sprintf(
+					'Cannot create donation "%s": donation status must be pending. Given: "%s".',
+					(string) $donation_id->get_value(),
+					$donation->get_status()->value,
+				),
+			);
+		}
+
 		try {
 			$campaign = $this->campaigns->find_by_id( $campaign_id );
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
@@ -89,6 +102,23 @@ final readonly class CreateDonationHandler {
 					'Cannot create donation "%s": campaign "%s" cannot receive donations.',
 					(string) $donation_id->get_value(),
 					(string) $campaign_id->get_value(),
+				),
+			);
+		}
+
+		$campaign_currency_code = $campaign->get_target()->get_currency()->get_code();
+		$donation_currency_code = $donation->get_money()->get_currency()->get_code();
+
+		if ( $donation_currency_code !== $campaign_currency_code ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: CreateDonationPreconditionReason::CampaignCurrencyMismatch,
+				message: sprintf(
+					'Cannot create donation "%s": campaign "%s" uses currency "%s". Given: "%s".',
+					(string) $donation_id->get_value(),
+					(string) $campaign_id->get_value(),
+					$campaign_currency_code,
+					$donation_currency_code,
 				),
 			);
 		}

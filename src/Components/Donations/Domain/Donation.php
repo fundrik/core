@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Domain;
 
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
-use Fundrik\Core\Components\Donations\Domain\Exceptions\InvalidDonationAmountException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
@@ -25,10 +24,8 @@ final readonly class Donation {
 	 * @param EntityId $id Donation ID.
 	 * @param EntityVersion $version Donation version.
 	 * @param EntityId $campaign_id Campaign ID.
-	 * @param Money $money Donation amount and currency.
+	 * @param Money $money Donation money.
 	 * @param DonationStatus $status Donation status.
-	 *
-	 * @throws InvalidDonationAmountException When amount is zero or negative.
 	 */
 	public function __construct(
 		private EntityId $id,
@@ -36,18 +33,7 @@ final readonly class Donation {
 		private EntityId $campaign_id,
 		private Money $money,
 		private DonationStatus $status,
-	) {
-
-		if ( $this->money->get_amount_minor() <= 0 ) {
-
-			throw new InvalidDonationAmountException(
-				sprintf(
-					'Donation amount must be a positive integer in minor units. Given: %d.',
-					$this->money->get_amount_minor(),
-				),
-			);
-		}
-	}
+	) {}
 
 	/**
 	 * Returns donation ID value object.

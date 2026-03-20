@@ -23,6 +23,8 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
@@ -51,6 +53,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Fundrik::class )]
 #[UsesClass( CampaignDetails::class )]
 #[UsesClass( CampaignDetailsMapper::class )]
+#[UsesClass( DonationDetails::class )]
+#[UsesClass( DonationDetailsMapper::class )]
 #[UsesClass( CampaignQueryService::class )]
 #[UsesClass( CampaignCommandService::class )]
 #[UsesClass( AbstractCampaignMutationHandler::class )]
@@ -182,12 +186,19 @@ final class FundrikFactoryTest extends MockeryTestCase {
 		$this->donation_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_donation_id ): bool => $actual_donation_id->equals( $donation_id ),
+			)
 			->andReturn( $donation );
 
-		$result = $this->fundrik->donation_query()->find_by_id( $donation_id );
+		$result = $this->fundrik->donation_query()->find_by_id( $donation_id->get_value() );
 
-		$this->assertSame( $donation, $result );
+		$this->assertInstanceOf( DonationDetails::class, $result );
+		$this->assertSame( $donation_id->get_value(), $result->get_id() );
+		$this->assertSame( $donation->get_campaign_id()->get_value(), $result->get_campaign_id() );
+		$this->assertSame( $donation->get_money()->get_amount()->get_value(), $result->get_amount() );
+		$this->assertSame( $donation->get_money()->get_currency()->get_code(), $result->get_currency_code() );
+		$this->assertSame( $donation->get_status()->value, $result->get_status() );
 	}
 
 	#[Test]
@@ -199,7 +210,9 @@ final class FundrikFactoryTest extends MockeryTestCase {
 		$this->donation_repository
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation_id ) )
+			->withArgs(
+				static fn ( EntityId $actual_donation_id ): bool => $actual_donation_id->equals( $donation_id ),
+			)
 			->andReturn( $donation );
 
 		$this->donation_repository
@@ -228,8 +241,10 @@ final class FundrikFactoryTest extends MockeryTestCase {
 				},
 			);
 
-		$result = $this->fundrik->donation_command()->authorize( $donation_id );
+		$result = $this->fundrik->donation_command()->authorize( $donation_id->get_value() );
 
-		$this->assertSame( 'authorized', $result->get_status()->value );
+		$this->assertInstanceOf( DonationDetails::class, $result );
+		$this->assertSame( $donation_id->get_value(), $result->get_id() );
+		$this->assertSame( 'authorized', $result->get_status() );
 	}
 }
