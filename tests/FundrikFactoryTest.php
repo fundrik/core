@@ -22,19 +22,18 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnaps
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationRejectedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationSucceededEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
-use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
@@ -69,13 +68,12 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
-#[UsesClass( AuthorizeDonationHandler::class )]
-#[UsesClass( CaptureDonationHandler::class )]
-#[UsesClass( FailDonationHandler::class )]
+#[UsesClass( SucceedDonationHandler::class )]
+#[UsesClass( RejectDonationHandler::class )]
 #[UsesClass( RefundDonationHandler::class )]
-#[UsesClass( CancelDonationHandler::class )]
 #[UsesClass( CampaignDeletedEvent::class )]
-#[UsesClass( DonationAuthorizedEvent::class )]
+#[UsesClass( DonationSucceededEvent::class )]
+#[UsesClass( DonationRejectedEvent::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignFactory::class )]
 #[UsesClass( CampaignTitle::class )]
@@ -217,7 +215,7 @@ final class FundrikFactoryTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function create_wires_donation_command_to_injected_ports_for_authorize(): void {
+	public function create_wires_donation_command_to_injected_ports_for_succeed(): void {
 
 		$donation_id = EntityId::create( 5_001 );
 		$donation = $this->make_pending_donation( 5_001, 1_001 );
@@ -236,7 +234,7 @@ final class FundrikFactoryTest extends MockeryTestCase {
 			->withArgs(
 				function ( Donation $authorized_donation ): bool {
 
-					$this->assertSame( 'authorized', $authorized_donation->get_status()->value );
+					$this->assertSame( 'succeeded', $authorized_donation->get_status()->value );
 
 					return true;
 				},
@@ -249,13 +247,13 @@ final class FundrikFactoryTest extends MockeryTestCase {
 			->withArgs(
 				function ( object $event ) use ( $donation_id ): bool {
 
-					$this->assertInstanceOf( DonationAuthorizedEvent::class, $event );
+					$this->assertInstanceOf( DonationSucceededEvent::class, $event );
 					$this->assertTrue( $event->get_donation_id()->equals( $donation_id ) );
 
 					return true;
 				},
 			);
 
-		$this->fundrik->donation_command()->authorize( $donation_id->get_value() );
+		$this->fundrik->donation_command()->succeed( $donation_id->get_value() );
 	}
 }

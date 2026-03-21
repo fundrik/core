@@ -7,11 +7,11 @@ namespace Fundrik\Core\Components\Donations\Application\Events;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Signals that a donation has been captured.
+ * Signals that a donation has succeeded.
  *
  * @since 0.1.0
  */
-final readonly class DonationCapturedEvent implements DonationApplicationEventInterface {
+final readonly class DonationSucceededEvent implements DonationApplicationEventInterface {
 
 	/**
 	 * Constructor.

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation;
+namespace Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation;
 
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Throwable;
 
 /**
- * Thrown when authorize-donation targets a donation that no longer exists.
+ * Thrown when a donation to succeed cannot be found.
  *
  * @since 0.1.0
  */
-final class AuthorizeDonationNotFoundException extends AuthorizeDonationException {
+final class SucceedDonationNotFoundException extends SucceedDonationException {
 
 	/**
 	 * Constructor.
@@ -27,7 +27,7 @@ final class AuthorizeDonationNotFoundException extends AuthorizeDonationExceptio
 		parent::__construct(
 			stage: UseCaseFailureStage::Persistence,
 			message: sprintf(
-				'Cannot authorize donation "%s": donation does not exist.',
+				'Cannot succeed donation "%s": donation does not exist.',
 				$donation_id,
 			),
 			previous: $previous,

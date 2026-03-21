@@ -116,9 +116,9 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 	}
 
 	/**
-	 * Returns a valid captured donation for tests with optional field overrides.
+	 * Returns a valid succeeded donation for tests with optional field overrides.
 	 */
-	protected function make_captured_donation(
+	protected function make_succeeded_donation(
 		int|string $id = 5_001,
 		int|string|EntityId $campaign_id = 901,
 		int $amount = 1_000,
@@ -130,6 +130,24 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 			campaign_id: $campaign_id,
 			amount: $amount,
 			currency: $currency,
-		)->capture();
+		)->succeed();
+	}
+
+	/**
+	 * Returns a valid rejected donation for tests with optional field overrides.
+	 */
+	protected function make_rejected_donation(
+		int|string $id = 5_001,
+		int|string|EntityId $campaign_id = 901,
+		int $amount = 1_000,
+		string $currency = 'RUB',
+	): Donation {
+
+		return $this->make_pending_donation(
+			id: $id,
+			campaign_id: $campaign_id,
+			amount: $amount,
+			currency: $currency,
+		)->reject();
 	}
 }

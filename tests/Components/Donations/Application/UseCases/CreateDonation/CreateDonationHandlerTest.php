@@ -235,7 +235,7 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_throws_when_donation_status_is_not_pending(): void {
 
-		$donation = $this->make_pending_donation()->authorize();
+		$donation = $this->make_pending_donation()->succeed();
 
 		$this->campaigns
 			->shouldNotReceive( 'find_by_id' );
@@ -253,7 +253,7 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
 			$this->assertSame( CreateDonationPreconditionReason::DonationStatusMustBePending, $exception->get_reason() );
 			$this->assertSame(
-				'Cannot create donation "5001": donation status must be pending. Given: "authorized".',
+				'Cannot create donation "5001": donation status must be pending. Given: "succeeded".',
 				$exception->getMessage(),
 			);
 		}

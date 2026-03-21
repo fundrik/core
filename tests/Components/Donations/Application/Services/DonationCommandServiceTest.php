@@ -8,22 +8,18 @@ use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\Campa
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Commands\CreateDonationCommand;
-use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationCanceledEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationCapturedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationFailedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationRejectedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationRefundedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationSucceededEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\UseCases\AbstractDonationMutationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationException;
-use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationException;
+use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
@@ -41,19 +37,15 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( DonationCommandService::class )]
 #[UsesClass( DonationCreatedEvent::class )]
-#[UsesClass( DonationAuthorizedEvent::class )]
-#[UsesClass( DonationCapturedEvent::class )]
-#[UsesClass( DonationFailedEvent::class )]
+#[UsesClass( DonationSucceededEvent::class )]
+#[UsesClass( DonationRejectedEvent::class )]
 #[UsesClass( DonationRefundedEvent::class )]
-#[UsesClass( DonationCanceledEvent::class )]
 #[UsesClass( CreateDonationCommand::class )]
 #[UsesClass( AbstractDonationMutationHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
-#[UsesClass( AuthorizeDonationHandler::class )]
-#[UsesClass( CaptureDonationHandler::class )]
-#[UsesClass( FailDonationHandler::class )]
+#[UsesClass( SucceedDonationHandler::class )]
+#[UsesClass( RejectDonationHandler::class )]
 #[UsesClass( RefundDonationHandler::class )]
-#[UsesClass( CancelDonationHandler::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
@@ -85,11 +77,9 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 				$this->event_bus,
 			),
 			new DonationFactory(),
-			new AuthorizeDonationHandler( $this->donation_repository, $this->event_bus ),
-			new CaptureDonationHandler( $this->donation_repository, $this->event_bus ),
-			new FailDonationHandler( $this->donation_repository, $this->event_bus ),
+			new SucceedDonationHandler( $this->donation_repository, $this->event_bus ),
+			new RejectDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RefundDonationHandler( $this->donation_repository, $this->event_bus ),
-			new CancelDonationHandler( $this->donation_repository, $this->event_bus ),
 		);
 	}
 
@@ -142,8 +132,8 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 	): void {
 
 		$donation_id = EntityId::create( 5_001 );
-		$donation = $source_state === 'captured'
-			? $this->make_captured_donation( 5_001, 901 )
+		$donation = $source_state === 'succeeded'
+			? $this->make_succeeded_donation( 5_001, 901 )
 			: $this->make_pending_donation( 5_001, 901 );
 
 		$this->donation_repository
@@ -178,21 +168,19 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 	public static function mutation_provider(): array {
 
 		return [
-			'authorize' => [ 'authorize', DonationAuthorizedEvent::class, 'authorized', 'pending' ],
-			'capture' => [ 'capture', DonationCapturedEvent::class, 'captured', 'pending' ],
-			'fail' => [ 'fail', DonationFailedEvent::class, 'failed', 'pending' ],
-			'refund' => [ 'refund', DonationRefundedEvent::class, 'refunded', 'captured' ],
-			'cancel' => [ 'cancel', DonationCanceledEvent::class, 'canceled', 'pending' ],
+			'succeed' => [ 'succeed', DonationSucceededEvent::class, 'succeeded', 'pending' ],
+			'reject' => [ 'reject', DonationRejectedEvent::class, 'rejected', 'pending' ],
+			'refund' => [ 'refund', DonationRefundedEvent::class, 'refunded', 'succeeded' ],
 		];
 	}
 
 	#[Test]
-	public function authorize_throws_precondition_exception_for_invalid_donation_id(): void {
+	public function succeed_throws_precondition_exception_for_invalid_donation_id(): void {
 
-		$this->expectException( AuthorizeDonationException::class );
+		$this->expectException( SucceedDonationException::class );
 		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: -1.' );
 
-		$this->command->authorize( -1 );
+		$this->command->succeed( -1 );
 	}
 
 	private function event_of_type( string $event_class, EntityId $donation_id ): callable {

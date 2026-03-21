@@ -21,13 +21,11 @@ use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\Dona
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
-use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 
@@ -139,11 +137,9 @@ final readonly class FundrikFactory {
 				$this->event_bus,
 			),
 			new DonationFactory(),
-			new AuthorizeDonationHandler( $this->donation_repository, $this->event_bus ),
-			new CaptureDonationHandler( $this->donation_repository, $this->event_bus ),
-			new FailDonationHandler( $this->donation_repository, $this->event_bus ),
+			new SucceedDonationHandler( $this->donation_repository, $this->event_bus ),
+			new RejectDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RefundDonationHandler( $this->donation_repository, $this->event_bus ),
-			new CancelDonationHandler( $this->donation_repository, $this->event_bus ),
 		);
 	}
 }

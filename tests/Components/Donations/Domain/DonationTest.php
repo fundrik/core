@@ -43,96 +43,74 @@ final class DonationTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function authorize_changes_status(): void {
+	public function succeed_changes_status(): void {
 
-		$authorized = $this->make_pending_donation()->authorize();
+		$succeeded = $this->make_pending_donation()->succeed();
 
-		$this->assertSame( DonationStatus::Authorized, $authorized->get_status() );
+		$this->assertSame( DonationStatus::Succeeded, $succeeded->get_status() );
 	}
 
 	#[Test]
-	public function capture_is_allowed_from_pending_and_authorized(): void {
+	public function reject_changes_status(): void {
 
-		$capture_from_pending = $this->make_pending_donation()->capture();
-		$capture_from_authorized = $this->make_pending_donation()->authorize()->capture();
+		$rejected = $this->make_pending_donation()->reject();
 
-		$this->assertSame( DonationStatus::Captured, $capture_from_pending->get_status() );
-		$this->assertSame( DonationStatus::Captured, $capture_from_authorized->get_status() );
+		$this->assertSame( DonationStatus::Rejected, $rejected->get_status() );
 	}
 
 	#[Test]
-	public function refund_is_allowed_only_from_captured(): void {
+	public function refund_is_allowed_only_from_succeeded(): void {
 
-		$refunded = $this->make_pending_donation()->capture()->refund();
+		$refunded = $this->make_pending_donation()->succeed()->refund();
 
 		$this->assertSame( DonationStatus::Refunded, $refunded->get_status() );
 	}
 
 	#[Test]
-	public function cancel_is_allowed_from_pending_and_authorized(): void {
-
-		$canceled_from_pending = $this->make_pending_donation()->cancel();
-		$canceled_from_authorized = $this->make_pending_donation()->authorize()->cancel();
-
-		$this->assertSame( DonationStatus::Canceled, $canceled_from_pending->get_status() );
-		$this->assertSame( DonationStatus::Canceled, $canceled_from_authorized->get_status() );
-	}
-
-	#[Test]
-	public function fail_is_allowed_from_pending_and_authorized(): void {
-
-		$failed_from_pending = $this->make_pending_donation()->fail();
-		$failed_from_authorized = $this->make_pending_donation()->authorize()->fail();
-
-		$this->assertSame( DonationStatus::Failed, $failed_from_pending->get_status() );
-		$this->assertSame( DonationStatus::Failed, $failed_from_authorized->get_status() );
-	}
-
-	#[Test]
 	public function throws_when_transition_is_not_allowed(): void {
 
-		$refunded = $this->make_pending_donation()->capture()->refund();
+		$refunded = $this->make_pending_donation()->succeed()->refund();
 
 		$this->expectException( DonationChangeException::class );
-		$this->expectExceptionMessage( 'Cannot capture donation from status "refunded".' );
+		$this->expectExceptionMessage( 'Cannot succeed donation from status "refunded".' );
 
-		$refunded->capture();
+		$refunded->succeed();
 	}
 
 	#[Test]
-	public function throws_when_authorize_is_called_from_non_pending_status(): void {
+	public function throws_when_succeed_is_called_from_non_pending_status(): void {
 
 		$this->expectException( DonationChangeException::class );
-		$this->expectExceptionMessage( 'Cannot authorize donation from status "authorized".' );
+		$this->expectExceptionMessage( 'Cannot succeed donation from status "succeeded".' );
 
-		$this->make_pending_donation()->authorize()->authorize();
+		$this->make_pending_donation()->succeed()->succeed();
 	}
 
 	#[Test]
-	public function throws_when_fail_is_called_from_non_pending_or_non_authorized_status(): void {
+	public function throws_when_reject_is_called_from_non_pending_status(): void {
 
 		$this->expectException( DonationChangeException::class );
-		$this->expectExceptionMessage( 'Cannot fail donation from status "captured".' );
+		$this->expectExceptionMessage( 'Cannot reject donation from status "succeeded".' );
 
-		$this->make_pending_donation()->capture()->fail();
+		$this->make_pending_donation()->succeed()->reject();
 	}
 
 	#[Test]
 	public function throws_when_refund_is_called_from_non_captured_status(): void {
 
 		$this->expectException( DonationChangeException::class );
-		$this->expectExceptionMessage( 'Cannot refund donation from status "authorized".' );
+		$this->expectExceptionMessage( 'Cannot refund donation from status "pending".' );
 
-		$this->make_pending_donation()->authorize()->refund();
+		$this->make_pending_donation()->refund();
 	}
 
 	#[Test]
-	public function throws_when_cancel_is_called_from_non_pending_or_non_authorized_status(): void {
+	public function throws_when_reject_is_called_from_refunded_status(): void {
 
 		$this->expectException( DonationChangeException::class );
-		$this->expectExceptionMessage( 'Cannot cancel donation from status "captured".' );
+		$this->expectExceptionMessage( 'Cannot reject donation from status "refunded".' );
 
-		$this->make_pending_donation()->capture()->cancel();
+		$this->make_pending_donation()->succeed()->refund()->reject();
 	}
 
 	#[Test]

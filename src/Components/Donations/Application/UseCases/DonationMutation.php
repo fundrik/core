@@ -12,29 +12,19 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases;
 enum DonationMutation: string {
 
 	/**
-	 * Donation authorization mutation.
+	 * Donation success mutation.
 	 */
-	case Authorize = 'authorize';
+	case Succeed = 'succeed';
 
 	/**
-	 * Donation capture mutation.
+	 * Donation rejection mutation.
 	 */
-	case Capture = 'capture';
-
-	/**
-	 * Donation failure mutation.
-	 */
-	case Fail = 'fail';
+	case Reject = 'reject';
 
 	/**
 	 * Donation refund mutation.
 	 */
 	case Refund = 'refund';
-
-	/**
-	 * Donation cancellation mutation.
-	 */
-	case Cancel = 'cancel';
 
 	/**
 	 * Returns the infinitive phrase used in failure messages.
@@ -58,11 +48,9 @@ enum DonationMutation: string {
 	public function event_label(): string {
 
 		return match ( $this ) {
-			self::Authorize => 'authorized',
-			self::Capture => 'captured',
-			self::Fail => 'failed',
+			self::Succeed => 'succeeded',
+			self::Reject => 'rejected',
 			self::Refund => 'refunded',
-			self::Cancel => 'canceled',
 		};
 	}
 

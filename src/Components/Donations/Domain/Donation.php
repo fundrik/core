@@ -96,57 +96,41 @@ final readonly class Donation {
 	}
 
 	/**
-	 * Authorizes donation.
+	 * Marks donation as succeeded.
 	 *
-	 * Allowed transition: pending -> authorized.
+	 * Allowed transition: pending -> succeeded.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self Donation in authorized status.
+	 * @return self Donation in succeeded status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function authorize(): self {
+	public function succeed(): self {
 
-		return $this->with_status( $this->status->authorize() );
+		return $this->with_status( $this->status->succeed() );
 	}
 
 	/**
-	 * Captures donation.
+	 * Marks donation as rejected.
 	 *
-	 * Allowed transitions: pending|authorized -> captured.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return self Donation in captured status.
-	 *
-	 * @throws DonationChangeException When transition is not allowed.
-	 */
-	public function capture(): self {
-
-		return $this->with_status( $this->status->capture() );
-	}
-
-	/**
-	 * Marks donation as failed.
-	 *
-	 * Allowed transitions: pending|authorized -> failed.
+	 * Allowed transition: pending -> rejected.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self Donation in failed status.
+	 * @return self Donation in rejected status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function fail(): self {
+	public function reject(): self {
 
-		return $this->with_status( $this->status->fail() );
+		return $this->with_status( $this->status->reject() );
 	}
 
 	/**
 	 * Refunds donation.
 	 *
-	 * Allowed transition: captured -> refunded.
+	 * Allowed transition: succeeded -> refunded.
 	 *
 	 * @since 0.1.0
 	 *
@@ -157,22 +141,6 @@ final readonly class Donation {
 	public function refund(): self {
 
 		return $this->with_status( $this->status->refund() );
-	}
-
-	/**
-	 * Cancels donation.
-	 *
-	 * Allowed transitions: pending|authorized -> canceled.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return self Donation in canceled status.
-	 *
-	 * @throws DonationChangeException When transition is not allowed.
-	 */
-	public function cancel(): self {
-
-		return $this->with_status( $this->status->cancel() );
 	}
 
 	/**

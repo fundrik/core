@@ -36,14 +36,14 @@ final class DonationFactoryTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function create_builds_donation_in_captured_state(): void {
+	public function create_builds_donation_in_succeeded_state(): void {
 
 		$donation = $this->factory->create(
 			id: EntityId::create( 101 ),
 			version: EntityVersion::create( 2 ),
 			campaign_id: EntityId::create( 901 ),
 			money: Money::create( 1_500, 'RUB' ),
-			status: DonationStatus::Captured,
+			status: DonationStatus::Succeeded,
 		);
 
 		$this->assertSame( 101, $donation->get_id()->get_value() );
@@ -51,7 +51,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 		$this->assertSame( 901, $donation->get_campaign_id()->get_value() );
 		$this->assertSame( 1_500, $donation->get_money()->get_amount()->get_value() );
 		$this->assertSame( 'RUB', $donation->get_money()->get_currency()->get_code() );
-		$this->assertSame( DonationStatus::Captured, $donation->get_status() );
+		$this->assertSame( DonationStatus::Succeeded, $donation->get_status() );
 	}
 
 	#[Test]
@@ -91,7 +91,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 			campaign_id: 22,
 			amount: 3_000,
 			currency_code: 'EUR',
-			status: DonationStatus::Captured->value,
+			status: DonationStatus::Succeeded->value,
 		);
 
 		$this->assertSame( 11, $donation->get_id()->get_value() );
@@ -99,7 +99,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 		$this->assertSame( 2, $donation->get_version()->get_value() );
 		$this->assertSame( 3_000, $donation->get_money()->get_amount()->get_value() );
 		$this->assertSame( 'EUR', $donation->get_money()->get_currency()->get_code() );
-		$this->assertSame( DonationStatus::Captured, $donation->get_status() );
+		$this->assertSame( DonationStatus::Succeeded, $donation->get_status() );
 	}
 
 	#[Test]

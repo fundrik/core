@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Donations\Application\Events;
 
 use Fundrik\Core\Components\Donations\Application\Events\DonationApplicationEventInterface;
-use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationCanceledEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationCapturedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationFailedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationRejectedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationRefundedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationSucceededEvent;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -19,11 +17,9 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass( DonationCreatedEvent::class )]
-#[CoversClass( DonationAuthorizedEvent::class )]
-#[CoversClass( DonationCapturedEvent::class )]
-#[CoversClass( DonationFailedEvent::class )]
+#[CoversClass( DonationSucceededEvent::class )]
+#[CoversClass( DonationRejectedEvent::class )]
 #[CoversClass( DonationRefundedEvent::class )]
-#[CoversClass( DonationCanceledEvent::class )]
 #[UsesClass( EntityId::class )]
 final class DonationEventsTest extends TestCase {
 
@@ -54,11 +50,9 @@ final class DonationEventsTest extends TestCase {
 
 		return [
 			'created' => [ DonationCreatedEvent::class ],
-			'authorized' => [ DonationAuthorizedEvent::class ],
-			'captured' => [ DonationCapturedEvent::class ],
-			'failed' => [ DonationFailedEvent::class ],
+			'succeeded' => [ DonationSucceededEvent::class ],
+			'rejected' => [ DonationRejectedEvent::class ],
 			'refunded' => [ DonationRefundedEvent::class ],
-			'canceled' => [ DonationCanceledEvent::class ],
 		];
 	}
 }

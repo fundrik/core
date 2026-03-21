@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation;
+namespace Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation;
 
-use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationRejectedEvent;
 use Fundrik\Core\Components\Donations\Application\UseCases\AbstractDonationMutationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutation;
 use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationPreconditionReason;
@@ -15,35 +15,35 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Throwable;
 
 /**
- * Handles authorizing an existing donation.
+ * Handles rejecting an existing donation.
  *
  * @since 0.1.0
  */
-final readonly class AuthorizeDonationHandler extends AbstractDonationMutationHandler {
+final readonly class RejectDonationHandler extends AbstractDonationMutationHandler {
 
 	/**
-	 * Creates the authorize-donation exception used when the donation disappears before persistence.
+	 * Creates the reject-donation exception used when the donation disappears before persistence.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param Throwable $previous Previous repository exception.
 	 *
-	 * @return AuthorizeDonationException Concrete authorize-donation exception.
+	 * @return RejectDonationException Concrete reject-donation exception.
 	 */
 	protected function new_not_found_mutation_exception(
 		EntityId $donation_id,
 		Throwable $previous,
-	): AuthorizeDonationException {
+	): RejectDonationException {
 
-		return new AuthorizeDonationNotFoundException(
+		return new RejectDonationNotFoundException(
 			(string) $donation_id->get_value(),
 			$previous,
 		);
 	}
 
 	/**
-	 * Creates the authorize-donation exception exposed by this use case.
+	 * Creates the reject-donation exception exposed by this use case.
 	 *
 	 * @since 0.1.0
 	 *
@@ -52,20 +52,20 @@ final readonly class AuthorizeDonationHandler extends AbstractDonationMutationHa
 	 * @param Throwable|null $previous Previous exception.
 	 * @param DonationMutationPreconditionReason|null $reason Optional precondition failure reason.
 	 *
-	 * @return AuthorizeDonationException Concrete authorize-donation exception.
+	 * @return RejectDonationException Concrete reject-donation exception.
 	 */
 	protected function new_mutation_exception(
 		UseCaseFailureStage $stage,
 		string $message,
 		?Throwable $previous = null,
 		?DonationMutationPreconditionReason $reason = null,
-	): AuthorizeDonationException {
+	): RejectDonationException {
 
-		return new AuthorizeDonationException( $stage, $message, $previous, $reason );
+		return new RejectDonationException( $stage, $message, $previous, $reason );
 	}
 
 	/**
-	 * Authorizes an existing donation.
+	 * Rejects an existing donation.
 	 *
 	 * @since 0.1.0
 	 *
@@ -75,19 +75,19 @@ final readonly class AuthorizeDonationHandler extends AbstractDonationMutationHa
 	 */
 	public function handle( EntityId $donation_id ): Donation {
 
-		$mutation = DonationMutation::Authorize;
+		$mutation = DonationMutation::Reject;
 		$donation = $this->require_donation( $donation_id, $mutation );
 
 		try {
-			$authorized_donation = $donation->authorize();
+			$rejected_donation = $donation->reject();
 		} catch ( DonationDomainException $e ) {
 			$this->reject_mutation( $donation_id, $mutation, $e );
 		}
 
 		return $this->persist_donation(
-			$authorized_donation,
+			$rejected_donation,
 			$mutation,
-			new DonationAuthorizedEvent( $authorized_donation->get_id() ),
+			new DonationRejectedEvent( $rejected_donation->get_id() ),
 		);
 	}
 }

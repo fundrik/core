@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Application\Services;
 
 use Fundrik\Core\Components\Donations\Application\Commands\CreateDonationCommand;
-use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationException;
-use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationException;
-use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationException;
-use Fundrik\Core\Components\Donations\Application\UseCases\CaptureDonation\CaptureDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationException;
-use Fundrik\Core\Components\Donations\Application\UseCases\FailDonation\FailDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationException;
+use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationException;
+use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationFactoryException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
@@ -37,20 +33,16 @@ final readonly class DonationCommandService {
 	 *
 	 * @param CreateDonationHandler $create_donation Creates new donations.
 	 * @param DonationFactory $donation_factory Creates donations from public input.
-	 * @param AuthorizeDonationHandler $authorize_donation Authorizes donations.
-	 * @param CaptureDonationHandler $capture_donation Captures donations.
-	 * @param FailDonationHandler $fail_donation Marks donations as failed.
+	 * @param SucceedDonationHandler $succeed_donation Marks donations as succeeded.
+	 * @param RejectDonationHandler $reject_donation Marks donations as rejected.
 	 * @param RefundDonationHandler $refund_donation Refunds donations.
-	 * @param CancelDonationHandler $cancel_donation Cancels donations.
 	 */
 	public function __construct(
 		private CreateDonationHandler $create_donation,
 		private DonationFactory $donation_factory,
-		private AuthorizeDonationHandler $authorize_donation,
-		private CaptureDonationHandler $capture_donation,
-		private FailDonationHandler $fail_donation,
+		private SucceedDonationHandler $succeed_donation,
+		private RejectDonationHandler $reject_donation,
 		private RefundDonationHandler $refund_donation,
-		private CancelDonationHandler $cancel_donation,
 	) {}
 
 	/**
@@ -83,75 +75,51 @@ final readonly class DonationCommandService {
 	}
 
 	/**
-	 * Authorizes an existing donation.
+	 * Marks an existing donation as succeeded.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @throws AuthorizeDonationException When authorization fails.
+	 * @throws SucceedDonationException When success marking fails.
 	 */
-	public function authorize( int|string|EntityId $donation_id ): void {
+	public function succeed( int|string|EntityId $donation_id ): void {
 
 		try {
 			$entity_id = EntityId::create( $donation_id );
 		} catch ( InvalidEntityIdException $e ) {
-			throw new AuthorizeDonationException(
+			throw new SucceedDonationException(
 				stage: UseCaseFailureStage::Precondition,
 				message: $e->getMessage(),
 				previous: $e,
 			);
 		}
 
-		$this->authorize_donation->handle( $entity_id );
+		$this->succeed_donation->handle( $entity_id );
 	}
 
 	/**
-	 * Captures an existing donation.
+	 * Marks an existing donation as rejected.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @throws CaptureDonationException When capture fails.
+	 * @throws RejectDonationException When rejection fails.
 	 */
-	public function capture( int|string|EntityId $donation_id ): void {
+	public function reject( int|string|EntityId $donation_id ): void {
 
 		try {
 			$entity_id = EntityId::create( $donation_id );
 		} catch ( InvalidEntityIdException $e ) {
-			throw new CaptureDonationException(
+			throw new RejectDonationException(
 				stage: UseCaseFailureStage::Precondition,
 				message: $e->getMessage(),
 				previous: $e,
 			);
 		}
 
-		$this->capture_donation->handle( $entity_id );
-	}
-
-	/**
-	 * Marks an existing donation as failed.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param int|string|EntityId $donation_id Donation ID.
-	 *
-	 * @throws FailDonationException When failure marking fails.
-	 */
-	public function fail( int|string|EntityId $donation_id ): void {
-
-		try {
-			$entity_id = EntityId::create( $donation_id );
-		} catch ( InvalidEntityIdException $e ) {
-			throw new FailDonationException(
-				stage: UseCaseFailureStage::Precondition,
-				message: $e->getMessage(),
-				previous: $e,
-			);
-		}
-
-		$this->fail_donation->handle( $entity_id );
+		$this->reject_donation->handle( $entity_id );
 	}
 
 	/**
@@ -176,29 +144,5 @@ final readonly class DonationCommandService {
 		}
 
 		$this->refund_donation->handle( $entity_id );
-	}
-
-	/**
-	 * Cancels an existing donation.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param int|string|EntityId $donation_id Donation ID.
-	 *
-	 * @throws CancelDonationException When cancellation fails.
-	 */
-	public function cancel( int|string|EntityId $donation_id ): void {
-
-		try {
-			$entity_id = EntityId::create( $donation_id );
-		} catch ( InvalidEntityIdException $e ) {
-			throw new CancelDonationException(
-				stage: UseCaseFailureStage::Precondition,
-				message: $e->getMessage(),
-				previous: $e,
-			);
-		}
-
-		$this->cancel_donation->handle( $entity_id );
 	}
 }

@@ -14,76 +14,50 @@ use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
 enum DonationStatus: string {
 
 	case Pending = 'pending';
-	case Authorized = 'authorized';
-	case Captured = 'captured';
-	case Failed = 'failed';
+	case Succeeded = 'succeeded';
+	case Rejected = 'rejected';
 	case Refunded = 'refunded';
-	case Canceled = 'canceled';
 
 	/**
-	 * Authorizes donation status.
+	 * Marks donation status as succeeded.
 	 *
-	 * Allowed transition: pending -> authorized.
+	 * Allowed transition: pending -> succeeded.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self Authorized donation status.
+	 * @return self Succeeded donation status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function authorize(): self {
+	public function succeed(): self {
 
-		$this->assert_transition_allowed( [ self::Pending ], 'authorize' );
+		$this->assert_transition_allowed( [ self::Pending ], 'succeed' );
 
-		return self::Authorized;
+		return self::Succeeded;
 	}
 
 	/**
-	 * Captures donation status.
+	 * Marks donation status as rejected.
 	 *
-	 * Allowed transitions: pending|authorized -> captured.
+	 * Allowed transition: pending -> rejected.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self Captured donation status.
+	 * @return self Rejected donation status.
 	 *
 	 * @throws DonationChangeException When transition is not allowed.
 	 */
-	public function capture(): self {
+	public function reject(): self {
 
-		$this->assert_transition_allowed(
-			[ self::Pending, self::Authorized ],
-			'capture',
-		);
+		$this->assert_transition_allowed( [ self::Pending ], 'reject' );
 
-		return self::Captured;
+		return self::Rejected;
 	}
 
 	/**
-	 * Marks donation status as failed.
+	 * Marks donation status as refunded.
 	 *
-	 * Allowed transitions: pending|authorized -> failed.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return self Failed donation status.
-	 *
-	 * @throws DonationChangeException When transition is not allowed.
-	 */
-	public function fail(): self {
-
-		$this->assert_transition_allowed(
-			[ self::Pending, self::Authorized ],
-			'fail',
-		);
-
-		return self::Failed;
-	}
-
-	/**
-	 * Refunds donation status.
-	 *
-	 * Allowed transition: captured -> refunded.
+	 * Allowed transition: succeeded -> refunded.
 	 *
 	 * @since 0.1.0
 	 *
@@ -93,30 +67,9 @@ enum DonationStatus: string {
 	 */
 	public function refund(): self {
 
-		$this->assert_transition_allowed( [ self::Captured ], 'refund' );
+		$this->assert_transition_allowed( [ self::Succeeded ], 'refund' );
 
 		return self::Refunded;
-	}
-
-	/**
-	 * Cancels donation status.
-	 *
-	 * Allowed transitions: pending|authorized -> canceled.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return self Canceled donation status.
-	 *
-	 * @throws DonationChangeException When transition is not allowed.
-	 */
-	public function cancel(): self {
-
-		$this->assert_transition_allowed(
-			[ self::Pending, self::Authorized ],
-			'cancel',
-		);
-
-		return self::Canceled;
 	}
 
 	/**

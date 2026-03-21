@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation;
+namespace Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation;
 
-use Fundrik\Core\Components\Donations\Application\Events\DonationCanceledEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationSucceededEvent;
 use Fundrik\Core\Components\Donations\Application\UseCases\AbstractDonationMutationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutation;
 use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationPreconditionReason;
@@ -15,35 +15,35 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Throwable;
 
 /**
- * Handles canceling an existing donation.
+ * Handles succeeding an existing donation.
  *
  * @since 0.1.0
  */
-final readonly class CancelDonationHandler extends AbstractDonationMutationHandler {
+final readonly class SucceedDonationHandler extends AbstractDonationMutationHandler {
 
 	/**
-	 * Creates the cancel-donation exception used when the donation disappears before persistence.
+	 * Creates the succeed-donation exception used when the donation disappears before persistence.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param Throwable $previous Previous repository exception.
 	 *
-	 * @return CancelDonationException Concrete cancel-donation exception.
+	 * @return SucceedDonationException Concrete succeed-donation exception.
 	 */
 	protected function new_not_found_mutation_exception(
 		EntityId $donation_id,
 		Throwable $previous,
-	): CancelDonationException {
+	): SucceedDonationException {
 
-		return new CancelDonationNotFoundException(
+		return new SucceedDonationNotFoundException(
 			(string) $donation_id->get_value(),
 			$previous,
 		);
 	}
 
 	/**
-	 * Creates the cancel-donation exception exposed by this use case.
+	 * Creates the succeed-donation exception exposed by this use case.
 	 *
 	 * @since 0.1.0
 	 *
@@ -52,20 +52,20 @@ final readonly class CancelDonationHandler extends AbstractDonationMutationHandl
 	 * @param Throwable|null $previous Previous exception.
 	 * @param DonationMutationPreconditionReason|null $reason Optional precondition failure reason.
 	 *
-	 * @return CancelDonationException Concrete cancel-donation exception.
+	 * @return SucceedDonationException Concrete succeed-donation exception.
 	 */
 	protected function new_mutation_exception(
 		UseCaseFailureStage $stage,
 		string $message,
 		?Throwable $previous = null,
 		?DonationMutationPreconditionReason $reason = null,
-	): CancelDonationException {
+	): SucceedDonationException {
 
-		return new CancelDonationException( $stage, $message, $previous, $reason );
+		return new SucceedDonationException( $stage, $message, $previous, $reason );
 	}
 
 	/**
-	 * Cancels an existing donation.
+	 * Succeeds an existing donation.
 	 *
 	 * @since 0.1.0
 	 *
@@ -75,19 +75,19 @@ final readonly class CancelDonationHandler extends AbstractDonationMutationHandl
 	 */
 	public function handle( EntityId $donation_id ): Donation {
 
-		$mutation = DonationMutation::Cancel;
+		$mutation = DonationMutation::Succeed;
 		$donation = $this->require_donation( $donation_id, $mutation );
 
 		try {
-			$canceled_donation = $donation->cancel();
+			$succeeded_donation = $donation->succeed();
 		} catch ( DonationDomainException $e ) {
 			$this->reject_mutation( $donation_id, $mutation, $e );
 		}
 
 		return $this->persist_donation(
-			$canceled_donation,
+			$succeeded_donation,
 			$mutation,
-			new DonationCanceledEvent( $canceled_donation->get_id() ),
+			new DonationSucceededEvent( $succeeded_donation->get_id() ),
 		);
 	}
 }

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Donations\Application\UseCases\FailDonation;
+namespace Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation;
 
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Throwable;
 
 /**
- * Thrown when fail-donation targets a donation that no longer exists.
+ * Thrown when a donation to reject cannot be found.
  *
  * @since 0.1.0
  */
-final class FailDonationNotFoundException extends FailDonationException {
+final class RejectDonationNotFoundException extends RejectDonationException {
 
 	/**
 	 * Constructor.
@@ -27,7 +27,7 @@ final class FailDonationNotFoundException extends FailDonationException {
 		parent::__construct(
 			stage: UseCaseFailureStage::Persistence,
 			message: sprintf(
-				'Cannot fail donation "%s": donation does not exist.',
+				'Cannot reject donation "%s": donation does not exist.',
 				$donation_id,
 			),
 			previous: $previous,
