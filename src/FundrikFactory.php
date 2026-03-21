@@ -9,11 +9,11 @@ use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\Campa
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
@@ -102,8 +102,8 @@ final readonly class FundrikFactory {
 			new CampaignFactory(),
 			new SyncCampaignFromSnapshotHandler( $this->campaign_repository, $this->event_bus ),
 			new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
-			new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
-			new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),
+			new EnableCampaignDonationsHandler( $this->campaign_repository, $this->event_bus ),
+			new DisableCampaignDonationsHandler( $this->campaign_repository, $this->event_bus ),
 			new ChangeCampaignTargetHandler( $this->campaign_repository, $this->event_bus ),
 			new DeleteCampaignHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
 		);

@@ -7,11 +7,11 @@ namespace Fundrik\Core\Components\Campaigns\Application\Events;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Signals that a campaign has been opened for donations.
+ * Signals that campaign donations have been disabled.
  *
  * @since 0.1.0
  */
-final readonly class CampaignOpenedEvent implements CampaignChangedEventInterface {
+final readonly class CampaignDonationsDisabledEvent implements CampaignChangedEventInterface {
 
 	/**
 	 * Constructor.

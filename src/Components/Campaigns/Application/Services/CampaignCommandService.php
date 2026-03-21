@@ -8,14 +8,14 @@ use Fundrik\Core\Components\Campaigns\Application\Commands\CreateCampaignCommand
 use Fundrik\Core\Components\Campaigns\Application\Commands\SyncCampaignFromSnapshotCommand;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotException;
@@ -48,8 +48,8 @@ final readonly class CampaignCommandService {
 	 * @param CampaignFactory $campaign_factory Creates campaigns from public input.
 	 * @param SyncCampaignFromSnapshotHandler $sync_campaign_from_snapshot Synchronizes campaigns from snapshots.
 	 * @param RenameCampaignHandler $rename_campaign Renames campaigns.
-	 * @param OpenCampaignHandler $open_campaign Opens campaigns for donations.
-	 * @param CloseCampaignHandler $close_campaign Closes campaigns for donations.
+	 * @param EnableCampaignDonationsHandler $enable_donations Enables accepting donations for campaigns.
+	 * @param DisableCampaignDonationsHandler $disable_donations Disables accepting donations for campaigns.
 	 * @param ChangeCampaignTargetHandler $change_target Changes campaign targets.
 	 * @param DeleteCampaignHandler $delete_campaign Deletes campaigns.
 	 */
@@ -58,8 +58,8 @@ final readonly class CampaignCommandService {
 		private CampaignFactory $campaign_factory,
 		private SyncCampaignFromSnapshotHandler $sync_campaign_from_snapshot,
 		private RenameCampaignHandler $rename_campaign,
-		private OpenCampaignHandler $open_campaign,
-		private CloseCampaignHandler $close_campaign,
+		private EnableCampaignDonationsHandler $enable_donations,
+		private DisableCampaignDonationsHandler $disable_donations,
 		private ChangeCampaignTargetHandler $change_target,
 		private DeleteCampaignHandler $delete_campaign,
 	) {}
@@ -80,7 +80,7 @@ final readonly class CampaignCommandService {
 			$campaign = $this->campaign_factory->create_new_from_primitives(
 				id: $command->get_id(),
 				title: $command->get_title(),
-				is_open: $command->can_receive_donations(),
+				accepts_donations: $command->accepts_donations(),
 				currency_code: $command->get_currency_code(),
 				target_amount: $command->get_target_amount(),
 			);
@@ -111,7 +111,7 @@ final readonly class CampaignCommandService {
 				id: $command->get_id(),
 				version: $command->get_expected_version(),
 				title: $command->get_title(),
-				is_open: $command->can_receive_donations(),
+				accepts_donations: $command->accepts_donations(),
 				currency_code: $command->get_currency_code(),
 				target_amount: $command->get_target_amount(),
 			);
@@ -155,35 +155,35 @@ final readonly class CampaignCommandService {
 	}
 
 	/**
-	 * Opens an existing campaign for donations.
+	 * Enables accepting donations for an existing campaign.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
-	 * @throws OpenCampaignException When opening fails.
+	 * @throws EnableCampaignDonationsException When enabling donation acceptance fails.
 	 */
-	public function open( int|string|EntityId $campaign_id ): void {
+	public function enable_donations( int|string|EntityId $campaign_id ): void {
 
-		$entity_id = $this->require_campaign_id( $campaign_id, OpenCampaignException::class );
+		$entity_id = $this->require_campaign_id( $campaign_id, EnableCampaignDonationsException::class );
 
-		$this->open_campaign->handle( $entity_id );
+		$this->enable_donations->handle( $entity_id );
 	}
 
 	/**
-	 * Closes an existing campaign for donations.
+	 * Disables accepting donations for an existing campaign.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
-	 * @throws CloseCampaignException When closing fails.
+	 * @throws DisableCampaignDonationsException When disabling donation acceptance fails.
 	 */
-	public function close( int|string|EntityId $campaign_id ): void {
+	public function disable_donations( int|string|EntityId $campaign_id ): void {
 
-		$entity_id = $this->require_campaign_id( $campaign_id, CloseCampaignException::class );
+		$entity_id = $this->require_campaign_id( $campaign_id, DisableCampaignDonationsException::class );
 
-		$this->close_campaign->handle( $entity_id );
+		$this->disable_donations->handle( $entity_id );
 	}
 
 	/**
@@ -241,8 +241,8 @@ final readonly class CampaignCommandService {
 	 *
 	 * @throws CreateCampaignException When create-campaign ID validation fails.
 	 * @throws RenameCampaignException When rename-campaign ID validation fails.
-	 * @throws OpenCampaignException When open-campaign ID validation fails.
-	 * @throws CloseCampaignException When close-campaign ID validation fails.
+	 * @throws EnableCampaignDonationsException When enable-donations ID validation fails.
+	 * @throws DisableCampaignDonationsException When disable-donations ID validation fails.
 	 * @throws ChangeCampaignTargetException When target-change ID validation fails.
 	 * @throws DeleteCampaignException When delete-campaign ID validation fails.
 	 */

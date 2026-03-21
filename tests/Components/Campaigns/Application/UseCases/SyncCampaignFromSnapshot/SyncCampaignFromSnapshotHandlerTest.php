@@ -8,6 +8,7 @@ use Fundrik\Core\Components\Campaigns\Application\Events\CampaignSynchronizedEve
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotNotFoundException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotPreconditionReason;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
@@ -28,6 +29,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( SyncCampaignFromSnapshotHandler::class )]
 #[UsesClass( SyncCampaignFromSnapshotException::class )]
+#[UsesClass( SyncCampaignFromSnapshotNotFoundException::class )]
 #[UsesClass( SyncCampaignFromSnapshotPreconditionReason::class )]
 #[UsesClass( CampaignSynchronizedEvent::class )]
 #[UsesClass( Campaign::class )]
@@ -55,11 +57,11 @@ final class SyncCampaignFromSnapshotHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_updates_existing_campaign_with_single_persistence_write(): void {
 
-		$persisted = $this->make_campaign( title: 'Old Campaign', is_open: false, target_amount: 1_000 );
+		$persisted = $this->make_campaign( title: 'Old Campaign', accepts_donations: false, target_amount: 1_000 );
 		$snapshot = $this->make_campaign(
 			id: $persisted->get_id()->get_value(),
 			title: 'Synced Campaign',
-			is_open: true,
+			accepts_donations: true,
 			target_amount: 5_000,
 		);
 		$campaign_id = $persisted->get_id();
@@ -102,7 +104,7 @@ final class SyncCampaignFromSnapshotHandlerTest extends MockeryTestCase {
 			id: $persisted->get_id(),
 			version: EntityVersion::create( 2 ),
 			title: CampaignTitle::create( 'Test Campaign' ),
-			is_open: true,
+			accepts_donations: true,
 			target: CampaignTarget::create( 'RUB', 100 ),
 		);
 
@@ -178,6 +180,7 @@ final class SyncCampaignFromSnapshotHandlerTest extends MockeryTestCase {
 			$this->handler->handle( $snapshot );
 			$this->fail( 'Expected SyncCampaignFromSnapshotException to be thrown.' );
 		} catch ( SyncCampaignFromSnapshotException $exception ) {
+			$this->assertInstanceOf( SyncCampaignFromSnapshotNotFoundException::class, $exception );
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
 			$this->assertSame( SyncCampaignFromSnapshotPreconditionReason::CampaignNotFound, $exception->get_reason() );
 			$this->assertSame( 'Cannot sync campaign "1": campaign does not exist.', $exception->getMessage() );
@@ -294,6 +297,7 @@ final class SyncCampaignFromSnapshotHandlerTest extends MockeryTestCase {
 			$this->handler->handle( $snapshot );
 			$this->fail( 'Expected SyncCampaignFromSnapshotException to be thrown.' );
 		} catch ( SyncCampaignFromSnapshotException $exception ) {
+			$this->assertInstanceOf( SyncCampaignFromSnapshotNotFoundException::class, $exception );
 			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
 			$this->assertNull( $exception->get_reason() );
 			$this->assertSame( 'Cannot sync campaign "1": campaign does not exist.', $exception->getMessage() );

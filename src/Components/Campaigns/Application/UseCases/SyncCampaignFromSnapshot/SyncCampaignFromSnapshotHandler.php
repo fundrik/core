@@ -9,7 +9,7 @@ use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\Campa
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
-use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+	use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -106,7 +106,7 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	private function needs_sync( Campaign $persisted, Campaign $snapshot ): bool {
 
 		return $persisted->get_title() !== $snapshot->get_title()
-			|| $persisted->can_receive_donations() !== $snapshot->can_receive_donations()
+			|| $persisted->accepts_donations() !== $snapshot->accepts_donations()
 			|| ! $persisted->get_target()->equals( $snapshot->get_target() );
 	}
 
@@ -205,23 +205,20 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	 * @param SyncCampaignFromSnapshotPreconditionReason|null $reason Failure reason, if available.
 	 * @param CampaignNotFoundExceptionInterface|null $previous Previous exception.
 	 *
-	 * @return SyncCampaignFromSnapshotException Campaign-not-found exception.
+	 * @return SyncCampaignFromSnapshotNotFoundException Campaign-not-found exception.
 	 */
 	private function new_campaign_not_found_exception(
 		EntityId $campaign_id,
 		UseCaseFailureStage $stage,
 		?SyncCampaignFromSnapshotPreconditionReason $reason,
 		?CampaignNotFoundExceptionInterface $previous = null,
-	): SyncCampaignFromSnapshotException {
+	): SyncCampaignFromSnapshotNotFoundException {
 
-		return new SyncCampaignFromSnapshotException(
-			stage: $stage,
-			reason: $reason,
-			message: sprintf(
-				'Cannot sync campaign "%s": campaign does not exist.',
-				(string) $campaign_id->get_value(),
-			),
-			previous: $previous,
+		return new SyncCampaignFromSnapshotNotFoundException(
+			(string) $campaign_id->get_value(),
+			$stage,
+			$previous,
+			$reason,
 		);
 	}
 }

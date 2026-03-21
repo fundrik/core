@@ -57,13 +57,13 @@ final readonly class CreateCampaignCommand {
 	}
 
 	/**
-	 * Returns whether the campaign can receive donations.
+	 * Returns whether the campaign accepts donations.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return bool True when the campaign can receive donations.
+	 * @return bool True when the campaign accepts donations.
 	 */
-	public function can_receive_donations(): bool {
+	public function accepts_donations(): bool {
 
 		return $this->accepts_donations;
 	}

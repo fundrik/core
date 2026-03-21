@@ -57,7 +57,7 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 		$this->assertInstanceOf( CampaignDetails::class, $result );
 		$this->assertSame( $details->get_id(), $result->get_id() );
 		$this->assertSame( $details->get_title(), $result->get_title() );
-		$this->assertSame( $details->can_receive_donations(), $result->can_receive_donations() );
+		$this->assertSame( $details->accepts_donations(), $result->accepts_donations() );
 		$this->assertSame( $details->get_currency_code(), $result->get_currency_code() );
 		$this->assertSame( $details->get_target_amount(), $result->get_target_amount() );
 		$this->assertSame( $details->get_created_at(), $result->get_created_at() );

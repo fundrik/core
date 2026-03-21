@@ -94,12 +94,12 @@ final readonly class CreateDonationHandler {
 			);
 		}
 
-		if ( ! $campaign->can_receive_donations() ) {
+		if ( ! $campaign->accepts_donations() ) {
 			throw new CreateDonationException(
 				stage: UseCaseFailureStage::Precondition,
-				reason: CreateDonationPreconditionReason::CampaignCannotReceiveDonations,
+				reason: CreateDonationPreconditionReason::CampaignDoesNotAcceptDonations,
 				message: sprintf(
-					'Cannot create donation "%s": campaign "%s" cannot receive donations.',
+					'Cannot create donation "%s": campaign "%s" does not accept donations.',
 					(string) $donation_id->get_value(),
 					(string) $campaign_id->get_value(),
 				),

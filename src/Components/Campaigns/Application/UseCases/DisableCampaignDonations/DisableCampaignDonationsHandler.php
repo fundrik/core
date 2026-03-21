@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign;
+namespace Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations;
 
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDonationsDisabledEvent;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutation;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationPreconditionReason;
@@ -15,35 +15,35 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Throwable;
 
 /**
- * Handles opening an existing campaign for donations.
+ * Handles disabling donation acceptance for an existing campaign.
  *
  * @since 0.1.0
  */
-final readonly class OpenCampaignHandler extends AbstractCampaignMutationHandler {
+final readonly class DisableCampaignDonationsHandler extends AbstractCampaignMutationHandler {
 
 	/**
-	 * Creates the open-campaign exception used when the campaign disappears before persistence.
+	 * Creates the disable-donations exception used when the campaign disappears before persistence.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Throwable $previous Previous repository exception.
 	 *
-	 * @return OpenCampaignException Concrete open-campaign exception.
+	 * @return DisableCampaignDonationsException Concrete disable-donations exception.
 	 */
 	protected function new_not_found_mutation_exception(
 		EntityId $campaign_id,
 		Throwable $previous,
-	): OpenCampaignException {
+	): DisableCampaignDonationsException {
 
-		return new OpenCampaignNotFoundException(
+		return new DisableCampaignDonationsNotFoundException(
 			(string) $campaign_id->get_value(),
 			$previous,
 		);
 	}
 
 	/**
-	 * Creates the open-campaign exception exposed by this use case.
+	 * Creates the disable-donations exception exposed by this use case.
 	 *
 	 * @since 0.1.0
 	 *
@@ -52,20 +52,20 @@ final readonly class OpenCampaignHandler extends AbstractCampaignMutationHandler
 	 * @param Throwable|null $previous Previous exception.
 	 * @param CampaignMutationPreconditionReason|null $reason Optional precondition failure reason.
 	 *
-	 * @return OpenCampaignException Concrete open-campaign exception.
+	 * @return DisableCampaignDonationsException Concrete disable-donations exception.
 	 */
 	protected function new_mutation_exception(
 		UseCaseFailureStage $stage,
 		string $message,
 		?Throwable $previous = null,
 		?CampaignMutationPreconditionReason $reason = null,
-	): OpenCampaignException {
+	): DisableCampaignDonationsException {
 
-		return new OpenCampaignException( $stage, $message, $previous, $reason );
+		return new DisableCampaignDonationsException( $stage, $message, $previous, $reason );
 	}
 
 	/**
-	 * Opens an existing campaign for donations.
+	 * Disables accepting donations for an existing campaign.
 	 *
 	 * @since 0.1.0
 	 *
@@ -75,19 +75,19 @@ final readonly class OpenCampaignHandler extends AbstractCampaignMutationHandler
 	 */
 	public function handle( EntityId $campaign_id ): Campaign {
 
-		$mutation = CampaignMutation::Open;
+		$mutation = CampaignMutation::DisableDonations;
 		$campaign = $this->require_campaign( $campaign_id, $mutation );
 
 		try {
-			$opened_campaign = $campaign->open();
+			$updated_campaign = $campaign->disable_donations();
 		} catch ( CampaignDomainException $e ) {
 			$this->reject_mutation( $campaign_id, $mutation, $e );
 		}
 
 		return $this->persist_campaign(
-			$opened_campaign,
+			$updated_campaign,
 			$mutation,
-			new CampaignOpenedEvent( $opened_campaign->get_id() ),
+			new CampaignDonationsDisabledEvent( $updated_campaign->get_id() ),
 		);
 	}
 }

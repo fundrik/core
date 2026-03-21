@@ -24,14 +24,14 @@ final readonly class Campaign {
 	 * @param EntityId $id Campaign ID.
 	 * @param EntityVersion $version Campaign version.
 	 * @param CampaignTitle $title Campaign title.
-	 * @param bool $is_open Whether the campaign is open for donations.
+	 * @param bool $accepts_donations Whether the campaign accepts donations.
 	 * @param CampaignTarget $target Campaign target.
 	 */
 	public function __construct(
 		private EntityId $id,
 		private EntityVersion $version,
 		private CampaignTitle $title,
-		private bool $is_open,
+		private bool $accepts_donations,
 		private CampaignTarget $target,
 	) {}
 
@@ -72,15 +72,15 @@ final readonly class Campaign {
 	}
 
 	/**
-	 * Returns whether the campaign can receive new donations.
+	 * Returns whether the campaign accepts donations.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return bool True when the campaign is open for donations.
+	 * @return bool True when the campaign accepts donations.
 	 */
-	public function can_receive_donations(): bool {
+	public function accepts_donations(): bool {
 
-		return $this->is_open;
+		return $this->accepts_donations;
 	}
 
 	/**
@@ -130,40 +130,40 @@ final readonly class Campaign {
 			);
 		}
 
-		return new self( $this->id, $this->version, $new_title, $this->is_open, $this->target );
+		return new self( $this->id, $this->version, $new_title, $this->accepts_donations, $this->target );
 	}
 
 	/**
-	 * Opens the campaign for donations.
+	 * Enables accepting donations for the campaign.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self Campaign in open state.
+	 * @return self Campaign with donation acceptance enabled.
 	 *
-	 * @throws CampaignChangeException When the campaign is already open.
+	 * @throws CampaignChangeException When donation acceptance is already enabled.
 	 */
-	public function open(): self {
+	public function enable_donations(): self {
 
-		if ( $this->is_open ) {
-			throw new CampaignChangeException( 'Cannot open campaign: already open.' );
+		if ( $this->accepts_donations ) {
+			throw new CampaignChangeException( 'Cannot enable donations for campaign: already enabled.' );
 		}
 
 		return new self( $this->id, $this->version, $this->title, true, $this->target );
 	}
 
 	/**
-	 * Closes the campaign for donations.
+	 * Disables accepting donations for the campaign.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self Campaign in closed state.
+	 * @return self Campaign with donation acceptance disabled.
 	 *
-	 * @throws CampaignChangeException When the campaign is already closed.
+	 * @throws CampaignChangeException When donation acceptance is already disabled.
 	 */
-	public function close(): self {
+	public function disable_donations(): self {
 
-		if ( ! $this->is_open ) {
-			throw new CampaignChangeException( 'Cannot close campaign: already closed.' );
+		if ( ! $this->accepts_donations ) {
+			throw new CampaignChangeException( 'Cannot disable donations for campaign: already disabled.' );
 		}
 
 		return new self( $this->id, $this->version, $this->title, false, $this->target );
@@ -188,6 +188,6 @@ final readonly class Campaign {
 			throw new CampaignChangeException( 'Target amount must be different from the current one.' );
 		}
 
-		return new self( $this->id, $this->version, $this->title, $this->is_open, $updated_target );
+		return new self( $this->id, $this->version, $this->title, $this->accepts_donations, $updated_target );
 	}
 }

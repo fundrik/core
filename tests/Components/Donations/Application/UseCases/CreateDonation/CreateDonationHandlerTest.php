@@ -287,10 +287,10 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function handle_throws_when_campaign_cannot_receive_donations_because_it_is_closed(): void {
+	public function handle_throws_when_campaign_does_not_accept_donations(): void {
 
 		$donation = $this->make_pending_donation();
-		$campaign = $this->make_donation_campaign( is_open: false );
+		$campaign = $this->make_donation_campaign( accepts_donations: false );
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
@@ -310,11 +310,11 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 		} catch ( CreateDonationException $exception ) {
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
 			$this->assertSame(
-				CreateDonationPreconditionReason::CampaignCannotReceiveDonations,
+				CreateDonationPreconditionReason::CampaignDoesNotAcceptDonations,
 				$exception->get_reason(),
 			);
 			$this->assertSame(
-				'Cannot create donation "5001": campaign "901" cannot receive donations.',
+				'Cannot create donation "5001": campaign "901" does not accept donations.',
 				$exception->getMessage(),
 			);
 		}
@@ -351,8 +351,8 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 		}
 	}
 
-	private function make_donation_campaign( bool $is_open = true, string $currency_code = 'RUB' ): Campaign {
+	private function make_donation_campaign( bool $accepts_donations = true, string $currency_code = 'RUB' ): Campaign {
 
-		return $this->make_campaign( 901, 'Campaign 901', $is_open, $currency_code, 10_000 );
+		return $this->make_campaign( 901, 'Campaign 901', $accepts_donations, $currency_code, 10_000 );
 	}
 }

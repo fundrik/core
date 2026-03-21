@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases;
 
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignClosedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDonationsDisabledEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDonationsEnabledEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignRenamedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
@@ -17,12 +17,12 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationPreco
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetNotFoundException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignNotFoundException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignNotFoundException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsNotFoundException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsNotFoundException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignNotFoundException;
@@ -47,16 +47,16 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( AbstractCampaignMutationHandler::class )]
 #[CoversClass( RenameCampaignHandler::class )]
-#[CoversClass( OpenCampaignHandler::class )]
-#[CoversClass( CloseCampaignHandler::class )]
+#[CoversClass( EnableCampaignDonationsHandler::class )]
+#[CoversClass( DisableCampaignDonationsHandler::class )]
 #[CoversClass( ChangeCampaignTargetHandler::class )]
 #[UsesClass( CampaignMutationException::class )]
 #[UsesClass( RenameCampaignException::class )]
 #[UsesClass( RenameCampaignNotFoundException::class )]
-#[UsesClass( OpenCampaignException::class )]
-#[UsesClass( OpenCampaignNotFoundException::class )]
-#[UsesClass( CloseCampaignException::class )]
-#[UsesClass( CloseCampaignNotFoundException::class )]
+#[UsesClass( EnableCampaignDonationsException::class )]
+#[UsesClass( EnableCampaignDonationsNotFoundException::class )]
+#[UsesClass( DisableCampaignDonationsException::class )]
+#[UsesClass( DisableCampaignDonationsNotFoundException::class )]
 #[UsesClass( ChangeCampaignTargetException::class )]
 #[UsesClass( ChangeCampaignTargetNotFoundException::class )]
 #[UsesClass( CampaignMutationPreconditionReason::class )]
@@ -64,8 +64,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CampaignApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( CampaignRenamedEvent::class )]
-#[UsesClass( CampaignOpenedEvent::class )]
-#[UsesClass( CampaignClosedEvent::class )]
+#[UsesClass( CampaignDonationsEnabledEvent::class )]
+#[UsesClass( CampaignDonationsDisabledEvent::class )]
 #[UsesClass( CampaignTargetChangedEvent::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTitle::class )]
@@ -396,8 +396,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return [
 			'rename' => [ 'rename', CampaignRenamedEvent::class ],
-			'open' => [ 'open', CampaignOpenedEvent::class ],
-			'close' => [ 'close', CampaignClosedEvent::class ],
+			'enable_donations' => [ 'enable_donations', CampaignDonationsEnabledEvent::class ],
+			'disable_donations' => [ 'disable_donations', CampaignDonationsDisabledEvent::class ],
 			'change_target' => [ 'change_target', CampaignTargetChangedEvent::class ],
 		];
 	}
@@ -406,8 +406,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return [
 			'rename' => [ 'rename', 'rename', RenameCampaignException::class ],
-			'open' => [ 'open', 'open', OpenCampaignException::class ],
-			'close' => [ 'close', 'close', CloseCampaignException::class ],
+			'enable_donations' => [ 'enable_donations', 'enable donations for', EnableCampaignDonationsException::class ],
+			'disable_donations' => [ 'disable_donations', 'disable donations for', DisableCampaignDonationsException::class ],
 			'change_target' => [ 'change_target', 'change target for', ChangeCampaignTargetException::class ],
 		];
 	}
@@ -416,8 +416,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return [
 			'rename' => [ 'rename', 'renamed', 'renamed', RenameCampaignException::class ],
-			'open' => [ 'open', 'opened', 'opened', OpenCampaignException::class ],
-			'close' => [ 'close', 'closed', 'closed', CloseCampaignException::class ],
+			'enable_donations' => [ 'enable_donations', 'donations enabled', 'updated', EnableCampaignDonationsException::class ],
+			'disable_donations' => [ 'disable_donations', 'donations disabled', 'updated', DisableCampaignDonationsException::class ],
 			'change_target' => [ 'change_target', 'target changed', 'updated', ChangeCampaignTargetException::class ],
 		];
 	}
@@ -426,8 +426,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return [
 			'rename' => [ 'rename', 'rename', RenameCampaignNotFoundException::class ],
-			'open' => [ 'open', 'open', OpenCampaignNotFoundException::class ],
-			'close' => [ 'close', 'close', CloseCampaignNotFoundException::class ],
+			'enable_donations' => [ 'enable_donations', 'enable donations for', EnableCampaignDonationsNotFoundException::class ],
+			'disable_donations' => [ 'disable_donations', 'disable donations for', DisableCampaignDonationsNotFoundException::class ],
 			'change_target' => [ 'change_target', 'change target for', ChangeCampaignTargetNotFoundException::class ],
 		];
 	}
@@ -436,8 +436,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return match ( $action ) {
 			'rename' => new RenameCampaignHandler( $this->campaigns, $this->event_bus ),
-			'open' => new OpenCampaignHandler( $this->campaigns, $this->event_bus ),
-			'close' => new CloseCampaignHandler( $this->campaigns, $this->event_bus ),
+			'enable_donations' => new EnableCampaignDonationsHandler( $this->campaigns, $this->event_bus ),
+			'disable_donations' => new DisableCampaignDonationsHandler( $this->campaigns, $this->event_bus ),
 			'change_target' => new ChangeCampaignTargetHandler( $this->campaigns, $this->event_bus ),
 		};
 	}
@@ -446,8 +446,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return match ( $action ) {
 			'rename' => $this->make_campaign( title: 'Old Title' ),
-			'open' => $this->make_campaign( is_open: false ),
-			'close' => $this->make_campaign( is_open: true ),
+			'enable_donations' => $this->make_campaign( accepts_donations: false ),
+			'disable_donations' => $this->make_campaign( accepts_donations: true ),
 			'change_target' => $this->make_campaign( target_amount: 100 ),
 		};
 	}
@@ -456,8 +456,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return match ( $action ) {
 			'rename' => $this->make_campaign( title: 'Test Campaign' ),
-			'open' => $this->make_campaign( is_open: true ),
-			'close' => $this->make_campaign( is_open: false ),
+			'enable_donations' => $this->make_campaign( accepts_donations: true ),
+			'disable_donations' => $this->make_campaign( accepts_donations: false ),
 			'change_target' => $this->make_campaign( target_amount: 100 ),
 		};
 	}
@@ -466,7 +466,7 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return match ( $action ) {
 			'rename' => $handler->handle( $campaign_id, CampaignTitle::create( 'Renamed Campaign' ) ),
-			'open', 'close' => $handler->handle( $campaign_id ),
+			'enable_donations', 'disable_donations' => $handler->handle( $campaign_id ),
 			'change_target' => $handler->handle( $campaign_id, Amount::create( 250 ) ),
 		};
 	}
@@ -475,7 +475,7 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		return match ( $action ) {
 			'rename' => $handler->handle( $campaign_id, CampaignTitle::create( 'Test Campaign' ) ),
-			'open', 'close' => $handler->handle( $campaign_id ),
+			'enable_donations', 'disable_donations' => $handler->handle( $campaign_id ),
 			'change_target' => $handler->handle( $campaign_id, Amount::create( 100 ) ),
 		};
 	}
@@ -486,8 +486,8 @@ final class CampaignMutationHandlersTest extends MockeryTestCase {
 
 		match ( $action ) {
 			'rename' => $this->assertSame( 'Renamed Campaign', $campaign->get_title() ),
-			'open' => $this->assertTrue( $campaign->can_receive_donations() ),
-			'close' => $this->assertFalse( $campaign->can_receive_donations() ),
+			'enable_donations' => $this->assertTrue( $campaign->accepts_donations() ),
+			'disable_donations' => $this->assertFalse( $campaign->accepts_donations() ),
 			'change_target' => $this->assertSame( 250, $campaign->get_target()->get_amount()?->get_value() ),
 		};
 	}

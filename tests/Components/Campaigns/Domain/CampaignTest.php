@@ -34,7 +34,7 @@ final class CampaignTest extends FundrikTestCase {
 		$this->assertSame( 1, $campaign->get_version()->get_value() );
 		$this->assertSame( 'Test Campaign', $campaign->get_title() );
 		$this->assertTrue( $entity_id->equals( $campaign->get_id() ) );
-		$this->assertTrue( $campaign->can_receive_donations() );
+		$this->assertTrue( $campaign->accepts_donations() );
 		$this->assertSame( 'RUB', $campaign->get_target()->get_currency()->get_code() );
 		$this->assertTrue( $campaign->has_target() );
 		$this->assertSame( 100, $campaign->get_target()->get_amount()?->get_value() );
@@ -96,55 +96,55 @@ final class CampaignTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function open_turns_campaign_open(): void {
+	public function enable_donations_turns_campaign_into_accepting_donations(): void {
 
-		$closed = $this->make_campaign( is_open: false );
+		$campaign = $this->make_campaign( accepts_donations: false );
 
-		$open = $closed->open();
+		$updated = $campaign->enable_donations();
 
-		$this->assertTrue( $open->can_receive_donations() );
+		$this->assertTrue( $updated->accepts_donations() );
 	}
 
 	#[Test]
-	public function open_throws_when_already_open(): void {
+	public function enable_donations_throws_when_already_enabled(): void {
 
-		$open = $this->make_campaign( is_open: true );
+		$campaign = $this->make_campaign( accepts_donations: true );
 
 		$this->expectException( CampaignChangeException::class );
-		$this->expectExceptionMessage( 'Cannot open campaign: already open.' );
+		$this->expectExceptionMessage( 'Cannot enable donations for campaign: already enabled.' );
 
-		$open->open();
+		$campaign->enable_donations();
 	}
 
 	#[Test]
-	public function close_turns_campaign_closed(): void {
+	public function disable_donations_turns_campaign_into_not_accepting_donations(): void {
 
-		$open = $this->make_campaign( is_open: true );
+		$campaign = $this->make_campaign( accepts_donations: true );
 
-		$closed = $open->close();
+		$updated = $campaign->disable_donations();
 
-		$this->assertFalse( $closed->can_receive_donations() );
+		$this->assertFalse( $updated->accepts_donations() );
 	}
 
 	#[Test]
-	public function close_throws_when_already_closed(): void {
+	public function disable_donations_throws_when_already_disabled(): void {
 
-		$closed = $this->make_campaign( is_open: false );
+		$campaign = $this->make_campaign( accepts_donations: false );
 
 		$this->expectException( CampaignChangeException::class );
-		$this->expectExceptionMessage( 'Cannot close campaign: already closed.' );
+		$this->expectExceptionMessage( 'Cannot disable donations for campaign: already disabled.' );
 
-		$closed->close();
+		$campaign->disable_donations();
 	}
 
 	#[Test]
-	public function can_receive_donations_requires_campaign_to_be_open(): void {
+	public function accepts_donations_reflects_campaign_state(): void {
 
-		$open = $this->make_campaign( is_open: true );
-		$closed = $this->make_campaign( is_open: false );
+		$enabled = $this->make_campaign( accepts_donations: true );
+		$disabled = $this->make_campaign( accepts_donations: false );
 
-		$this->assertTrue( $open->can_receive_donations() );
-		$this->assertFalse( $closed->can_receive_donations() );
+		$this->assertTrue( $enabled->accepts_donations() );
+		$this->assertFalse( $disabled->accepts_donations() );
 	}
 
 	#[Test]

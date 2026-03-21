@@ -6,10 +6,10 @@ namespace Fundrik\Core\Tests\Components\Campaigns\Application\Services;
 
 use Fundrik\Core\Components\Campaigns\Application\Commands\CreateCampaignCommand;
 use Fundrik\Core\Components\Campaigns\Application\Commands\SyncCampaignFromSnapshotCommand;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignClosedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDonationsDisabledEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDonationsEnabledEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignRenamedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignSynchronizedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEvent;
@@ -18,11 +18,11 @@ use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandServic
 use Fundrik\Core\Components\Campaigns\Application\UseCases\AbstractCampaignMutationHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
@@ -51,8 +51,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( SyncCampaignFromSnapshotPreconditionReason::class )]
 #[UsesClass( CampaignCreatedEvent::class )]
 #[UsesClass( CampaignRenamedEvent::class )]
-#[UsesClass( CampaignOpenedEvent::class )]
-#[UsesClass( CampaignClosedEvent::class )]
+#[UsesClass( CampaignDonationsEnabledEvent::class )]
+#[UsesClass( CampaignDonationsDisabledEvent::class )]
 #[UsesClass( CampaignTargetChangedEvent::class )]
 #[UsesClass( CampaignDeletedEvent::class )]
 #[UsesClass( CampaignSynchronizedEvent::class )]
@@ -60,8 +60,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CreateCampaignHandler::class )]
 #[UsesClass( SyncCampaignFromSnapshotHandler::class )]
 #[UsesClass( RenameCampaignHandler::class )]
-#[UsesClass( OpenCampaignHandler::class )]
-#[UsesClass( CloseCampaignHandler::class )]
+#[UsesClass( EnableCampaignDonationsHandler::class )]
+#[UsesClass( DisableCampaignDonationsHandler::class )]
 #[UsesClass( ChangeCampaignTargetHandler::class )]
 #[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( Campaign::class )]
@@ -90,8 +90,8 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			new CampaignFactory(),
 			new SyncCampaignFromSnapshotHandler( $this->campaign_repository, $this->event_bus ),
 			new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
-			new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
-			new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),
+			new EnableCampaignDonationsHandler( $this->campaign_repository, $this->event_bus ),
+			new DisableCampaignDonationsHandler( $this->campaign_repository, $this->event_bus ),
 			new ChangeCampaignTargetHandler( $this->campaign_repository, $this->event_bus ),
 			new DeleteCampaignHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
 		);
@@ -104,7 +104,7 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$campaign = $this->make_campaign(
 			id: $campaign_id->get_value(),
 			title: 'New Campaign',
-			is_open: false,
+			accepts_donations: false,
 			target_amount: 5_000,
 		);
 		$command = new CreateCampaignCommand(
@@ -123,7 +123,7 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 
 					$this->assertSame( $campaign_id->get_value(), $created_campaign->get_id()->get_value() );
 					$this->assertSame( 'New Campaign', $created_campaign->get_title() );
-					$this->assertFalse( $created_campaign->can_receive_donations() );
+					$this->assertFalse( $created_campaign->accepts_donations() );
 					$this->assertSame( 'RUB', $created_campaign->get_target()->get_currency()->get_code() );
 					$this->assertSame( 5_000, $created_campaign->get_target()->get_amount()?->get_value() );
 
@@ -171,7 +171,7 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 	#[Test]
 	public function sync_from_snapshot_uses_injected_ports(): void {
 
-		$campaign = $this->make_campaign( id: 55, title: 'Old Campaign', is_open: false, target_amount: 1_000 );
+		$campaign = $this->make_campaign( id: 55, title: 'Old Campaign', accepts_donations: false, target_amount: 1_000 );
 		$campaign_id = $campaign->get_id();
 		$command = new SyncCampaignFromSnapshotCommand(
 			id: $campaign_id,
@@ -197,7 +197,7 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 				function ( Campaign $updated_campaign ): bool {
 
 					$this->assertSame( 'Synchronized Campaign', $updated_campaign->get_title() );
-					$this->assertTrue( $updated_campaign->can_receive_donations() );
+					$this->assertTrue( $updated_campaign->accepts_donations() );
 					$this->assertSame( 5_000, $updated_campaign->get_target()->get_amount()?->get_value() );
 
 					return true;
@@ -282,9 +282,9 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function open_uses_injected_ports(): void {
+	public function enable_donations_uses_injected_ports(): void {
 
-		$campaign = $this->make_campaign( is_open: false );
+		$campaign = $this->make_campaign( accepts_donations: false );
 		$campaign_id = $campaign->get_id();
 
 		$this->campaign_repository
@@ -298,23 +298,23 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->campaign_repository
 			->shouldReceive( 'update' )
 			->once()
-			->withArgs( static fn ( Campaign $updated_campaign ): bool => $updated_campaign->can_receive_donations() )
+			->withArgs( static fn ( Campaign $updated_campaign ): bool => $updated_campaign->accepts_donations() )
 			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
 
 		$this->event_bus
 			->shouldReceive( 'publish' )
 			->once()
-			->withArgs( $this->event_of_type( CampaignOpenedEvent::class, $campaign_id ) );
+			->withArgs( $this->event_of_type( CampaignDonationsEnabledEvent::class, $campaign_id ) );
 
-		$this->command->open( $campaign_id->get_value() );
+		$this->command->enable_donations( $campaign_id->get_value() );
 
 		$this->assertTrue( true );
 	}
 
 	#[Test]
-	public function close_uses_injected_ports(): void {
+	public function disable_donations_uses_injected_ports(): void {
 
-		$campaign = $this->make_campaign( is_open: true );
+		$campaign = $this->make_campaign( accepts_donations: true );
 		$campaign_id = $campaign->get_id();
 
 		$this->campaign_repository
@@ -328,15 +328,15 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->campaign_repository
 			->shouldReceive( 'update' )
 			->once()
-			->withArgs( static fn ( Campaign $updated_campaign ): bool => ! $updated_campaign->can_receive_donations() )
+			->withArgs( static fn ( Campaign $updated_campaign ): bool => ! $updated_campaign->accepts_donations() )
 			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
 
 		$this->event_bus
 			->shouldReceive( 'publish' )
 			->once()
-			->withArgs( $this->event_of_type( CampaignClosedEvent::class, $campaign_id ) );
+			->withArgs( $this->event_of_type( CampaignDonationsDisabledEvent::class, $campaign_id ) );
 
-		$this->command->close( $campaign_id->get_value() );
+		$this->command->disable_donations( $campaign_id->get_value() );
 
 		$this->assertTrue( true );
 	}

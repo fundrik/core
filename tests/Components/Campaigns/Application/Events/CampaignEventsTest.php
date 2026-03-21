@@ -6,10 +6,10 @@ namespace Fundrik\Core\Tests\Components\Campaigns\Application\Events;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignApplicationEventInterface;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignChangedEventInterface;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignClosedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
-use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDonationsDisabledEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDonationsEnabledEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignRenamedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignSynchronizedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEvent;
@@ -23,8 +23,8 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass( CampaignCreatedEvent::class )]
 #[CoversClass( CampaignDeletedEvent::class )]
 #[CoversClass( CampaignRenamedEvent::class )]
-#[CoversClass( CampaignOpenedEvent::class )]
-#[CoversClass( CampaignClosedEvent::class )]
+#[CoversClass( CampaignDonationsEnabledEvent::class )]
+#[CoversClass( CampaignDonationsDisabledEvent::class )]
 #[CoversClass( CampaignTargetChangedEvent::class )]
 #[CoversClass( CampaignSynchronizedEvent::class )]
 #[UsesClass( EntityId::class )]
@@ -70,8 +70,8 @@ final class CampaignEventsTest extends TestCase {
 			'created' => [ CampaignCreatedEvent::class ],
 			'deleted' => [ CampaignDeletedEvent::class ],
 			'renamed' => [ CampaignRenamedEvent::class ],
-			'opened' => [ CampaignOpenedEvent::class ],
-			'closed' => [ CampaignClosedEvent::class ],
+			'donations_enabled' => [ CampaignDonationsEnabledEvent::class ],
+			'donations_disabled' => [ CampaignDonationsDisabledEvent::class ],
 			'target_changed' => [ CampaignTargetChangedEvent::class ],
 			'synchronized' => [ CampaignSynchronizedEvent::class ],
 		];
@@ -81,8 +81,8 @@ final class CampaignEventsTest extends TestCase {
 
 		return [
 			'renamed' => [ CampaignRenamedEvent::class ],
-			'opened' => [ CampaignOpenedEvent::class ],
-			'closed' => [ CampaignClosedEvent::class ],
+			'donations_enabled' => [ CampaignDonationsEnabledEvent::class ],
+			'donations_disabled' => [ CampaignDonationsDisabledEvent::class ],
 			'target_changed' => [ CampaignTargetChangedEvent::class ],
 			'synchronized' => [ CampaignSynchronizedEvent::class ],
 		];

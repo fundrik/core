@@ -26,7 +26,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 	protected function make_campaign_details(
 		int|string $id = 1,
 		string $title = 'Test Campaign',
-		bool $can_receive_donations = true,
+		bool $accepts_donations = true,
 		string $currency_code = 'RUB',
 		?int $target_amount = 100,
 		?UtcDateTime $created_at = null,
@@ -36,7 +36,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 		return new CampaignDetails(
 			id: $id,
 			title: $title,
-			can_receive_donations: $can_receive_donations,
+			accepts_donations: $accepts_donations,
 			currency_code: $currency_code,
 			target_amount: $target_amount,
 			created_at: $created_at ?? $this->make_utc_date_time( '2026-03-01T10:00:00+00:00' ),
@@ -82,7 +82,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 	protected function make_campaign(
 		int|string $id = 1,
 		string $title = 'Test Campaign',
-		bool $is_open = true,
+		bool $accepts_donations = true,
 		string $currency_code = 'RUB',
 		?int $target_amount = 100,
 	): Campaign {
@@ -91,7 +91,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 			id: EntityId::create( $id ),
 			version: EntityVersion::initial(),
 			title: CampaignTitle::create( $title ),
-			is_open: $is_open,
+			accepts_donations: $accepts_donations,
 			target: CampaignTarget::create( $currency_code, $target_amount ),
 		);
 	}

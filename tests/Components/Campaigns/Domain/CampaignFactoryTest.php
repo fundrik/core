@@ -41,7 +41,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: EntityId::create( 1 ),
 			version: EntityVersion::create( 3 ),
 			title: CampaignTitle::create( 'Save the cats' ),
-			is_open: false,
+			accepts_donations: false,
 			target: CampaignTarget::create( 'RUB', 123 ),
 		);
 
@@ -49,7 +49,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 		$this->assertSame( 1, $campaign->get_id()->get_value() );
 		$this->assertSame( 3, $campaign->get_version()->get_value() );
 		$this->assertSame( 'Save the cats', $campaign->get_title() );
-		$this->assertFalse( $campaign->can_receive_donations() );
+		$this->assertFalse( $campaign->accepts_donations() );
 		$this->assertSame( 'RUB', $campaign->get_target()->get_currency()->get_code() );
 		$this->assertTrue( $campaign->has_target() );
 		$this->assertSame( 123, $campaign->get_target()->get_amount()?->get_value() );
@@ -62,7 +62,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: EntityId::create( 'c6f2a6d1-2b2a-4b33-9c9d-8a3e5d9c1b22' ),
 			version: EntityVersion::create( 2 ),
 			title: CampaignTitle::create( 'Save the dogs' ),
-			is_open: true,
+			accepts_donations: true,
 			target: CampaignTarget::create( 'USD', null ),
 		);
 
@@ -78,7 +78,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 		$campaign = $this->factory->create_new(
 			id: EntityId::create( 1 ),
 			title: CampaignTitle::create( 'New campaign' ),
-			is_open: true,
+			accepts_donations: true,
 			target: CampaignTarget::create( 'RUB', null ),
 		);
 
@@ -92,7 +92,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: 10,
 			version: 2,
 			title: 'From primitives',
-			is_open: true,
+			accepts_donations: true,
 			currency_code: 'EUR',
 			target_amount: 500,
 		);
@@ -111,7 +111,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: 10,
 			version: 2,
 			title: 'Without target',
-			is_open: true,
+			accepts_donations: true,
 			currency_code: 'RUB',
 			target_amount: null,
 		);
@@ -128,7 +128,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 				id: -1,
 				version: 1,
 				title: 'Invalid id',
-				is_open: true,
+				accepts_donations: true,
 				currency_code: 'RUB',
 				target_amount: null,
 			);
@@ -150,7 +150,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: 1,
 			version: 0,
 			title: 'Invalid version',
-			is_open: true,
+			accepts_donations: true,
 			currency_code: 'RUB',
 			target_amount: null,
 		);
@@ -165,7 +165,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: 1,
 			version: 1,
 			title: '   ',
-			is_open: true,
+			accepts_donations: true,
 			currency_code: 'RUB',
 			target_amount: null,
 		);
@@ -180,7 +180,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: 1,
 			version: 1,
 			title: 'Invalid target',
-			is_open: true,
+			accepts_donations: true,
 			currency_code: 'RUB',
 			target_amount: 0,
 		);
@@ -195,7 +195,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: 1,
 			version: 1,
 			title: 'Invalid amount',
-			is_open: true,
+			accepts_donations: true,
 			currency_code: 'RUB',
 			target_amount: -1,
 		);
@@ -210,7 +210,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 			id: 1,
 			version: 1,
 			title: 'Invalid currency',
-			is_open: true,
+			accepts_donations: true,
 			currency_code: 'EURO',
 			target_amount: 100,
 		);
@@ -224,7 +224,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 				id: 1,
 				version: 1,
 				title: 'Invalid currency',
-				is_open: true,
+				accepts_donations: true,
 				currency_code: 'EURO',
 				target_amount: null,
 			);
@@ -243,7 +243,7 @@ final class CampaignFactoryTest extends FundrikTestCase {
 		$campaign = $this->factory->create_new_from_primitives(
 			id: 20,
 			title: 'New from primitives',
-			is_open: false,
+			accepts_donations: false,
 			currency_code: 'USD',
 			target_amount: null,
 		);

@@ -20,7 +20,7 @@ final readonly class CampaignDetails {
 	 *
 	 * @param int|string $id Campaign identifier.
 	 * @param string $title Campaign title.
-	 * @param bool $can_receive_donations Whether the campaign accepts donations.
+	 * @param bool $accepts_donations Whether the campaign accepts donations.
 	 * @param string $currency_code Campaign currency code.
 	 * @param int|null $target_amount Target amount, if configured.
 	 * @param UtcDateTime $created_at Creation timestamp.
@@ -29,7 +29,7 @@ final readonly class CampaignDetails {
 	public function __construct(
 		private int|string $id,
 		private string $title,
-		private bool $can_receive_donations,
+		private bool $accepts_donations,
 		private string $currency_code,
 		private ?int $target_amount,
 		private UtcDateTime $created_at,
@@ -61,15 +61,15 @@ final readonly class CampaignDetails {
 	}
 
 	/**
-	 * Returns whether the campaign can receive donations.
+	 * Returns whether the campaign accepts donations.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return bool True when the campaign accepts donations.
 	 */
-	public function can_receive_donations(): bool {
+	public function accepts_donations(): bool {
 
-		return $this->can_receive_donations;
+		return $this->accepts_donations;
 	}
 
 	/**

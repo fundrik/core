@@ -27,7 +27,7 @@ final readonly class CampaignFactory {
 	 * @param EntityId $id Campaign ID.
 	 * @param EntityVersion $version Campaign version.
 	 * @param CampaignTitle $title Campaign title.
-	 * @param bool $is_open Whether the campaign is open.
+	 * @param bool $accepts_donations Whether the campaign accepts donations.
 	 * @param CampaignTarget $target Campaign target.
 	 *
 	 * @return Campaign Built campaign entity.
@@ -36,11 +36,11 @@ final readonly class CampaignFactory {
 		EntityId $id,
 		EntityVersion $version,
 		CampaignTitle $title,
-		bool $is_open,
+		bool $accepts_donations,
 		CampaignTarget $target,
 	): Campaign {
 
-		return new Campaign( $id, $version, $title, $is_open, $target );
+		return new Campaign( $id, $version, $title, $accepts_donations, $target );
 	}
 
 	/**
@@ -51,7 +51,7 @@ final readonly class CampaignFactory {
 	 * @param int|string|EntityId $id Campaign ID.
 	 * @param int $version Campaign version.
 	 * @param string $title Campaign title.
-	 * @param bool $is_open Whether the campaign is open.
+	 * @param bool $accepts_donations Whether the campaign accepts donations.
 	 * @param string $currency_code Campaign currency code (ISO 4217).
 	 * @param int|null $target_amount Target amount, if configured.
 	 *
@@ -63,7 +63,7 @@ final readonly class CampaignFactory {
 		int|string|EntityId $id,
 		int $version,
 		string $title,
-		bool $is_open,
+		bool $accepts_donations,
 		string $currency_code,
 		?int $target_amount,
 	): Campaign {
@@ -74,7 +74,7 @@ final readonly class CampaignFactory {
 				id: EntityId::create( $id ),
 				version: EntityVersion::create( $version ),
 				title: CampaignTitle::create( $title ),
-				is_open: $is_open,
+				accepts_donations: $accepts_donations,
 				target: CampaignTarget::create( $currency_code, $target_amount ),
 			);
 
@@ -96,14 +96,19 @@ final readonly class CampaignFactory {
 	 *
 	 * @param EntityId $id Campaign ID.
 	 * @param CampaignTitle $title Campaign title.
-	 * @param bool $is_open Whether the campaign is open.
+	 * @param bool $accepts_donations Whether the campaign accepts donations.
 	 * @param CampaignTarget $target Campaign target.
 	 *
 	 * @return Campaign Built campaign entity.
 	 */
-	public function create_new( EntityId $id, CampaignTitle $title, bool $is_open, CampaignTarget $target ): Campaign {
+	public function create_new(
+		EntityId $id,
+		CampaignTitle $title,
+		bool $accepts_donations,
+		CampaignTarget $target,
+	): Campaign {
 
-		return new Campaign( $id, EntityVersion::initial(), $title, $is_open, $target );
+		return new Campaign( $id, EntityVersion::initial(), $title, $accepts_donations, $target );
 	}
 
 	/**
@@ -113,7 +118,7 @@ final readonly class CampaignFactory {
 	 *
 	 * @param int|string|EntityId $id Campaign ID.
 	 * @param string $title Campaign title.
-	 * @param bool $is_open Whether the campaign is open.
+	 * @param bool $accepts_donations Whether the campaign accepts donations.
 	 * @param string $currency_code Campaign currency code (ISO 4217).
 	 * @param int|null $target_amount Target amount, if configured.
 	 *
@@ -124,7 +129,7 @@ final readonly class CampaignFactory {
 	public function create_new_from_primitives(
 		int|string|EntityId $id,
 		string $title,
-		bool $is_open,
+		bool $accepts_donations,
 		string $currency_code,
 		?int $target_amount,
 	): Campaign {
@@ -133,7 +138,7 @@ final readonly class CampaignFactory {
 			$id,
 			EntityVersion::initial()->get_value(),
 			$title,
-			$is_open,
+			$accepts_donations,
 			$currency_code,
 			$target_amount,
 		);

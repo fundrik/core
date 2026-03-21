@@ -13,7 +13,7 @@ use Throwable;
  *
  * @since 0.1.0
  */
-final class SyncCampaignFromSnapshotException extends CampaignApplicationException {
+class SyncCampaignFromSnapshotException extends CampaignApplicationException {
 
 	/**
 	 * Constructor.

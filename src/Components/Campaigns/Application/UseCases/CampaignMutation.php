@@ -17,14 +17,14 @@ enum CampaignMutation: string {
 	case Rename = 'rename';
 
 	/**
-	 * Campaign open mutation.
+	 * Campaign donations-enable mutation.
 	 */
-	case Open = 'open';
+	case EnableDonations = 'enable_donations';
 
 	/**
-	 * Campaign close mutation.
+	 * Campaign donations-disable mutation.
 	 */
-	case Close = 'close';
+	case DisableDonations = 'disable_donations';
 
 	/**
 	 * Campaign target mutation.
@@ -42,6 +42,8 @@ enum CampaignMutation: string {
 
 		return match ( $this ) {
 			self::ChangeTarget => 'change target for',
+			self::EnableDonations => 'enable donations for',
+			self::DisableDonations => 'disable donations for',
 			default => $this->value,
 		};
 	}
@@ -57,8 +59,8 @@ enum CampaignMutation: string {
 
 		return match ( $this ) {
 			self::Rename => 'renamed',
-			self::Open => 'opened',
-			self::Close => 'closed',
+			self::EnableDonations => 'donations enabled',
+			self::DisableDonations => 'donations disabled',
 			self::ChangeTarget => 'target changed',
 		};
 	}
@@ -74,6 +76,8 @@ enum CampaignMutation: string {
 
 		return match ( $this ) {
 			self::ChangeTarget => 'updated',
+			self::EnableDonations => 'updated',
+			self::DisableDonations => 'updated',
 			default => $this->event_label(),
 		};
 	}

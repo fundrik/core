@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign;
+namespace Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations;
 
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Throwable;
 
 /**
- * Thrown when open-campaign targets a campaign that no longer exists.
+ * Thrown when enable-campaign-donations targets a campaign that no longer exists.
  *
  * @since 0.1.0
  */
-final class OpenCampaignNotFoundException extends OpenCampaignException {
+final class EnableCampaignDonationsNotFoundException extends EnableCampaignDonationsException {
 
 	/**
 	 * Constructor.
@@ -27,7 +27,7 @@ final class OpenCampaignNotFoundException extends OpenCampaignException {
 		parent::__construct(
 			stage: UseCaseFailureStage::Persistence,
 			message: sprintf(
-				'Cannot open campaign "%s": campaign does not exist.',
+				'Cannot enable donations for campaign "%s": campaign does not exist.',
 				$campaign_id,
 			),
 			previous: $previous,
