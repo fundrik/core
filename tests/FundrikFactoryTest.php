@@ -18,6 +18,7 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\Delete
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -60,6 +61,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationCommandService::class )]
 #[UsesClass( FindCampaignByIdHandler::class )]
 #[UsesClass( CreateCampaignHandler::class )]
+#[UsesClass( SyncCampaignFromSnapshotHandler::class )]
 #[UsesClass( RenameCampaignHandler::class )]
 #[UsesClass( OpenCampaignHandler::class )]
 #[UsesClass( CloseCampaignHandler::class )]

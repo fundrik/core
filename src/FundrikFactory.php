@@ -15,6 +15,7 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\Delete
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
@@ -99,6 +100,7 @@ final readonly class FundrikFactory {
 		return new CampaignCommandService(
 			new CreateCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new CampaignFactory(),
+			new SyncCampaignFromSnapshotHandler( $this->campaign_repository, $this->event_bus ),
 			new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),

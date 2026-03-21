@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\Services;
 
 use Fundrik\Core\Components\Campaigns\Application\Commands\CreateCampaignCommand;
+use Fundrik\Core\Components\Campaigns\Application\Commands\SyncCampaignFromSnapshotCommand;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignClosedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignRenamedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignSynchronizedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignCommandService;
@@ -22,6 +24,9 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\Create
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotPreconditionReason;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
@@ -40,15 +45,20 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( CampaignCommandService::class )]
 #[UsesClass( CreateCampaignCommand::class )]
+#[UsesClass( SyncCampaignFromSnapshotCommand::class )]
 #[UsesClass( CreateCampaignException::class )]
+#[UsesClass( SyncCampaignFromSnapshotException::class )]
+#[UsesClass( SyncCampaignFromSnapshotPreconditionReason::class )]
 #[UsesClass( CampaignCreatedEvent::class )]
 #[UsesClass( CampaignRenamedEvent::class )]
 #[UsesClass( CampaignOpenedEvent::class )]
 #[UsesClass( CampaignClosedEvent::class )]
 #[UsesClass( CampaignTargetChangedEvent::class )]
 #[UsesClass( CampaignDeletedEvent::class )]
+#[UsesClass( CampaignSynchronizedEvent::class )]
 #[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( CreateCampaignHandler::class )]
+#[UsesClass( SyncCampaignFromSnapshotHandler::class )]
 #[UsesClass( RenameCampaignHandler::class )]
 #[UsesClass( OpenCampaignHandler::class )]
 #[UsesClass( CloseCampaignHandler::class )]
@@ -78,6 +88,7 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 		$this->command = new CampaignCommandService(
 			new CreateCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new CampaignFactory(),
+			new SyncCampaignFromSnapshotHandler( $this->campaign_repository, $this->event_bus ),
 			new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
 			new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),
@@ -150,6 +161,81 @@ final class CampaignCommandServiceTest extends MockeryTestCase {
 			$this->fail( 'Expected CreateCampaignException to be thrown.' );
 		} catch ( CreateCampaignException $exception ) {
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+			$this->assertSame(
+				'ID must be a positive integer or a valid UUID. Given: "invalid-id".',
+				$exception->getMessage(),
+			);
+		}
+	}
+
+	#[Test]
+	public function sync_from_snapshot_uses_injected_ports(): void {
+
+		$campaign = $this->make_campaign( id: 55, title: 'Old Campaign', is_open: false, target_amount: 1_000 );
+		$campaign_id = $campaign->get_id();
+		$command = new SyncCampaignFromSnapshotCommand(
+			id: $campaign_id,
+			expected_version: 1,
+			title: 'Synchronized Campaign',
+			accepts_donations: true,
+			currency_code: 'RUB',
+			target_amount: 5_000,
+		);
+
+		$this->campaign_repository
+			->shouldReceive( 'find_by_id' )
+			->once()
+			->withArgs(
+				static fn ( EntityId $actual_campaign_id ): bool => $actual_campaign_id->equals( $campaign_id ),
+			)
+			->andReturn( $campaign );
+
+		$this->campaign_repository
+			->shouldReceive( 'update' )
+			->once()
+			->withArgs(
+				function ( Campaign $updated_campaign ): bool {
+
+					$this->assertSame( 'Synchronized Campaign', $updated_campaign->get_title() );
+					$this->assertTrue( $updated_campaign->can_receive_donations() );
+					$this->assertSame( 5_000, $updated_campaign->get_target()->get_amount()?->get_value() );
+
+					return true;
+				},
+			)
+			->andReturnUsing( static fn ( Campaign $updated_campaign ): Campaign => $updated_campaign );
+
+		$this->event_bus
+			->shouldReceive( 'publish' )
+			->once()
+			->withArgs( $this->event_of_type( CampaignSynchronizedEvent::class, $campaign_id ) );
+
+		$this->command->sync_from_snapshot( $command );
+
+		$this->assertTrue( true );
+	}
+
+	#[Test]
+	public function sync_from_snapshot_wraps_invalid_id_message(): void {
+
+		$this->campaign_repository
+			->shouldNotReceive( 'find_by_id' );
+
+		$command = new SyncCampaignFromSnapshotCommand(
+			id: 'invalid-id',
+			expected_version: 1,
+			title: 'Snapshot Campaign',
+			accepts_donations: true,
+			currency_code: 'RUB',
+			target_amount: 500,
+		);
+
+		try {
+			$this->command->sync_from_snapshot( $command );
+			$this->fail( 'Expected SyncCampaignFromSnapshotException to be thrown.' );
+		} catch ( SyncCampaignFromSnapshotException $exception ) {
+			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+			$this->assertSame( SyncCampaignFromSnapshotPreconditionReason::SnapshotInvalid, $exception->get_reason() );
 			$this->assertSame(
 				'ID must be a positive integer or a valid UUID. Given: "invalid-id".',
 				$exception->getMessage(),

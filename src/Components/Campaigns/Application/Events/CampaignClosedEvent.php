@@ -11,7 +11,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
  *
  * @since 0.1.0
  */
-final readonly class CampaignClosedEvent implements CampaignApplicationEventInterface {
+final readonly class CampaignClosedEvent implements CampaignChangedEventInterface {
 
 	/**
 	 * Constructor.

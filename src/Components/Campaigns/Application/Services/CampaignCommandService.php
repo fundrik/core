@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\Services;
 
 use Fundrik\Core\Components\Campaigns\Application\Commands\CreateCampaignCommand;
+use Fundrik\Core\Components\Campaigns\Application\Commands\SyncCampaignFromSnapshotCommand;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CloseCampaign\CloseCampaignException;
@@ -17,6 +18,9 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCamp
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotPreconditionReason;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Campaigns\Domain\Exceptions\CampaignFactoryException;
@@ -42,6 +46,7 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param CreateCampaignHandler $create_campaign Creates new campaigns.
 	 * @param CampaignFactory $campaign_factory Creates campaigns from public input.
+	 * @param SyncCampaignFromSnapshotHandler $sync_campaign_from_snapshot Synchronizes campaigns from snapshots.
 	 * @param RenameCampaignHandler $rename_campaign Renames campaigns.
 	 * @param OpenCampaignHandler $open_campaign Opens campaigns for donations.
 	 * @param CloseCampaignHandler $close_campaign Closes campaigns for donations.
@@ -51,6 +56,7 @@ final readonly class CampaignCommandService {
 	public function __construct(
 		private CreateCampaignHandler $create_campaign,
 		private CampaignFactory $campaign_factory,
+		private SyncCampaignFromSnapshotHandler $sync_campaign_from_snapshot,
 		private RenameCampaignHandler $rename_campaign,
 		private OpenCampaignHandler $open_campaign,
 		private CloseCampaignHandler $close_campaign,
@@ -87,6 +93,38 @@ final readonly class CampaignCommandService {
 		}
 
 		$this->create_campaign->handle( $campaign );
+	}
+
+	/**
+	 * Synchronizes a campaign from an authoritative snapshot.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param SyncCampaignFromSnapshotCommand $command Public campaign synchronization input.
+	 *
+	 * @throws SyncCampaignFromSnapshotException When campaign synchronization fails.
+	 */
+	public function sync_from_snapshot( SyncCampaignFromSnapshotCommand $command ): void {
+
+		try {
+			$snapshot = $this->campaign_factory->create_from_primitives(
+				id: $command->get_id(),
+				version: $command->get_expected_version(),
+				title: $command->get_title(),
+				is_open: $command->can_receive_donations(),
+				currency_code: $command->get_currency_code(),
+				target_amount: $command->get_target_amount(),
+			);
+		} catch ( CampaignFactoryException $e ) {
+			throw new SyncCampaignFromSnapshotException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: SyncCampaignFromSnapshotPreconditionReason::SnapshotInvalid,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
+
+		$this->sync_campaign_from_snapshot->handle( $snapshot );
 	}
 
 	/**

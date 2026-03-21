@@ -7,11 +7,11 @@ namespace Fundrik\Core\Components\Campaigns\Application\Events;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Signals that a campaign target has changed.
+ * Signals that a campaign has been synchronized from a snapshot.
  *
  * @since 0.1.0
  */
-final readonly class CampaignTargetChangedEvent implements CampaignChangedEventInterface {
+final readonly class CampaignSynchronizedEvent implements CampaignChangedEventInterface {
 
 	/**
 	 * Constructor.

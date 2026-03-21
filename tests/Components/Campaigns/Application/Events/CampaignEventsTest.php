@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\Events;
 
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignApplicationEventInterface;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignChangedEventInterface;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignClosedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignCreatedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignDeletedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignOpenedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignRenamedEvent;
+use Fundrik\Core\Components\Campaigns\Application\Events\CampaignSynchronizedEvent;
 use Fundrik\Core\Components\Campaigns\Application\Events\CampaignTargetChangedEvent;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -24,6 +26,7 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass( CampaignOpenedEvent::class )]
 #[CoversClass( CampaignClosedEvent::class )]
 #[CoversClass( CampaignTargetChangedEvent::class )]
+#[CoversClass( CampaignSynchronizedEvent::class )]
 #[UsesClass( EntityId::class )]
 final class CampaignEventsTest extends TestCase {
 
@@ -50,6 +53,17 @@ final class CampaignEventsTest extends TestCase {
 		$this->assertTrue( $event->get_campaign_id()->equals( $id ) );
 	}
 
+	#[Test]
+	#[DataProvider( 'changed_event_class_provider' )]
+	public function it_marks_changed_events( string $event_class ): void {
+
+		$id = EntityId::create( 321 );
+		$event = new $event_class( $id );
+
+		$this->assertInstanceOf( CampaignChangedEventInterface::class, $event );
+		$this->assertTrue( $event->get_campaign_id()->equals( $id ) );
+	}
+
 	public static function event_class_provider(): array {
 
 		return [
@@ -59,6 +73,18 @@ final class CampaignEventsTest extends TestCase {
 			'opened' => [ CampaignOpenedEvent::class ],
 			'closed' => [ CampaignClosedEvent::class ],
 			'target_changed' => [ CampaignTargetChangedEvent::class ],
+			'synchronized' => [ CampaignSynchronizedEvent::class ],
+		];
+	}
+
+	public static function changed_event_class_provider(): array {
+
+		return [
+			'renamed' => [ CampaignRenamedEvent::class ],
+			'opened' => [ CampaignOpenedEvent::class ],
+			'closed' => [ CampaignClosedEvent::class ],
+			'target_changed' => [ CampaignTargetChangedEvent::class ],
+			'synchronized' => [ CampaignSynchronizedEvent::class ],
 		];
 	}
 }

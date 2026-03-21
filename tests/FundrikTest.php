@@ -16,6 +16,7 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\Delete
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
@@ -45,6 +46,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationCommandService::class )]
 #[UsesClass( FindCampaignByIdHandler::class )]
 #[UsesClass( CreateCampaignHandler::class )]
+#[UsesClass( SyncCampaignFromSnapshotHandler::class )]
 #[UsesClass( RenameCampaignHandler::class )]
 #[UsesClass( OpenCampaignHandler::class )]
 #[UsesClass( CloseCampaignHandler::class )]
@@ -85,6 +87,7 @@ final class FundrikTest extends MockeryTestCase {
 			new CampaignCommandService(
 				new CreateCampaignHandler( $this->campaign_repository, $this->event_bus ),
 				new CampaignFactory(),
+				new SyncCampaignFromSnapshotHandler( $this->campaign_repository, $this->event_bus ),
 				new RenameCampaignHandler( $this->campaign_repository, $this->event_bus ),
 				new OpenCampaignHandler( $this->campaign_repository, $this->event_bus ),
 				new CloseCampaignHandler( $this->campaign_repository, $this->event_bus ),
