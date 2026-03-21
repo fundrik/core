@@ -9,6 +9,7 @@ use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -38,6 +39,30 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 			can_receive_donations: $can_receive_donations,
 			currency_code: $currency_code,
 			target_amount: $target_amount,
+			created_at: $created_at ?? $this->make_utc_date_time( '2026-03-01T10:00:00+00:00' ),
+			updated_at: $updated_at,
+		);
+	}
+
+	/**
+	 * Returns valid donation details for tests with optional field overrides.
+	 */
+	protected function make_donation_details(
+		int|string $id = 5_001,
+		int|string $campaign_id = 901,
+		int $amount = 1_000,
+		string $currency_code = 'RUB',
+		string $status = 'pending',
+		?UtcDateTime $created_at = null,
+		?UtcDateTime $updated_at = null,
+	): DonationDetails {
+
+		return new DonationDetails(
+			id: $id,
+			campaign_id: $campaign_id,
+			amount: $amount,
+			currency_code: $currency_code,
+			status: $status,
 			created_at: $created_at ?? $this->make_utc_date_time( '2026-03-01T10:00:00+00:00' ),
 			updated_at: $updated_at,
 		);

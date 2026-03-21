@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Application\Services;
 
 use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -24,11 +23,9 @@ final readonly class DonationQueryService {
 	 * @since 0.1.0
 	 *
 	 * @param FindDonationByIdHandler $find_donation_by_id Retrieves a donation by its ID.
-	 * @param DonationDetailsMapper $donation_details_mapper Maps domain donations to public details.
 	 */
 	public function __construct(
 		private FindDonationByIdHandler $find_donation_by_id,
-		private DonationDetailsMapper $donation_details_mapper,
 	) {}
 
 	/**
@@ -45,15 +42,9 @@ final readonly class DonationQueryService {
 	public function find_by_id( int|string|EntityId $donation_id ): ?DonationDetails {
 
 		try {
-			$donation = $this->find_donation_by_id->handle( EntityId::create( $donation_id ) );
+			return $this->find_donation_by_id->handle( EntityId::create( $donation_id ) );
 		} catch ( InvalidEntityIdException $e ) {
 			throw new FindDonationByIdException( $e->getMessage(), previous: $e );
 		}
-
-		if ( $donation === null ) {
-			return null;
-		}
-
-		return $this->donation_details_mapper->map( $donation );
 	}
 }

@@ -16,8 +16,8 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\Find
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
@@ -43,12 +43,14 @@ final readonly class FundrikFactory {
 	 * @since 0.1.0
 	 *
 	 * @param CampaignDetailsReadPort $campaign_details_read Campaign details read port.
+	 * @param DonationDetailsReadPort $donation_details_read Donation details read port.
 	 * @param CampaignRepositoryPort $campaign_repository Provides campaign persistence.
 	 * @param DonationRepositoryPort $donation_repository Provides donation persistence.
 	 * @param ApplicationEventBusPort $event_bus Publishes application events.
 	 */
 	public function __construct(
 		private CampaignDetailsReadPort $campaign_details_read,
+		private DonationDetailsReadPort $donation_details_read,
 		private CampaignRepositoryPort $campaign_repository,
 		private DonationRepositoryPort $donation_repository,
 		private ApplicationEventBusPort $event_bus,
@@ -115,8 +117,7 @@ final readonly class FundrikFactory {
 	private function create_donation_query_service(): DonationQueryService {
 
 		return new DonationQueryService(
-			new FindDonationByIdHandler( $this->donation_repository ),
-			new DonationDetailsMapper(),
+			new FindDonationByIdHandler( $this->donation_details_read ),
 		);
 	}
 
@@ -130,9 +131,12 @@ final readonly class FundrikFactory {
 	private function create_donation_command_service(): DonationCommandService {
 
 		return new DonationCommandService(
-			new CreateDonationHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
+			new CreateDonationHandler(
+				$this->campaign_repository,
+				$this->donation_repository,
+				$this->event_bus,
+			),
 			new DonationFactory(),
-			new DonationDetailsMapper(),
 			new AuthorizeDonationHandler( $this->donation_repository, $this->event_bus ),
 			new CaptureDonationHandler( $this->donation_repository, $this->event_bus ),
 			new FailDonationHandler( $this->donation_repository, $this->event_bus ),

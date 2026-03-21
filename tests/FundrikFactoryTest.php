@@ -22,9 +22,9 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Events\DonationAuthorizedEvent;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
@@ -53,7 +53,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Fundrik::class )]
 #[UsesClass( CampaignDetails::class )]
 #[UsesClass( DonationDetails::class )]
-#[UsesClass( DonationDetailsMapper::class )]
 #[UsesClass( CampaignQueryService::class )]
 #[UsesClass( CampaignCommandService::class )]
 #[UsesClass( AbstractCampaignMutationHandler::class )]
@@ -87,6 +86,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 final class FundrikFactoryTest extends MockeryTestCase {
 
 	private CampaignDetailsReadPort&MockInterface $campaign_details_read;
+	private DonationDetailsReadPort&MockInterface $donation_details_read;
 	private CampaignRepositoryPort&MockInterface $campaign_repository;
 	private DonationRepositoryPort&MockInterface $donation_repository;
 	private ApplicationEventBusPort&MockInterface $event_bus;
@@ -97,12 +97,14 @@ final class FundrikFactoryTest extends MockeryTestCase {
 		parent::setUp();
 
 		$this->campaign_details_read = Mockery::mock( CampaignDetailsReadPort::class );
+		$this->donation_details_read = Mockery::mock( DonationDetailsReadPort::class );
 		$this->campaign_repository = Mockery::mock( CampaignRepositoryPort::class );
 		$this->donation_repository = Mockery::mock( DonationRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
 		$this->fundrik = ( new FundrikFactory(
 			$this->campaign_details_read,
+			$this->donation_details_read,
 			$this->campaign_repository,
 			$this->donation_repository,
 			$this->event_bus,
@@ -182,27 +184,34 @@ final class FundrikFactoryTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function create_wires_donation_query_to_injected_donation_repository(): void {
+	public function create_wires_donation_query_to_injected_donation_details_read_port(): void {
 
-		$donation = $this->make_pending_donation( 5_001, 1_001 );
-		$donation_id = $donation->get_id();
+		$details = $this->make_donation_details(
+			id: 5_001,
+			campaign_id: 1_001,
+			status: 'pending',
+			updated_at: $this->make_utc_date_time( '2026-03-02T10:00:00+00:00' ),
+		);
+		$donation_id = EntityId::create( $details->get_id() );
 
-		$this->donation_repository
+		$this->donation_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->withArgs(
 				static fn ( EntityId $actual_donation_id ): bool => $actual_donation_id->equals( $donation_id ),
 			)
-			->andReturn( $donation );
+			->andReturn( $details );
 
 		$result = $this->fundrik->donation_query()->find_by_id( $donation_id->get_value() );
 
 		$this->assertInstanceOf( DonationDetails::class, $result );
-		$this->assertSame( $donation_id->get_value(), $result->get_id() );
-		$this->assertSame( $donation->get_campaign_id()->get_value(), $result->get_campaign_id() );
-		$this->assertSame( $donation->get_money()->get_amount()->get_value(), $result->get_amount() );
-		$this->assertSame( $donation->get_money()->get_currency()->get_code(), $result->get_currency_code() );
-		$this->assertSame( $donation->get_status()->value, $result->get_status() );
+		$this->assertSame( $details->get_id(), $result->get_id() );
+		$this->assertSame( $details->get_campaign_id(), $result->get_campaign_id() );
+		$this->assertSame( $details->get_amount(), $result->get_amount() );
+		$this->assertSame( $details->get_currency_code(), $result->get_currency_code() );
+		$this->assertSame( $details->get_status(), $result->get_status() );
+		$this->assertSame( $details->get_created_at(), $result->get_created_at() );
+		$this->assertSame( $details->get_updated_at(), $result->get_updated_at() );
 	}
 
 	#[Test]
@@ -245,10 +254,6 @@ final class FundrikFactoryTest extends MockeryTestCase {
 				},
 			);
 
-		$result = $this->fundrik->donation_command()->authorize( $donation_id->get_value() );
-
-		$this->assertInstanceOf( DonationDetails::class, $result );
-		$this->assertSame( $donation_id->get_value(), $result->get_id() );
-		$this->assertSame( 'authorized', $result->get_status() );
+		$this->fundrik->donation_command()->authorize( $donation_id->get_value() );
 	}
 }

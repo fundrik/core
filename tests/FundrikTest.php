@@ -17,8 +17,8 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\Find
 use Fundrik\Core\Components\Campaigns\Application\UseCases\OpenCampaign\OpenCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
@@ -43,7 +43,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( DonationQueryService::class )]
 #[UsesClass( DonationCommandService::class )]
-#[UsesClass( DonationDetailsMapper::class )]
 #[UsesClass( FindCampaignByIdHandler::class )]
 #[UsesClass( CreateCampaignHandler::class )]
 #[UsesClass( RenameCampaignHandler::class )]
@@ -64,6 +63,7 @@ final class FundrikTest extends MockeryTestCase {
 
 	private CampaignDetailsReadPort&MockInterface $campaign_details_read;
 	private CampaignRepositoryPort&MockInterface $campaign_repository;
+	private DonationDetailsReadPort&MockInterface $donation_details_read;
 	private DonationRepositoryPort&MockInterface $donation_repository;
 	private ApplicationEventBusPort&MockInterface $event_bus;
 	private Fundrik $fundrik;
@@ -74,6 +74,7 @@ final class FundrikTest extends MockeryTestCase {
 
 		$this->campaign_details_read = Mockery::mock( CampaignDetailsReadPort::class );
 		$this->campaign_repository = Mockery::mock( CampaignRepositoryPort::class );
+		$this->donation_details_read = Mockery::mock( DonationDetailsReadPort::class );
 		$this->donation_repository = Mockery::mock( DonationRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
@@ -91,18 +92,35 @@ final class FundrikTest extends MockeryTestCase {
 				new DeleteCampaignHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
 			),
 			new DonationQueryService(
-				new FindDonationByIdHandler( $this->donation_repository ),
-				new DonationDetailsMapper(),
+				new FindDonationByIdHandler( $this->donation_details_read ),
 			),
 			new DonationCommandService(
-				new CreateDonationHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
+				new CreateDonationHandler(
+					$this->campaign_repository,
+					$this->donation_repository,
+					$this->event_bus,
+				),
 				new DonationFactory(),
-				new DonationDetailsMapper(),
-				new AuthorizeDonationHandler( $this->donation_repository, $this->event_bus ),
-				new CaptureDonationHandler( $this->donation_repository, $this->event_bus ),
-				new FailDonationHandler( $this->donation_repository, $this->event_bus ),
-				new RefundDonationHandler( $this->donation_repository, $this->event_bus ),
-				new CancelDonationHandler( $this->donation_repository, $this->event_bus ),
+				new AuthorizeDonationHandler(
+					$this->donation_repository,
+					$this->event_bus,
+				),
+				new CaptureDonationHandler(
+					$this->donation_repository,
+					$this->event_bus,
+				),
+				new FailDonationHandler(
+					$this->donation_repository,
+					$this->event_bus,
+				),
+				new RefundDonationHandler(
+					$this->donation_repository,
+					$this->event_bus,
+				),
+				new CancelDonationHandler(
+					$this->donation_repository,
+					$this->event_bus,
+				),
 			),
 		);
 	}

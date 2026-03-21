@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById;
 
-use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
-use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
-use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadExceptionInterface;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
@@ -21,10 +21,10 @@ final readonly class FindDonationByIdHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DonationRepositoryPort $repository Retrieves donations from storage.
+	 * @param DonationDetailsReadPort $donation_details_read Retrieves donation details from storage.
 	 */
 	public function __construct(
-		private DonationRepositoryPort $repository,
+		private DonationDetailsReadPort $donation_details_read,
 	) {}
 
 	/**
@@ -34,15 +34,15 @@ final readonly class FindDonationByIdHandler {
 	 *
 	 * @param EntityId $donation_id Donation ID to retrieve.
 	 *
-	 * @return Donation|null Donation if found, null otherwise.
+	 * @return DonationDetails|null Donation details if found, null otherwise.
 	 *
 	 * @throws FindDonationByIdException When donation retrieval fails.
 	 */
-	public function handle( EntityId $donation_id ): ?Donation {
+	public function handle( EntityId $donation_id ): ?DonationDetails {
 
 		try {
-			return $this->repository->find_by_id( $donation_id );
-		} catch ( DonationRepositoryExceptionInterface $e ) {
+			return $this->donation_details_read->find_by_id( $donation_id );
+		} catch ( DonationDetailsReadExceptionInterface $e ) {
 			throw new FindDonationByIdException(
 				sprintf(
 					'Failed to retrieve donation "%s".',

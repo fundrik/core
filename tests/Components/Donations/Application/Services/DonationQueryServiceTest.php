@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Tests\Components\Donations\Application\Services;
 
-use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
 use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
-use Fundrik\Core\Components\Donations\Domain\Donation;
-use Fundrik\Core\Components\Donations\Domain\DonationFactory;
-use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\Money;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -25,17 +19,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( DonationQueryService::class )]
 #[UsesClass( DonationDetails::class )]
-#[UsesClass( DonationDetailsMapper::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
-#[UsesClass( Donation::class )]
-#[UsesClass( DonationFactory::class )]
-#[UsesClass( DonationStatus::class )]
-#[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( Money::class )]
 final class DonationQueryServiceTest extends MockeryTestCase {
 
-	private DonationRepositoryPort&MockInterface $donation_repository;
+	private DonationDetailsReadPort&MockInterface $donation_details_read;
 
 	private DonationQueryService $query;
 
@@ -43,35 +31,41 @@ final class DonationQueryServiceTest extends MockeryTestCase {
 
 		parent::setUp();
 
-		$this->donation_repository = Mockery::mock( DonationRepositoryPort::class );
+		$this->donation_details_read = Mockery::mock( DonationDetailsReadPort::class );
 		$this->query = new DonationQueryService(
-			new FindDonationByIdHandler( $this->donation_repository ),
-			new DonationDetailsMapper(),
+			new FindDonationByIdHandler( $this->donation_details_read ),
 		);
 	}
 
 	#[Test]
-	public function find_by_id_uses_injected_donation_repository(): void {
+	public function find_by_id_uses_injected_donation_details_read_port(): void {
 
-		$donation = $this->make_pending_donation( 5_001, 901 );
-		$donation_id = $donation->get_id();
+		$details = $this->make_donation_details(
+			id: 5_001,
+			campaign_id: 901,
+			status: 'pending',
+			updated_at: $this->make_utc_date_time( '2026-03-02T10:00:00+00:00' ),
+		);
+		$donation_id = EntityId::create( $details->get_id() );
 
-		$this->donation_repository
+		$this->donation_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->withArgs(
 				static fn ( EntityId $actual_donation_id ): bool => $actual_donation_id->equals( $donation_id ),
 			)
-			->andReturn( $donation );
+			->andReturn( $details );
 
 		$result = $this->query->find_by_id( $donation_id->get_value() );
 
 		$this->assertInstanceOf( DonationDetails::class, $result );
-		$this->assertSame( $donation_id->get_value(), $result->get_id() );
-		$this->assertSame( $donation->get_campaign_id()->get_value(), $result->get_campaign_id() );
-		$this->assertSame( $donation->get_money()->get_amount()->get_value(), $result->get_amount() );
-		$this->assertSame( $donation->get_money()->get_currency()->get_code(), $result->get_currency_code() );
-		$this->assertSame( $donation->get_status()->value, $result->get_status() );
+		$this->assertSame( $details->get_id(), $result->get_id() );
+		$this->assertSame( $details->get_campaign_id(), $result->get_campaign_id() );
+		$this->assertSame( $details->get_amount(), $result->get_amount() );
+		$this->assertSame( $details->get_currency_code(), $result->get_currency_code() );
+		$this->assertSame( $details->get_status(), $result->get_status() );
+		$this->assertSame( $details->get_created_at(), $result->get_created_at() );
+		$this->assertSame( $details->get_updated_at(), $result->get_updated_at() );
 	}
 
 	#[Test]

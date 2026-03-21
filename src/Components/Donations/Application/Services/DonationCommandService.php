@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Application\Services;
 
 use Fundrik\Core\Components\Donations\Application\Commands\CreateDonationCommand;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CancelDonation\CancelDonationException;
@@ -39,7 +37,6 @@ final readonly class DonationCommandService {
 	 *
 	 * @param CreateDonationHandler $create_donation Creates new donations.
 	 * @param DonationFactory $donation_factory Creates donations from public input.
-	 * @param DonationDetailsMapper $donation_details_mapper Maps domain donations to public details.
 	 * @param AuthorizeDonationHandler $authorize_donation Authorizes donations.
 	 * @param CaptureDonationHandler $capture_donation Captures donations.
 	 * @param FailDonationHandler $fail_donation Marks donations as failed.
@@ -49,7 +46,6 @@ final readonly class DonationCommandService {
 	public function __construct(
 		private CreateDonationHandler $create_donation,
 		private DonationFactory $donation_factory,
-		private DonationDetailsMapper $donation_details_mapper,
 		private AuthorizeDonationHandler $authorize_donation,
 		private CaptureDonationHandler $capture_donation,
 		private FailDonationHandler $fail_donation,
@@ -64,11 +60,9 @@ final readonly class DonationCommandService {
 	 *
 	 * @param CreateDonationCommand $command Public donation creation input.
 	 *
-	 * @return DonationDetails Persisted donation details.
-	 *
 	 * @throws CreateDonationException When creation fails.
 	 */
-	public function create( CreateDonationCommand $command ): DonationDetails {
+	public function create( CreateDonationCommand $command ): void {
 
 		try {
 			$donation = $this->donation_factory->create_pending_from_primitives(
@@ -85,7 +79,7 @@ final readonly class DonationCommandService {
 			);
 		}
 
-		return $this->donation_details_mapper->map( $this->create_donation->handle( $donation ) );
+		$this->create_donation->handle( $donation );
 	}
 
 	/**
@@ -95,11 +89,9 @@ final readonly class DonationCommandService {
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return DonationDetails Persisted donation details.
-	 *
 	 * @throws AuthorizeDonationException When authorization fails.
 	 */
-	public function authorize( int|string|EntityId $donation_id ): DonationDetails {
+	public function authorize( int|string|EntityId $donation_id ): void {
 
 		try {
 			$entity_id = EntityId::create( $donation_id );
@@ -111,9 +103,7 @@ final readonly class DonationCommandService {
 			);
 		}
 
-		return $this->donation_details_mapper->map(
-			$this->authorize_donation->handle( $entity_id ),
-		);
+		$this->authorize_donation->handle( $entity_id );
 	}
 
 	/**
@@ -123,11 +113,9 @@ final readonly class DonationCommandService {
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return DonationDetails Persisted donation details.
-	 *
 	 * @throws CaptureDonationException When capture fails.
 	 */
-	public function capture( int|string|EntityId $donation_id ): DonationDetails {
+	public function capture( int|string|EntityId $donation_id ): void {
 
 		try {
 			$entity_id = EntityId::create( $donation_id );
@@ -139,9 +127,7 @@ final readonly class DonationCommandService {
 			);
 		}
 
-		return $this->donation_details_mapper->map(
-			$this->capture_donation->handle( $entity_id ),
-		);
+		$this->capture_donation->handle( $entity_id );
 	}
 
 	/**
@@ -151,11 +137,9 @@ final readonly class DonationCommandService {
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return DonationDetails Persisted donation details.
-	 *
 	 * @throws FailDonationException When failure marking fails.
 	 */
-	public function fail( int|string|EntityId $donation_id ): DonationDetails {
+	public function fail( int|string|EntityId $donation_id ): void {
 
 		try {
 			$entity_id = EntityId::create( $donation_id );
@@ -167,9 +151,7 @@ final readonly class DonationCommandService {
 			);
 		}
 
-		return $this->donation_details_mapper->map(
-			$this->fail_donation->handle( $entity_id ),
-		);
+		$this->fail_donation->handle( $entity_id );
 	}
 
 	/**
@@ -179,11 +161,9 @@ final readonly class DonationCommandService {
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return DonationDetails Persisted donation details.
-	 *
 	 * @throws RefundDonationException When refund fails.
 	 */
-	public function refund( int|string|EntityId $donation_id ): DonationDetails {
+	public function refund( int|string|EntityId $donation_id ): void {
 
 		try {
 			$entity_id = EntityId::create( $donation_id );
@@ -195,9 +175,7 @@ final readonly class DonationCommandService {
 			);
 		}
 
-		return $this->donation_details_mapper->map(
-			$this->refund_donation->handle( $entity_id ),
-		);
+		$this->refund_donation->handle( $entity_id );
 	}
 
 	/**
@@ -207,11 +185,9 @@ final readonly class DonationCommandService {
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return DonationDetails Persisted donation details.
-	 *
 	 * @throws CancelDonationException When cancellation fails.
 	 */
-	public function cancel( int|string|EntityId $donation_id ): DonationDetails {
+	public function cancel( int|string|EntityId $donation_id ): void {
 
 		try {
 			$entity_id = EntityId::create( $donation_id );
@@ -223,8 +199,6 @@ final readonly class DonationCommandService {
 			);
 		}
 
-		return $this->donation_details_mapper->map(
-			$this->cancel_donation->handle( $entity_id ),
-		);
+		$this->cancel_donation->handle( $entity_id );
 	}
 }

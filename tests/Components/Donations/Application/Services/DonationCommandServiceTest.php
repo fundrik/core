@@ -15,8 +15,6 @@ use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationFailedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationRefundedEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetailsMapper;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\UseCases\AbstractDonationMutationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\AuthorizeDonation\AuthorizeDonationException;
@@ -49,8 +47,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationRefundedEvent::class )]
 #[UsesClass( DonationCanceledEvent::class )]
 #[UsesClass( CreateDonationCommand::class )]
-#[UsesClass( DonationDetails::class )]
-#[UsesClass( DonationDetailsMapper::class )]
 #[UsesClass( AbstractDonationMutationHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
 #[UsesClass( AuthorizeDonationHandler::class )]
@@ -83,9 +79,12 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
 
 		$this->command = new DonationCommandService(
-			new CreateDonationHandler( $this->campaign_repository, $this->donation_repository, $this->event_bus ),
+			new CreateDonationHandler(
+				$this->campaign_repository,
+				$this->donation_repository,
+				$this->event_bus,
+			),
 			new DonationFactory(),
-			new DonationDetailsMapper(),
 			new AuthorizeDonationHandler( $this->donation_repository, $this->event_bus ),
 			new CaptureDonationHandler( $this->donation_repository, $this->event_bus ),
 			new FailDonationHandler( $this->donation_repository, $this->event_bus ),
@@ -130,14 +129,7 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( DonationCreatedEvent::class, EntityId::create( 5_001 ) ) );
 
-		$result = $this->command->create( $command );
-
-		$this->assertInstanceOf( DonationDetails::class, $result );
-		$this->assertSame( 5_001, $result->get_id() );
-		$this->assertSame( 901, $result->get_campaign_id() );
-		$this->assertSame( 1_000, $result->get_amount() );
-		$this->assertSame( 'RUB', $result->get_currency_code() );
-		$this->assertSame( DonationStatus::Pending->value, $result->get_status() );
+		$this->command->create( $command );
 	}
 
 	#[Test]
@@ -180,11 +172,7 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 			->once()
 			->withArgs( $this->event_of_type( $event_class, $donation_id ) );
 
-		$result = $this->command->{$method}( $donation_id->get_value() );
-
-		$this->assertInstanceOf( DonationDetails::class, $result );
-		$this->assertSame( $expected_status, $result->get_status() );
-		$this->assertSame( $donation_id->get_value(), $result->get_id() );
+		$this->command->{$method}( $donation_id->get_value() );
 	}
 
 	public static function mutation_provider(): array {

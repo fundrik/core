@@ -22,6 +22,7 @@
 # Editing Conventions
 
 - When editing files in this repository, preserve Windows line endings (`CRLF`).
+- Do not add runtime no-op code like `unset( $unused )` only to silence linting for fixed callback signatures; prefer a targeted `phpcs:ignore` with a short reason instead.
 
 # Docblock Conventions
 

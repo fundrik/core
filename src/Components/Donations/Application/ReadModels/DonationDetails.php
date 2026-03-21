@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\ReadModels;
 
+use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
+
 /**
  * Represents donation details exposed by the public read API.
  *
@@ -21,6 +23,8 @@ final readonly class DonationDetails {
 	 * @param int $amount Donation amount.
 	 * @param string $currency_code Donation currency code.
 	 * @param string $status Donation status.
+	 * @param UtcDateTime $created_at Creation timestamp.
+	 * @param UtcDateTime|null $updated_at Update timestamp, null otherwise.
 	 */
 	public function __construct(
 		private int|string $id,
@@ -28,6 +32,8 @@ final readonly class DonationDetails {
 		private int $amount,
 		private string $currency_code,
 		private string $status,
+		private UtcDateTime $created_at,
+		private ?UtcDateTime $updated_at = null,
 	) {}
 
 	/**
@@ -88,5 +94,29 @@ final readonly class DonationDetails {
 	public function get_status(): string {
 
 		return $this->status;
+	}
+
+	/**
+	 * Returns the creation timestamp.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return UtcDateTime Creation timestamp.
+	 */
+	public function get_created_at(): UtcDateTime {
+
+		return $this->created_at;
+	}
+
+	/**
+	 * Returns the last update timestamp.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return UtcDateTime|null Update timestamp, null otherwise.
+	 */
+	public function get_updated_at(): ?UtcDateTime {
+
+		return $this->updated_at;
 	}
 }

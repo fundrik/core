@@ -5,17 +5,13 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases\FindDonationById;
 
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
-use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
+use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
-use Fundrik\Core\Components\Donations\Domain\Donation;
-use Fundrik\Core\Components\Donations\Domain\DonationFactory;
-use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Components\Shared\Domain\EntityVersion;
-use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Tests\Fixtures\FakeDonationRepositoryException;
+use Fundrik\Core\Tests\Fixtures\FakeDonationDetailsReadException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -27,15 +23,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FindDonationByIdException::class )]
 #[UsesClass( DonationApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
-#[UsesClass( Donation::class )]
-#[UsesClass( DonationFactory::class )]
-#[UsesClass( DonationStatus::class )]
-#[UsesClass( EntityVersion::class )]
+#[UsesClass( DonationDetails::class )]
 #[UsesClass( EntityId::class )]
-#[UsesClass( Money::class )]
 final class FindDonationByIdHandlerTest extends MockeryTestCase {
 
-	private DonationRepositoryPort&MockInterface $repository;
+	private DonationDetailsReadPort&MockInterface $donation_details_read;
 
 	private FindDonationByIdHandler $handler;
 
@@ -43,25 +35,25 @@ final class FindDonationByIdHandlerTest extends MockeryTestCase {
 
 		parent::setUp();
 
-		$this->repository = Mockery::mock( DonationRepositoryPort::class );
-		$this->handler = new FindDonationByIdHandler( $this->repository );
+		$this->donation_details_read = Mockery::mock( DonationDetailsReadPort::class );
+		$this->handler = new FindDonationByIdHandler( $this->donation_details_read );
 	}
 
 	#[Test]
-	public function handle_returns_donation(): void {
+	public function handle_returns_donation_details(): void {
 
-		$donation = $this->make_pending_donation();
-		$donation_id = $donation->get_id();
+		$details = $this->make_donation_details();
+		$donation_id = EntityId::create( $details->get_id() );
 
-		$this->repository
+		$this->donation_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
-			->andReturn( $donation );
+			->andReturn( $details );
 
 		$result = $this->handler->handle( $donation_id );
 
-		$this->assertSame( $donation, $result );
+		$this->assertSame( $details, $result );
 	}
 
 	#[Test]
@@ -69,7 +61,7 @@ final class FindDonationByIdHandlerTest extends MockeryTestCase {
 
 		$donation_id = EntityId::create( 5_001 );
 
-		$this->repository
+		$this->donation_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
@@ -84,9 +76,9 @@ final class FindDonationByIdHandlerTest extends MockeryTestCase {
 	public function handle_wraps_repository_exception(): void {
 
 		$donation_id = EntityId::create( 5_001 );
-		$e = new FakeDonationRepositoryException();
+		$e = new FakeDonationDetailsReadException();
 
-		$this->repository
+		$this->donation_details_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
@@ -97,6 +89,7 @@ final class FindDonationByIdHandlerTest extends MockeryTestCase {
 			$this->fail( 'Expected FindDonationByIdException to be thrown.' );
 		} catch ( FindDonationByIdException $exception ) {
 			$this->assertSame( $e, $exception->getPrevious() );
+			$this->assertSame( 'Failed to retrieve donation "5001".', $exception->getMessage() );
 		}
 	}
 }
