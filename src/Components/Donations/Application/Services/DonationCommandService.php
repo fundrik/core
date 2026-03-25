@@ -7,16 +7,17 @@ namespace Fundrik\Core\Components\Donations\Application\Services;
 use Fundrik\Core\Components\Donations\Application\Commands\CreateDonationCommand;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\DonationCreationData;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationHandler;
-use Fundrik\Core\Components\Donations\Domain\DonationFactory;
-use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationFactoryException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+use Fundrik\Core\Components\Shared\Domain\Amount;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidAmountException;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 
 /**
@@ -32,14 +33,12 @@ final readonly class DonationCommandService {
 	 * @since 0.1.0
 	 *
 	 * @param CreateDonationHandler $create_donation Creates new donations.
-	 * @param DonationFactory $donation_factory Creates donations from public input.
 	 * @param SucceedDonationHandler $succeed_donation Marks donations as succeeded.
 	 * @param RejectDonationHandler $reject_donation Marks donations as rejected.
 	 * @param RefundDonationHandler $refund_donation Refunds donations.
 	 */
 	public function __construct(
 		private CreateDonationHandler $create_donation,
-		private DonationFactory $donation_factory,
 		private SucceedDonationHandler $succeed_donation,
 		private RejectDonationHandler $reject_donation,
 		private RefundDonationHandler $refund_donation,
@@ -57,13 +56,12 @@ final readonly class DonationCommandService {
 	public function create( CreateDonationCommand $command ): void {
 
 		try {
-			$donation = $this->donation_factory->create_pending_from_primitives(
-				id: $command->get_id(),
-				campaign_id: $command->get_campaign_id(),
-				amount: $command->get_amount(),
-				currency_code: $command->get_currency_code(),
+			$creation_data = new DonationCreationData(
+				donation_id: EntityId::create( $command->get_id() ),
+				campaign_id: EntityId::create( $command->get_campaign_id() ),
+				amount: Amount::create( $command->get_amount() ),
 			);
-		} catch ( DonationFactoryException $e ) {
+		} catch ( InvalidEntityIdException | InvalidAmountException $e ) {
 			throw new CreateDonationException(
 				stage: UseCaseFailureStage::Precondition,
 				message: $e->getMessage(),
@@ -71,7 +69,7 @@ final readonly class DonationCommandService {
 			);
 		}
 
-		$this->create_donation->handle( $donation );
+		$this->create_donation->handle( $creation_data );
 	}
 
 	/**

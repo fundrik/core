@@ -133,10 +133,10 @@ final readonly class FundrikFactory {
 		return new DonationCommandService(
 			new CreateDonationHandler(
 				$this->campaign_repository,
+				new DonationFactory(),
 				$this->donation_repository,
 				$this->event_bus,
 			),
-			new DonationFactory(),
 			new SucceedDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RejectDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RefundDonationHandler( $this->donation_repository, $this->event_bus ),

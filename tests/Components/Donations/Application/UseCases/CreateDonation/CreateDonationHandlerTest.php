@@ -12,14 +12,15 @@ use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplication
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationAlreadyExistsException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\DonationCreationData;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationPreconditionReason;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
-use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
+use Fundrik\Core\Components\Shared\Domain\Amount;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
@@ -42,12 +43,13 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DonationApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( DonationCreatedEvent::class )]
+#[UsesClass( DonationCreationData::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
-#[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityId::class )]
+#[UsesClass( Amount::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( Money::class )]
 final class CreateDonationHandlerTest extends MockeryTestCase {
@@ -65,69 +67,100 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 		$this->campaigns = Mockery::mock( CampaignRepositoryPort::class );
 		$this->repository = Mockery::mock( DonationRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
-		$this->handler = new CreateDonationHandler( $this->campaigns, $this->repository, $this->event_bus );
+		$this->handler = new CreateDonationHandler(
+			$this->campaigns,
+			new DonationFactory(),
+			$this->repository,
+			$this->event_bus,
+		);
 	}
 
 	#[Test]
 	public function handle_inserts_donation(): void {
 
-		$donation = $this->make_pending_donation();
+		$data = new DonationCreationData(
+			donation_id: EntityId::create( 5_001 ),
+			campaign_id: EntityId::create( 901 ),
+			amount: Amount::create( 1_000 ),
+		);
 		$campaign = $this->make_donation_campaign();
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->with( $this->identicalTo( $data->get_campaign_id() ) )
 			->andReturn( $campaign );
 
 		$this->repository
 			->shouldReceive( 'insert' )
 			->once()
-			->with( $this->identicalTo( $donation ) )
-			->andReturn( $donation );
+			->withArgs(
+				function ( Donation $donation ) use ( $data ): bool {
+
+					$this->assertSame( $data->get_donation_id(), $donation->get_id() );
+					$this->assertSame( $data->get_campaign_id(), $donation->get_campaign_id() );
+					$this->assertSame( $data->get_amount()->get_value(), $donation->get_money()->get_amount()->get_value() );
+					$this->assertSame( 'RUB', $donation->get_money()->get_currency()->get_code() );
+
+					return true;
+				},
+			)
+			->andReturnUsing( static fn ( Donation $donation ): Donation => $donation );
 
 		$this->event_bus
 			->shouldReceive( 'publish' )
 			->once()
 			->withArgs(
-				function ( object $event ) use ( $donation ): bool {
+				function ( object $event ) use ( $data ): bool {
 
 					$this->assertInstanceOf( DonationCreatedEvent::class, $event );
-					$this->assertSame( $donation->get_id(), $event->get_donation_id() );
+					$this->assertSame( $data->get_donation_id(), $event->get_donation_id() );
 
 					return true;
 				},
 			);
 
-		$result = $this->handler->handle( $donation );
+		$result = $this->handler->handle( $data );
 
-		$this->assertSame( $donation, $result );
+		$this->assertSame( $data->get_donation_id(), $result->get_id() );
+		$this->assertSame( $data->get_campaign_id(), $result->get_campaign_id() );
 	}
 
 	#[Test]
 	public function handle_throws_when_donation_already_exists(): void {
 
-		$donation = $this->make_pending_donation();
+		$data = new DonationCreationData(
+			donation_id: EntityId::create( 5_001 ),
+			campaign_id: EntityId::create( 901 ),
+			amount: Amount::create( 1_000 ),
+		);
 		$campaign = $this->make_donation_campaign();
 		$e = new FakeDonationAlreadyExistsException();
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->with( $this->identicalTo( $data->get_campaign_id() ) )
 			->andReturn( $campaign );
 
 		$this->repository
 			->shouldReceive( 'insert' )
 			->once()
-			->with( $this->identicalTo( $donation ) )
+			->withArgs(
+				function ( Donation $donation ) use ( $data ): bool {
+
+					$this->assertSame( $data->get_donation_id(), $donation->get_id() );
+
+					return true;
+				},
+			)
 			->andThrow( $e );
 
 		$this->event_bus
 			->shouldNotReceive( 'publish' );
 
 		try {
-			$this->handler->handle( $donation );
+			$this->handler->handle( $data );
 			$this->fail( 'Expected CreateDonationAlreadyExistsException to be thrown.' );
 		} catch ( CreateDonationAlreadyExistsException $exception ) {
 			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
@@ -139,27 +172,38 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_wraps_repository_exception(): void {
 
-		$donation = $this->make_pending_donation();
+		$data = new DonationCreationData(
+			donation_id: EntityId::create( 5_001 ),
+			campaign_id: EntityId::create( 901 ),
+			amount: Amount::create( 1_000 ),
+		);
 		$campaign = $this->make_donation_campaign();
 		$e = new FakeDonationRepositoryException();
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->with( $this->identicalTo( $data->get_campaign_id() ) )
 			->andReturn( $campaign );
 
 		$this->repository
 			->shouldReceive( 'insert' )
 			->once()
-			->with( $this->identicalTo( $donation ) )
+			->withArgs(
+				function ( Donation $donation ) use ( $data ): bool {
+
+					$this->assertSame( $data->get_donation_id(), $donation->get_id() );
+
+					return true;
+				},
+			)
 			->andThrow( $e );
 
 		$this->event_bus
 			->shouldNotReceive( 'publish' );
 
 		try {
-			$this->handler->handle( $donation );
+			$this->handler->handle( $data );
 			$this->fail( 'Expected CreateDonationException to be thrown.' );
 		} catch ( CreateDonationException $exception ) {
 			$this->assertSame( UseCaseFailureStage::Persistence, $exception->get_stage() );
@@ -171,21 +215,32 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_throws_when_created_event_publishing_fails(): void {
 
-		$donation = $this->make_pending_donation();
+		$data = new DonationCreationData(
+			donation_id: EntityId::create( 5_001 ),
+			campaign_id: EntityId::create( 901 ),
+			amount: Amount::create( 1_000 ),
+		);
 		$campaign = $this->make_donation_campaign();
 		$e = new FakeApplicationEventBusException();
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->with( $this->identicalTo( $data->get_campaign_id() ) )
 			->andReturn( $campaign );
 
 		$this->repository
 			->shouldReceive( 'insert' )
 			->once()
-			->with( $this->identicalTo( $donation ) )
-			->andReturn( $donation );
+			->withArgs(
+				function ( Donation $donation ) use ( $data ): bool {
+
+					$this->assertSame( $data->get_donation_id(), $donation->get_id() );
+
+					return true;
+				},
+			)
+			->andReturnUsing( static fn ( Donation $donation ): Donation => $donation );
 
 		$this->event_bus
 			->shouldReceive( 'publish' )
@@ -193,7 +248,7 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 			->andThrow( $e );
 
 		try {
-			$this->handler->handle( $donation );
+			$this->handler->handle( $data );
 			$this->fail( 'Expected CreateDonationException to be thrown.' );
 		} catch ( CreateDonationException $exception ) {
 			$this->assertSame( UseCaseFailureStage::EventPublish, $exception->get_stage() );
@@ -209,20 +264,24 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_throws_when_campaign_lookup_fails(): void {
 
-		$donation = $this->make_pending_donation();
+		$data = new DonationCreationData(
+			donation_id: EntityId::create( 5_001 ),
+			campaign_id: EntityId::create( 901 ),
+			amount: Amount::create( 1_000 ),
+		);
 		$e = new FakeCampaignRepositoryException();
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->with( $this->identicalTo( $data->get_campaign_id() ) )
 			->andThrow( $e );
 
 		$this->repository
 			->shouldNotReceive( 'insert' );
 
 		try {
-			$this->handler->handle( $donation );
+			$this->handler->handle( $data );
 			$this->fail( 'Expected CreateDonationException to be thrown.' );
 		} catch ( CreateDonationException $exception ) {
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
@@ -233,48 +292,25 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function handle_throws_when_donation_status_is_not_pending(): void {
-
-		$donation = $this->make_pending_donation()->succeed();
-
-		$this->campaigns
-			->shouldNotReceive( 'find_by_id' );
-
-		$this->repository
-			->shouldNotReceive( 'insert' );
-
-		$this->event_bus
-			->shouldNotReceive( 'publish' );
-
-		try {
-			$this->handler->handle( $donation );
-			$this->fail( 'Expected CreateDonationException to be thrown.' );
-		} catch ( CreateDonationException $exception ) {
-			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
-			$this->assertSame( CreateDonationPreconditionReason::DonationStatusMustBePending, $exception->get_reason() );
-			$this->assertSame(
-				'Cannot create donation "5001": donation status must be pending. Given: "succeeded".',
-				$exception->getMessage(),
-			);
-		}
-	}
-
-	#[Test]
 	public function handle_throws_when_campaign_does_not_exist(): void {
 
-		$donation = $this->make_pending_donation();
+		$data = new DonationCreationData(
+			donation_id: EntityId::create( 5_001 ),
+			campaign_id: EntityId::create( 901 ),
+			amount: Amount::create( 1_000 ),
+		);
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->with( $this->identicalTo( $data->get_campaign_id() ) )
 			->andReturn( null );
 
 		$this->repository
 			->shouldNotReceive( 'insert' );
 
 		try {
-			$this->handler->handle( $donation );
+			$this->handler->handle( $data );
 			$this->fail( 'Expected CreateDonationException to be thrown.' );
 		} catch ( CreateDonationException $exception ) {
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
@@ -289,13 +325,17 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 	#[Test]
 	public function handle_throws_when_campaign_does_not_accept_donations(): void {
 
-		$donation = $this->make_pending_donation();
+		$data = new DonationCreationData(
+			donation_id: EntityId::create( 5_001 ),
+			campaign_id: EntityId::create( 901 ),
+			amount: Amount::create( 1_000 ),
+		);
 		$campaign = $this->make_donation_campaign( accepts_donations: false );
 
 		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
+			->with( $this->identicalTo( $data->get_campaign_id() ) )
 			->andReturn( $campaign );
 
 		$this->repository
@@ -305,7 +345,7 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 			->shouldNotReceive( 'publish' );
 
 		try {
-			$this->handler->handle( $donation );
+			$this->handler->handle( $data );
 			$this->fail( 'Expected CreateDonationException to be thrown.' );
 		} catch ( CreateDonationException $exception ) {
 			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
@@ -315,37 +355,6 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 			);
 			$this->assertSame(
 				'Cannot create donation "5001": campaign "901" does not accept donations.',
-				$exception->getMessage(),
-			);
-		}
-	}
-
-	#[Test]
-	public function handle_throws_when_donation_currency_does_not_match_campaign_currency(): void {
-
-		$donation = $this->make_pending_donation( currency: 'USD' );
-		$campaign = $this->make_donation_campaign( currency_code: 'RUB' );
-
-		$this->campaigns
-			->shouldReceive( 'find_by_id' )
-			->once()
-			->with( $this->identicalTo( $donation->get_campaign_id() ) )
-			->andReturn( $campaign );
-
-		$this->repository
-			->shouldNotReceive( 'insert' );
-
-		$this->event_bus
-			->shouldNotReceive( 'publish' );
-
-		try {
-			$this->handler->handle( $donation );
-			$this->fail( 'Expected CreateDonationException to be thrown.' );
-		} catch ( CreateDonationException $exception ) {
-			$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
-			$this->assertSame( CreateDonationPreconditionReason::CampaignCurrencyMismatch, $exception->get_reason() );
-			$this->assertSame(
-				'Cannot create donation "5001": campaign "901" uses currency "RUB". Given: "USD".',
 				$exception->getMessage(),
 			);
 		}

@@ -6,15 +6,17 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation;
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationAlreadyExistsExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Domain\Donation;
-use Fundrik\Core\Components\Donations\Domain\DonationStatus;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
+use Fundrik\Core\Components\Shared\Domain\Money;
 
 /**
  * Handles creating a new donation.
@@ -29,11 +31,13 @@ final readonly class CreateDonationHandler {
 	 * @since 0.1.0
 	 *
 	 * @param CampaignRepositoryPort $campaigns Retrieves campaigns for donation precondition checks.
+	 * @param DonationFactory $donation_factory Creates donations from validated input.
 	 * @param DonationRepositoryPort $repository Adds donations to storage.
 	 * @param ApplicationEventBusPort $event_bus Publishes donation events.
 	 */
 	public function __construct(
 		private CampaignRepositoryPort $campaigns,
+		private DonationFactory $donation_factory,
 		private DonationRepositoryPort $repository,
 		private ApplicationEventBusPort $event_bus,
 	) {}
@@ -44,29 +48,17 @@ final readonly class CreateDonationHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param Donation $donation Donation to create.
+	 * @param DonationCreationData $data Validated donation creation data.
 	 *
 	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws CreateDonationAlreadyExistsException When the donation ID already exists.
 	 * @throws CreateDonationException When donation creation fails for another reason.
 	 */
-	public function handle( Donation $donation ): Donation {
+	public function handle( DonationCreationData $data ): Donation {
 
-		$campaign_id = $donation->get_campaign_id();
-		$donation_id = $donation->get_id();
-
-		if ( $donation->get_status() !== DonationStatus::Pending ) {
-			throw new CreateDonationException(
-				stage: UseCaseFailureStage::Precondition,
-				reason: CreateDonationPreconditionReason::DonationStatusMustBePending,
-				message: sprintf(
-					'Cannot create donation "%s": donation status must be pending. Given: "%s".',
-					(string) $donation_id->get_value(),
-					$donation->get_status()->value,
-				),
-			);
-		}
+		$donation_id = $data->get_donation_id();
+		$campaign_id = $data->get_campaign_id();
 
 		try {
 			$campaign = $this->campaigns->find_by_id( $campaign_id );
@@ -106,22 +98,14 @@ final readonly class CreateDonationHandler {
 			);
 		}
 
-		$campaign_currency_code = $campaign->get_target()->get_currency()->get_code();
-		$donation_currency_code = $donation->get_money()->get_currency()->get_code();
-
-		if ( $donation_currency_code !== $campaign_currency_code ) {
-			throw new CreateDonationException(
-				stage: UseCaseFailureStage::Precondition,
-				reason: CreateDonationPreconditionReason::CampaignCurrencyMismatch,
-				message: sprintf(
-					'Cannot create donation "%s": campaign "%s" uses currency "%s". Given: "%s".',
-					(string) $donation_id->get_value(),
-					(string) $campaign_id->get_value(),
-					$campaign_currency_code,
-					$donation_currency_code,
-				),
-			);
-		}
+		$donation = $this->donation_factory->create_pending(
+			$donation_id,
+			$campaign_id,
+			Money::create(
+				$data->get_amount()->get_value(),
+				$campaign->get_target()->get_currency()->get_code(),
+			),
+		);
 
 		try {
 			$created_donation = $this->repository->insert( $donation );

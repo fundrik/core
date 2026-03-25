@@ -11,9 +11,7 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation;
  */
 enum CreateDonationPreconditionReason: string {
 
-	case DonationStatusMustBePending = 'donation_status_must_be_pending';
 	case CampaignLookupFailed = 'campaign_lookup_failed';
 	case CampaignNotFound = 'campaign_not_found';
 	case CampaignDoesNotAcceptDonations = 'campaign_does_not_accept_donations';
-	case CampaignCurrencyMismatch = 'campaign_currency_mismatch';
 }

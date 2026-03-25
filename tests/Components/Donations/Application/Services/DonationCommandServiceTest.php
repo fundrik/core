@@ -22,7 +22,6 @@ use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\Succe
 use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
-use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
@@ -48,7 +47,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( RefundDonationHandler::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
-#[UsesClass( DonationStatus::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTitle::class )]
 #[UsesClass( EntityVersion::class )]
@@ -73,10 +71,10 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 		$this->command = new DonationCommandService(
 			new CreateDonationHandler(
 				$this->campaign_repository,
+				new DonationFactory(),
 				$this->donation_repository,
 				$this->event_bus,
 			),
-			new DonationFactory(),
 			new SucceedDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RejectDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RefundDonationHandler( $this->donation_repository, $this->event_bus ),
@@ -87,7 +85,7 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 	public function create_uses_injected_ports(): void {
 
 		$campaign = $this->make_campaign( 901, 'Campaign 901', true, 'RUB', 10_000 );
-		$command = new CreateDonationCommand( id: 5_001, campaign_id: 901, amount: 1_000, currency_code: 'RUB' );
+		$command = new CreateDonationCommand( id: 5_001, campaign_id: 901, amount: 1_000 );
 
 		$this->campaign_repository
 			->shouldReceive( 'find_by_id' )
@@ -107,7 +105,6 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 					$this->assertSame( 901, $donation->get_campaign_id()->get_value() );
 					$this->assertSame( 1_000, $donation->get_money()->get_amount()->get_value() );
 					$this->assertSame( 'RUB', $donation->get_money()->get_currency()->get_code() );
-					$this->assertSame( DonationStatus::Pending, $donation->get_status() );
 
 					return true;
 				},

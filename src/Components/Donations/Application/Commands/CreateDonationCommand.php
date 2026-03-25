@@ -21,13 +21,11 @@ final readonly class CreateDonationCommand {
 	 * @param int|string|EntityId $id Donation identifier.
 	 * @param int|string|EntityId $campaign_id Campaign identifier.
 	 * @param int $amount Donation amount.
-	 * @param string $currency_code Donation currency code.
 	 */
 	public function __construct(
 		private int|string|EntityId $id,
 		private int|string|EntityId $campaign_id,
 		private int $amount,
-		private string $currency_code,
 	) {}
 
 	/**
@@ -64,17 +62,5 @@ final readonly class CreateDonationCommand {
 	public function get_amount(): int {
 
 		return $this->amount;
-	}
-
-	/**
-	 * Returns the donation currency code.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string Donation currency code.
-	 */
-	public function get_currency_code(): string {
-
-		return $this->currency_code;
 	}
 }

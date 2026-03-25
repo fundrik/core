@@ -96,10 +96,10 @@ final class FundrikTest extends MockeryTestCase {
 			new DonationCommandService(
 				new CreateDonationHandler(
 					$this->campaign_repository,
+					new DonationFactory(),
 					$this->donation_repository,
 					$this->event_bus,
 				),
-				new DonationFactory(),
 				new SucceedDonationHandler(
 					$this->donation_repository,
 					$this->event_bus,
