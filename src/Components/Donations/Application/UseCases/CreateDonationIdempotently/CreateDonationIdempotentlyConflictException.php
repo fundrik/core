@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation;
+namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently;
 
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Throwable;
 
 /**
- * Thrown when create-donation is retried with an already persisted donation ID.
+ * Thrown when idempotent donation creation conflicts with an existing donation.
  *
  * @since 0.1.0
  */
-final class CreateDonationAlreadyExistsException extends CreateDonationException {
+final class CreateDonationIdempotentlyConflictException extends CreateDonationException {
 
 	/**
 	 * Constructor.
@@ -21,14 +22,14 @@ final class CreateDonationAlreadyExistsException extends CreateDonationException
 	 * @since 0.1.0
 	 *
 	 * @param int|string|EntityId $donation_id Existing donation identifier.
-	 * @param Throwable|null $previous Underlying repository exception.
+	 * @param Throwable|null $previous Previous exception.
 	 */
 	public function __construct( int|string|EntityId $donation_id, ?Throwable $previous = null ) {
 
 		parent::__construct(
-			stage: UseCaseFailureStage::Persistence,
+			stage: UseCaseFailureStage::Precondition,
 			message: sprintf(
-				'Cannot create donation "%s": donation already exists.',
+				'Cannot create donation "%s": request payload does not match existing donation.',
 				self::format_donation_id( $donation_id ),
 			),
 			previous: $previous,

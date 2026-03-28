@@ -6,7 +6,6 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation;
 
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
-use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationAlreadyExistsExceptionInterface;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
@@ -110,10 +109,7 @@ final readonly class CreateDonationHandler {
 		try {
 			$created_donation = $this->repository->insert( $donation );
 		} catch ( DonationAlreadyExistsExceptionInterface $e ) {
-			throw new CreateDonationAlreadyExistsException(
-				(string) $donation_id->get_value(),
-				$e,
-			);
+			throw new CreateDonationAlreadyExistsException( $donation_id, $e );
 		} catch ( DonationRepositoryExceptionInterface $e ) {
 			throw new CreateDonationException(
 				stage: UseCaseFailureStage::Persistence,

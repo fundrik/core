@@ -8,6 +8,9 @@ use Fundrik\Core\Components\Donations\Application\Commands\CreateDonationCommand
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\DonationCreationData;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyConflictException;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyResult;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationException;
@@ -33,12 +36,14 @@ final readonly class DonationCommandService {
 	 * @since 0.1.0
 	 *
 	 * @param CreateDonationHandler $create_donation Creates new donations.
+	 * @param CreateDonationIdempotentlyHandler $create_donation_idempotently Creates donations with idempotent replay semantics.
 	 * @param SucceedDonationHandler $succeed_donation Marks donations as succeeded.
 	 * @param RejectDonationHandler $reject_donation Marks donations as rejected.
 	 * @param RefundDonationHandler $refund_donation Refunds donations.
 	 */
 	public function __construct(
 		private CreateDonationHandler $create_donation,
+		private CreateDonationIdempotentlyHandler $create_donation_idempotently,
 		private SucceedDonationHandler $succeed_donation,
 		private RejectDonationHandler $reject_donation,
 		private RefundDonationHandler $refund_donation,
@@ -55,21 +60,28 @@ final readonly class DonationCommandService {
 	 */
 	public function create( CreateDonationCommand $command ): void {
 
-		try {
-			$creation_data = new DonationCreationData(
-				donation_id: EntityId::create( $command->get_id() ),
-				campaign_id: EntityId::create( $command->get_campaign_id() ),
-				amount: Amount::create( $command->get_amount() ),
-			);
-		} catch ( InvalidEntityIdException | InvalidAmountException $e ) {
-			throw new CreateDonationException(
-				stage: UseCaseFailureStage::Precondition,
-				message: $e->getMessage(),
-				previous: $e,
-			);
-		}
+		$creation_data = $this->create_donation_data( $command );
 
 		$this->create_donation->handle( $creation_data );
+	}
+
+	/**
+	 * Creates a new donation with idempotent replay semantics.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param CreateDonationCommand $command Public donation creation input.
+	 *
+	 * @return CreateDonationIdempotentlyResult Created or replayed donation result.
+	 *
+	 * @throws CreateDonationIdempotentlyConflictException When the request conflicts with an existing donation.
+	 * @throws CreateDonationException When idempotent creation fails.
+	 */
+	public function create_idempotently( CreateDonationCommand $command ): CreateDonationIdempotentlyResult {
+
+		return $this->create_donation_idempotently->handle(
+			$this->create_donation_data( $command ),
+		);
 	}
 
 	/**
@@ -142,5 +154,33 @@ final readonly class DonationCommandService {
 		}
 
 		$this->refund_donation->handle( $entity_id );
+	}
+
+	/**
+	 * Creates validated donation creation data from a public command.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param CreateDonationCommand $command Public donation creation input.
+	 *
+	 * @return DonationCreationData Validated donation creation data.
+	 *
+	 * @throws CreateDonationException When command normalization fails.
+	 */
+	private function create_donation_data( CreateDonationCommand $command ): DonationCreationData {
+
+		try {
+			return new DonationCreationData(
+				donation_id: EntityId::create( $command->get_id() ),
+				campaign_id: EntityId::create( $command->get_campaign_id() ),
+				amount: Amount::create( $command->get_amount() ),
+			);
+		} catch ( InvalidEntityIdException | InvalidAmountException $e ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
 	}
 }

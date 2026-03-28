@@ -22,6 +22,7 @@ use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\Donat
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
@@ -130,12 +131,18 @@ final readonly class FundrikFactory {
 	 */
 	private function create_donation_command_service(): DonationCommandService {
 
+		$create_donation = new CreateDonationHandler(
+			$this->campaign_repository,
+			new DonationFactory(),
+			$this->donation_repository,
+			$this->event_bus,
+		);
+
 		return new DonationCommandService(
-			new CreateDonationHandler(
-				$this->campaign_repository,
-				new DonationFactory(),
+			$create_donation,
+			new CreateDonationIdempotentlyHandler(
+				$create_donation,
 				$this->donation_repository,
-				$this->event_bus,
 			),
 			new SucceedDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RejectDonationHandler( $this->donation_repository, $this->event_bus ),

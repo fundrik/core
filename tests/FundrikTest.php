@@ -23,6 +23,7 @@ use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\Donat
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
@@ -52,6 +53,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DeleteCampaignHandler::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
+#[UsesClass( CreateDonationIdempotentlyHandler::class )]
 #[UsesClass( SucceedDonationHandler::class )]
 #[UsesClass( RejectDonationHandler::class )]
 #[UsesClass( RefundDonationHandler::class )]
@@ -75,6 +77,12 @@ final class FundrikTest extends MockeryTestCase {
 		$this->donation_details_read = Mockery::mock( DonationDetailsReadPort::class );
 		$this->donation_repository = Mockery::mock( DonationRepositoryPort::class );
 		$this->event_bus = Mockery::mock( ApplicationEventBusPort::class );
+		$create_donation = new CreateDonationHandler(
+			$this->campaign_repository,
+			new DonationFactory(),
+			$this->donation_repository,
+			$this->event_bus,
+		);
 
 		$this->fundrik = new Fundrik(
 			new CampaignQueryService(
@@ -94,11 +102,10 @@ final class FundrikTest extends MockeryTestCase {
 				new FindDonationByIdHandler( $this->donation_details_read ),
 			),
 			new DonationCommandService(
-				new CreateDonationHandler(
-					$this->campaign_repository,
-					new DonationFactory(),
+				$create_donation,
+				new CreateDonationIdempotentlyHandler(
+					$create_donation,
 					$this->donation_repository,
-					$this->event_bus,
 				),
 				new SucceedDonationHandler(
 					$this->donation_repository,
