@@ -7,8 +7,8 @@ namespace Fundrik\Core\Tests\Components\Donations\Application\Services;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
 use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationDetailsById\FindDonationDetailsByIdException;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationDetailsById\FindDonationDetailsByIdHandler;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -19,7 +19,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( DonationQueryService::class )]
 #[UsesClass( DonationDetails::class )]
-#[UsesClass( FindDonationByIdHandler::class )]
+#[UsesClass( FindDonationDetailsByIdHandler::class )]
 #[UsesClass( EntityId::class )]
 final class DonationQueryServiceTest extends MockeryTestCase {
 
@@ -33,7 +33,7 @@ final class DonationQueryServiceTest extends MockeryTestCase {
 
 		$this->donation_details_read = Mockery::mock( DonationDetailsReadPort::class );
 		$this->query = new DonationQueryService(
-			new FindDonationByIdHandler( $this->donation_details_read ),
+			new FindDonationDetailsByIdHandler( $this->donation_details_read ),
 		);
 	}
 
@@ -71,7 +71,7 @@ final class DonationQueryServiceTest extends MockeryTestCase {
 	#[Test]
 	public function find_by_id_throws_when_donation_id_is_invalid(): void {
 
-		$this->expectException( FindDonationByIdException::class );
+		$this->expectException( FindDonationDetailsByIdException::class );
 		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: -1.' );
 
 		$this->query->find_by_id( -1 );

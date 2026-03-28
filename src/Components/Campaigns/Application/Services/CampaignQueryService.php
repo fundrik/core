@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Campaigns\Application\Services;
 
 use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignDetailsById\FindCampaignDetailsByIdException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignDetailsById\FindCampaignDetailsByIdHandler;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 
@@ -22,29 +22,29 @@ final readonly class CampaignQueryService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param FindCampaignByIdHandler $find_campaign_by_id Retrieves campaign details by ID.
+	 * @param FindCampaignDetailsByIdHandler $find_campaign_details_by_id Retrieves campaign details by ID.
 	 */
 	public function __construct(
-		private FindCampaignByIdHandler $find_campaign_by_id,
+		private FindCampaignDetailsByIdHandler $find_campaign_details_by_id,
 	) {}
 
 	/**
-	 * Retrieves a campaign by its ID.
+	 * Retrieves campaign details by its ID.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string|EntityId $campaign_id Campaign ID to retrieve.
+	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
 	 * @return CampaignDetails|null Campaign details if found, null otherwise.
 	 *
-	 * @throws FindCampaignByIdException When campaign retrieval fails.
+	 * @throws FindCampaignDetailsByIdException When campaign details retrieval fails.
 	 */
 	public function find_by_id( int|string|EntityId $campaign_id ): ?CampaignDetails {
 
 		try {
-			return $this->find_campaign_by_id->handle( EntityId::create( $campaign_id ) );
+			return $this->find_campaign_details_by_id->handle( EntityId::create( $campaign_id ) );
 		} catch ( InvalidEntityIdException $e ) {
-			throw new FindCampaignByIdException( $e->getMessage(), previous: $e );
+			throw new FindCampaignDetailsByIdException( $e->getMessage(), previous: $e );
 		}
 	}
 }

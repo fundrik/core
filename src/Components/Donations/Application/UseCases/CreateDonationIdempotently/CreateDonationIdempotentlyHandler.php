@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently;
 
-use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
-use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationAlreadyExistsException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\DonationCreationData;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 
@@ -26,11 +26,11 @@ final readonly class CreateDonationIdempotentlyHandler {
 	 * @since 0.1.0
 	 *
 	 * @param CreateDonationHandler $create_donation Creates donations from validated input.
-	 * @param DonationRepositoryPort $donations Retrieves persisted donations for replay resolution.
+	 * @param FindDonationByIdHandler $find_donation_by_id Retrieves donation entities for replay resolution.
 	 */
 	public function __construct(
 		private CreateDonationHandler $create_donation,
-		private DonationRepositoryPort $donations,
+		private FindDonationByIdHandler $find_donation_by_id,
 	) {}
 
 	/**
@@ -107,8 +107,8 @@ final readonly class CreateDonationIdempotentlyHandler {
 		$donation_id = (string) $data->get_donation_id()->get_value();
 
 		try {
-			$existing_donation = $this->donations->find_by_id( $data->get_donation_id() );
-		} catch ( DonationRepositoryExceptionInterface $e ) {
+			$existing_donation = $this->find_donation_by_id->handle( $data->get_donation_id() );
+		} catch ( FindDonationByIdException $e ) {
 			throw new CreateDonationException(
 				stage: UseCaseFailureStage::Persistence,
 				message: sprintf(

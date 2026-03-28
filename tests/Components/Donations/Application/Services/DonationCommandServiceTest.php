@@ -9,15 +9,13 @@ use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\Commands\CreateDonationCommand;
 use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
-use Fundrik\Core\Components\Donations\Application\Events\DonationRejectedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationRefundedEvent;
+use Fundrik\Core\Components\Donations\Application\Events\DonationRejectedEvent;
 use Fundrik\Core\Components\Donations\Application\Events\DonationSucceededEvent;
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\UseCases\AbstractDonationMutationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyStatus;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationException;
@@ -28,7 +26,6 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
-use Fundrik\Core\Tests\Fixtures\FakeDonationAlreadyExistsException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -45,7 +42,6 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CreateDonationCommand::class )]
 #[UsesClass( AbstractDonationMutationHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
-#[UsesClass( CreateDonationIdempotentlyHandler::class )]
 #[UsesClass( SucceedDonationHandler::class )]
 #[UsesClass( RejectDonationHandler::class )]
 #[UsesClass( RefundDonationHandler::class )]
@@ -80,10 +76,6 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 
 		$this->command = new DonationCommandService(
 			$create_donation,
-			new CreateDonationIdempotentlyHandler(
-				$create_donation,
-				$this->donation_repository,
-			),
 			new SucceedDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RejectDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RefundDonationHandler( $this->donation_repository, $this->event_bus ),
@@ -126,42 +118,6 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 			->withArgs( $this->event_of_type( DonationCreatedEvent::class, EntityId::create( 5_001 ) ) );
 
 		$this->command->create( $command );
-	}
-
-	#[Test]
-	public function create_idempotently_returns_replayed_result_for_matching_duplicate_request(): void {
-
-		$campaign = $this->make_campaign( 901, 'Campaign 901', true, 'RUB', 10_000 );
-		$command = new CreateDonationCommand( id: 5_001, campaign_id: 901, amount: 1_000 );
-		$existing_donation = $this->make_pending_donation( 5_001, 901 );
-
-		$this->campaign_repository
-			->shouldReceive( 'find_by_id' )
-			->once()
-			->withArgs(
-				static fn ( EntityId $campaign_id ): bool => $campaign_id->equals( EntityId::create( 901 ) ),
-			)
-			->andReturn( $campaign );
-
-		$this->donation_repository
-			->shouldReceive( 'insert' )
-			->once()
-			->andThrow( new FakeDonationAlreadyExistsException() );
-
-		$this->donation_repository
-			->shouldReceive( 'find_by_id' )
-			->once()
-			->withArgs(
-				static fn ( EntityId $donation_id ): bool => $donation_id->equals( EntityId::create( 5_001 ) ),
-			)
-			->andReturn( $existing_donation );
-
-		$this->event_bus->shouldNotReceive( 'publish' );
-
-		$result = $this->command->create_idempotently( $command );
-
-		$this->assertSame( CreateDonationIdempotentlyStatus::Replayed, $result->get_status() );
-		$this->assertSame( $existing_donation, $result->get_donation() );
 	}
 
 	#[Test]

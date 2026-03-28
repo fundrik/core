@@ -13,7 +13,7 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\Create
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignDetailsById\FindCampaignDetailsByIdHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignFactory;
@@ -22,8 +22,7 @@ use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\Donat
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationDetailsById\FindDonationDetailsByIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationHandler;
@@ -83,7 +82,7 @@ final readonly class FundrikFactory {
 	private function create_campaign_query_service(): CampaignQueryService {
 
 		return new CampaignQueryService(
-			new FindCampaignByIdHandler( $this->campaign_details_read ),
+			new FindCampaignDetailsByIdHandler( $this->campaign_details_read ),
 		);
 	}
 
@@ -118,7 +117,7 @@ final readonly class FundrikFactory {
 	private function create_donation_query_service(): DonationQueryService {
 
 		return new DonationQueryService(
-			new FindDonationByIdHandler( $this->donation_details_read ),
+			new FindDonationDetailsByIdHandler( $this->donation_details_read ),
 		);
 	}
 
@@ -140,10 +139,6 @@ final readonly class FundrikFactory {
 
 		return new DonationCommandService(
 			$create_donation,
-			new CreateDonationIdempotentlyHandler(
-				$create_donation,
-				$this->donation_repository,
-			),
 			new SucceedDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RejectDonationHandler( $this->donation_repository, $this->event_bus ),
 			new RefundDonationHandler( $this->donation_repository, $this->event_bus ),

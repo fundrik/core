@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests\Components\Campaigns\Application\UseCases\FindCampaignById;
 
 use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadPort;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
+use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Tests\Fixtures\FakeCampaignDetailsReadException;
+use Fundrik\Core\Tests\Fixtures\FakeCampaignRepositoryException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -23,11 +23,11 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FindCampaignByIdException::class )]
 #[UsesClass( CampaignApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
-#[UsesClass( CampaignDetails::class )]
+#[UsesClass( Campaign::class )]
 #[UsesClass( EntityId::class )]
 final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 
-	private CampaignDetailsReadPort&MockInterface $campaign_details_read;
+	private CampaignRepositoryPort&MockInterface $campaigns;
 
 	private FindCampaignByIdHandler $handler;
 
@@ -35,34 +35,33 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 
 		parent::setUp();
 
-		$this->campaign_details_read = Mockery::mock( CampaignDetailsReadPort::class );
-
-		$this->handler = new FindCampaignByIdHandler( $this->campaign_details_read );
+		$this->campaigns = Mockery::mock( CampaignRepositoryPort::class );
+		$this->handler = new FindCampaignByIdHandler( $this->campaigns );
 	}
 
 	#[Test]
-	public function handle_returns_campaign_details(): void {
+	public function handle_returns_campaign_entity(): void {
 
-		$details = $this->make_campaign_details();
-		$campaign_id = EntityId::create( $details->get_id() );
+		$campaign = $this->make_campaign( 1_001 );
+		$campaign_id = $campaign->get_id();
 
-		$this->campaign_details_read
+		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
-			->andReturn( $details );
+			->andReturn( $campaign );
 
 		$result = $this->handler->handle( $campaign_id );
 
-		$this->assertSame( $details, $result );
+		$this->assertSame( $campaign, $result );
 	}
 
 	#[Test]
 	public function handle_returns_null_when_not_found(): void {
 
-		$campaign_id = $this->make_campaign()->get_id();
+		$campaign_id = EntityId::create( 1_001 );
 
-		$this->campaign_details_read
+		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $campaign_id ) )
@@ -74,14 +73,15 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 	}
 
 	#[Test]
-	public function handle_throws_view_exception(): void {
+	public function handle_wraps_repository_exception(): void {
 
-		$campaign_id = $this->make_campaign()->get_id();
-		$e = new FakeCampaignDetailsReadException();
+		$campaign_id = EntityId::create( 1_001 );
+		$e = new FakeCampaignRepositoryException();
 
-		$this->campaign_details_read
+		$this->campaigns
 			->shouldReceive( 'find_by_id' )
 			->once()
+			->with( $this->identicalTo( $campaign_id ) )
 			->andThrow( $e );
 
 		try {
@@ -89,7 +89,7 @@ final class FindCampaignByIdHandlerTest extends MockeryTestCase {
 			$this->fail( 'Expected FindCampaignByIdException to be thrown.' );
 		} catch ( FindCampaignByIdException $exception ) {
 			$this->assertSame( $e, $exception->getPrevious() );
-			$this->assertSame( 'Failed to retrieve campaign "1".', $exception->getMessage() );
+			$this->assertSame( 'Failed to retrieve campaign "1001".', $exception->getMessage() );
 		}
 	}
 }

@@ -7,8 +7,8 @@ namespace Fundrik\Core\Tests\Components\Campaigns\Application\Services;
 use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadPort;
 use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
 use Fundrik\Core\Components\Campaigns\Application\Services\CampaignQueryService;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdException;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignDetailsById\FindCampaignDetailsByIdException;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignDetailsById\FindCampaignDetailsByIdHandler;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -19,8 +19,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( CampaignQueryService::class )]
 #[UsesClass( CampaignDetails::class )]
-#[UsesClass( FindCampaignByIdException::class )]
-#[UsesClass( FindCampaignByIdHandler::class )]
+#[UsesClass( FindCampaignDetailsByIdException::class )]
+#[UsesClass( FindCampaignDetailsByIdHandler::class )]
 #[UsesClass( EntityId::class )]
 final class CampaignQueryServiceTest extends MockeryTestCase {
 
@@ -34,7 +34,7 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 
 		$this->campaign_details_read = Mockery::mock( CampaignDetailsReadPort::class );
 		$this->query = new CampaignQueryService(
-			new FindCampaignByIdHandler( $this->campaign_details_read ),
+			new FindCampaignDetailsByIdHandler( $this->campaign_details_read ),
 		);
 	}
 
@@ -92,8 +92,8 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 
 		try {
 			$this->query->find_by_id( 'invalid-id' );
-			$this->fail( 'Expected FindCampaignByIdException to be thrown.' );
-		} catch ( FindCampaignByIdException $exception ) {
+			$this->fail( 'Expected FindCampaignDetailsByIdException to be thrown.' );
+		} catch ( FindCampaignDetailsByIdException $exception ) {
 			$this->assertSame(
 				'ID must be a positive integer or a valid UUID. Given: "invalid-id".',
 				$exception->getMessage(),

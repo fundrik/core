@@ -17,6 +17,8 @@ use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempot
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyResult;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyStatus;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdException;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
@@ -43,6 +45,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( UseCaseFailureStage::class )]
 #[UsesClass( DonationApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
+#[UsesClass( FindDonationByIdException::class )]
 #[UsesClass( DonationCreatedEvent::class )]
 #[UsesClass( DonationCreationData::class )]
 #[UsesClass( Campaign::class )]
@@ -76,7 +79,7 @@ final class CreateDonationIdempotentlyHandlerTest extends MockeryTestCase {
 		);
 		$this->handler = new CreateDonationIdempotentlyHandler(
 			$create_donation,
-			$this->repository,
+			new FindDonationByIdHandler( $this->repository ),
 		);
 	}
 
@@ -223,9 +226,12 @@ final class CreateDonationIdempotentlyHandlerTest extends MockeryTestCase {
 			$this->handler->handle( $data );
 			$this->fail( 'Expected CreateDonationException to be thrown.' );
 		} catch ( CreateDonationException $caught_exception ) {
+			$find_donation_by_id_exception = $caught_exception->getPrevious();
+
 			$this->assertSame( UseCaseFailureStage::Persistence, $caught_exception->get_stage() );
-			$this->assertSame( $exception, $caught_exception->getPrevious() );
 			$this->assertSame( 'Failed to retrieve existing donation "5001".', $caught_exception->getMessage() );
+			$this->assertInstanceOf( FindDonationByIdException::class, $find_donation_by_id_exception );
+			$this->assertSame( $exception, $find_donation_by_id_exception->getPrevious() );
 		}
 	}
 

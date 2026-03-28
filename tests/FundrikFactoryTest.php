@@ -16,7 +16,7 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\Create
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsHandler;
-use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById\FindCampaignByIdHandler;
+use Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignDetailsById\FindCampaignDetailsByIdHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotHandler;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
@@ -30,7 +30,7 @@ use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
 use Fundrik\Core\Components\Donations\Application\Services\DonationCommandService;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationHandler;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationDetailsById\FindDonationDetailsByIdHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationHandler;
 use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationHandler;
@@ -58,7 +58,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( AbstractCampaignMutationHandler::class )]
 #[UsesClass( DonationQueryService::class )]
 #[UsesClass( DonationCommandService::class )]
-#[UsesClass( FindCampaignByIdHandler::class )]
+#[UsesClass( FindCampaignDetailsByIdHandler::class )]
 #[UsesClass( CreateCampaignHandler::class )]
 #[UsesClass( SyncCampaignFromSnapshotHandler::class )]
 #[UsesClass( RenameCampaignHandler::class )]
@@ -66,7 +66,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( DisableCampaignDonationsHandler::class )]
 #[UsesClass( ChangeCampaignTargetHandler::class )]
 #[UsesClass( DeleteCampaignHandler::class )]
-#[UsesClass( FindDonationByIdHandler::class )]
+#[UsesClass( FindDonationDetailsByIdHandler::class )]
 #[UsesClass( CreateDonationHandler::class )]
 #[UsesClass( SucceedDonationHandler::class )]
 #[UsesClass( RejectDonationHandler::class )]

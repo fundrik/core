@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById;
 
-use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadExceptionInterface;
-use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Handles retrieving a donation by its ID.
+ * Handles retrieving a donation entity by its ID.
  *
  * @since 0.1.0
  */
@@ -21,28 +21,28 @@ final readonly class FindDonationByIdHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param DonationDetailsReadPort $donation_details_read Retrieves donation details from storage.
+	 * @param DonationRepositoryPort $donations Retrieves donation entities from storage.
 	 */
 	public function __construct(
-		private DonationDetailsReadPort $donation_details_read,
+		private DonationRepositoryPort $donations,
 	) {}
 
 	/**
-	 * Retrieves a donation by its ID.
+	 * Retrieves a donation entity by its ID.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID to retrieve.
 	 *
-	 * @return DonationDetails|null Donation details if found, null otherwise.
+	 * @return Donation|null Donation entity if found, null otherwise.
 	 *
 	 * @throws FindDonationByIdException When donation retrieval fails.
 	 */
-	public function handle( EntityId $donation_id ): ?DonationDetails {
+	public function handle( EntityId $donation_id ): ?Donation {
 
 		try {
-			return $this->donation_details_read->find_by_id( $donation_id );
-		} catch ( DonationDetailsReadExceptionInterface $e ) {
+			return $this->donations->find_by_id( $donation_id );
+		} catch ( DonationRepositoryExceptionInterface $e ) {
 			throw new FindDonationByIdException(
 				sprintf(
 					'Failed to retrieve donation "%s".',

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Campaigns\Application\UseCases\FindCampaignById;
 
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadExceptionInterface;
-use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignDetailsRead\CampaignDetailsReadPort;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Handles retrieving a campaign by its ID.
+ * Handles retrieving a campaign entity by its ID.
  *
  * @since 0.1.0
  */
@@ -21,28 +21,28 @@ final readonly class FindCampaignByIdHandler {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param CampaignDetailsReadPort $campaign_details_read Campaign details read port.
+	 * @param CampaignRepositoryPort $campaigns Retrieves campaign entities from storage.
 	 */
 	public function __construct(
-		private CampaignDetailsReadPort $campaign_details_read,
+		private CampaignRepositoryPort $campaigns,
 	) {}
 
 	/**
-	 * Retrieves a campaign by its ID.
+	 * Retrieves a campaign entity by its ID.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID to retrieve.
 	 *
-	 * @return CampaignDetails|null Campaign details if found, null otherwise.
+	 * @return Campaign|null Campaign entity if found, null otherwise.
 	 *
 	 * @throws FindCampaignByIdException When retrieving the campaign fails.
 	 */
-	public function handle( EntityId $campaign_id ): ?CampaignDetails {
+	public function handle( EntityId $campaign_id ): ?Campaign {
 
 		try {
-			return $this->campaign_details_read->find_by_id( $campaign_id );
-		} catch ( CampaignDetailsReadExceptionInterface $e ) {
+			return $this->campaigns->find_by_id( $campaign_id );
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
 			throw new FindCampaignByIdException(
 				sprintf( 'Failed to retrieve campaign "%s".', (string) $campaign_id->get_value() ),
 				previous: $e,
