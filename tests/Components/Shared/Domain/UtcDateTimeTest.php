@@ -37,6 +37,31 @@ final class UtcDateTimeTest extends FundrikTestCase {
 	}
 
 	#[Test]
+	public function create_from_format_returns_utc_timestamp_from_formatted_string(): void {
+
+		$utc_date_time = UtcDateTime::create_from_format( '2026-03-01', 'Y-m-d' );
+
+		$this->assertSame( '2026-03-01T00:00:00+00:00', $utc_date_time->format( 'Y-m-d\TH:i:sP' ) );
+	}
+
+	#[Test]
+	public function create_from_format_throws_when_value_has_parser_warning(): void {
+
+		$this->expectException( InvalidUtcDateTimeException::class );
+		$this->expectExceptionMessage( 'Timestamp must be parseable using format "Y-m-d". Given: "2026-02-30".' );
+
+		UtcDateTime::create_from_format( '2026-02-30', 'Y-m-d' );
+	}
+
+	#[Test]
+	public function create_from_format_throws_when_value_contains_null_byte(): void {
+
+		$this->expectException( InvalidUtcDateTimeException::class );
+
+		UtcDateTime::create_from_format( "2026-03-01\0", 'Y-m-d' );
+	}
+
+	#[Test]
 	public function now_returns_utc_timestamp(): void {
 
 		$utc_date_time = UtcDateTime::now();
