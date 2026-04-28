@@ -41,15 +41,18 @@
 
 # Application Boundary Conventions
 
-- Treat `Application/UseCases/*Handler` as internal application-layer orchestration for domain operations, not as the package's public entry points.
-- Treat `Application/Services/*Service` as the supported public API for external consumers.
-- Public API discovery should happen through services; if a capability exists both as a handler and as a service method, the service contract is the official boundary.
-- Use cases may work with domain entities and value objects internally; service contracts should be designed for external ergonomics, safety by default, and long-term backward compatibility.
+- Treat `Application/UseCases/*Handler` as the supported low-level public application API for domain operations.
+- Treat `Application/Services/*Service` as the preferred high-level public API for external consumers.
+- Public API discovery should prefer services by default; handlers remain supported for advanced integrations that want lower-level control.
+- If a capability exists both as a handler and as a service method, the service contract is the ergonomic facade and the handler contract is the lower-level equivalent.
+- Use cases may work with domain entities and value objects as part of their supported contracts; service contracts should be designed for external ergonomics, safety by default, and long-term backward compatibility.
+- Treat abstract use-case helpers and other shared orchestration details as internal unless they are intentionally documented as supported public contracts.
 
 # Public API Conventions
 
 - Treat this package as a public library: when designing or changing behavior, evaluate not only current internal usage, but also API clarity, ergonomics, and logical consistency for external consumers.
-- `EntityId` is the only domain/shared value object currently allowed to be part of the supported public API; treat it as a stable public contract when it improves identity ergonomics.
+- `EntityId` is the only domain/shared value object currently allowed by default in public service contracts; treat it as a stable public contract when it improves identity ergonomics.
+- Low-level use-case handlers may expose additional domain entities and value objects when that is part of the supported contract.
 - Do not require aggregate-specific domain value objects such as `CampaignTitle`, `CampaignTarget`, or `Money` in public service contracts unless there is an explicit decision to bless them as public shared types.
 - Prefer scalar public inputs/outputs for domain-specific values in service contracts and read models; for monetary values, use explicit `amount`/`currency` pairs instead of exposing `Money`.
 
