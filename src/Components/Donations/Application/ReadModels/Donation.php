@@ -7,11 +7,11 @@ namespace Fundrik\Core\Components\Donations\Application\ReadModels;
 use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 
 /**
- * Represents donation details exposed by the public read API.
+ * Represents a donation exposed by the public read API.
  *
  * @since 0.1.0
  */
-final readonly class DonationDetails {
+final readonly class Donation {
 
 	/**
 	 * Constructor.

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases\FindDonationDetailsById;
+namespace Fundrik\Core\Tests\Components\Donations\Application\UseCases\ReadDonationById;
 
 use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplicationException;
-use Fundrik\Core\Components\Donations\Application\Ports\DonationDetailsRead\DonationDetailsReadPort;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationDetailsById\FindDonationDetailsByIdException;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationDetailsById\FindDonationDetailsByIdHandler;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRead\DonationReadPort;
+use Fundrik\Core\Components\Donations\Application\ReadModels\Donation;
+use Fundrik\Core\Components\Donations\Application\UseCases\ReadDonationById\ReadDonationByIdException;
+use Fundrik\Core\Components\Donations\Application\UseCases\ReadDonationById\ReadDonationByIdHandler;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
-use Fundrik\Core\Tests\Fixtures\FakeDonationDetailsReadException;
+use Fundrik\Core\Tests\Fixtures\FakeDonationReadException;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
 use Mockery\MockInterface;
@@ -19,41 +19,41 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\UsesClass;
 
-#[CoversClass( FindDonationDetailsByIdHandler::class )]
-#[UsesClass( FindDonationDetailsByIdException::class )]
+#[CoversClass( ReadDonationByIdHandler::class )]
+#[UsesClass( ReadDonationByIdException::class )]
 #[UsesClass( DonationApplicationException::class )]
 #[UsesClass( FundrikApplicationException::class )]
-#[UsesClass( DonationDetails::class )]
+#[UsesClass( Donation::class )]
 #[UsesClass( EntityId::class )]
-final class FindDonationDetailsByIdHandlerTest extends MockeryTestCase {
+final class ReadDonationByIdHandlerTest extends MockeryTestCase {
 
-	private DonationDetailsReadPort&MockInterface $donation_details_read;
+	private DonationReadPort&MockInterface $donation_read;
 
-	private FindDonationDetailsByIdHandler $handler;
+	private ReadDonationByIdHandler $handler;
 
 	protected function setUp(): void {
 
 		parent::setUp();
 
-		$this->donation_details_read = Mockery::mock( DonationDetailsReadPort::class );
-		$this->handler = new FindDonationDetailsByIdHandler( $this->donation_details_read );
+		$this->donation_read = Mockery::mock( DonationReadPort::class );
+		$this->handler = new ReadDonationByIdHandler( $this->donation_read );
 	}
 
 	#[Test]
-	public function handle_returns_donation_details(): void {
+	public function handle_returns_donation(): void {
 
-		$details = $this->make_donation_details();
-		$donation_id = EntityId::create( $details->get_id() );
+		$donation = $this->make_donation_read_model();
+		$donation_id = EntityId::create( $donation->get_id() );
 
-		$this->donation_details_read
+		$this->donation_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
-			->andReturn( $details );
+			->andReturn( $donation );
 
 		$result = $this->handler->handle( $donation_id );
 
-		$this->assertSame( $details, $result );
+		$this->assertSame( $donation, $result );
 	}
 
 	#[Test]
@@ -61,7 +61,7 @@ final class FindDonationDetailsByIdHandlerTest extends MockeryTestCase {
 
 		$donation_id = EntityId::create( 5_001 );
 
-		$this->donation_details_read
+		$this->donation_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
@@ -76,9 +76,9 @@ final class FindDonationDetailsByIdHandlerTest extends MockeryTestCase {
 	public function handle_wraps_repository_exception(): void {
 
 		$donation_id = EntityId::create( 5_001 );
-		$e = new FakeDonationDetailsReadException();
+		$e = new FakeDonationReadException();
 
-		$this->donation_details_read
+		$this->donation_read
 			->shouldReceive( 'find_by_id' )
 			->once()
 			->with( $this->identicalTo( $donation_id ) )
@@ -86,8 +86,8 @@ final class FindDonationDetailsByIdHandlerTest extends MockeryTestCase {
 
 		try {
 			$this->handler->handle( $donation_id );
-			$this->fail( 'Expected FindDonationDetailsByIdException to be thrown.' );
-		} catch ( FindDonationDetailsByIdException $exception ) {
+			$this->fail( 'Expected ReadDonationByIdException to be thrown.' );
+		} catch ( ReadDonationByIdException $exception ) {
 			$this->assertSame( $e, $exception->getPrevious() );
 			$this->assertSame( 'Failed to retrieve donation "5001".', $exception->getMessage() );
 		}

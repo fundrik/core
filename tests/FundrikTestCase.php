@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Fundrik\Core\Tests;
 
 use DateTimeImmutable;
-use Fundrik\Core\Components\Campaigns\Application\ReadModels\CampaignDetails;
+use Fundrik\Core\Components\Campaigns\Application\ReadModels\Campaign as CampaignReadModel;
 use Fundrik\Core\Components\Campaigns\Domain\Campaign;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTarget;
 use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
+use Fundrik\Core\Components\Donations\Application\ReadModels\Donation as DonationReadModel;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -21,9 +21,9 @@ use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 abstract class FundrikTestCase extends PHPUnitTestCase {
 
 	/**
-	 * Returns valid campaign details for tests with optional field overrides.
+	 * Returns a valid campaign read model for tests with optional field overrides.
 	 */
-	protected function make_campaign_details(
+	protected function make_campaign_read_model(
 		int|string $id = 1,
 		string $title = 'Test Campaign',
 		bool $accepts_donations = true,
@@ -31,9 +31,9 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 		?int $target_amount = 100,
 		?UtcDateTime $created_at = null,
 		?UtcDateTime $updated_at = null,
-	): CampaignDetails {
+	): CampaignReadModel {
 
-		return new CampaignDetails(
+		return new CampaignReadModel(
 			id: $id,
 			title: $title,
 			accepts_donations: $accepts_donations,
@@ -45,9 +45,9 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 	}
 
 	/**
-	 * Returns valid donation details for tests with optional field overrides.
+	 * Returns a valid donation read model for tests with optional field overrides.
 	 */
-	protected function make_donation_details(
+	protected function make_donation_read_model(
 		int|string $id = 5_001,
 		int|string $campaign_id = 901,
 		int $amount = 1_000,
@@ -55,9 +55,9 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 		string $status = 'pending',
 		?UtcDateTime $created_at = null,
 		?UtcDateTime $updated_at = null,
-	): DonationDetails {
+	): DonationReadModel {
 
-		return new DonationDetails(
+		return new DonationReadModel(
 			id: $id,
 			campaign_id: $campaign_id,
 			amount: $amount,

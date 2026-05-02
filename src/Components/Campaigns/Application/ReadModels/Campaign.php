@@ -7,11 +7,11 @@ namespace Fundrik\Core\Components\Campaigns\Application\ReadModels;
 use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 
 /**
- * Represents campaign details exposed by the public read API.
+ * Represents a campaign exposed by the public read API.
  *
  * @since 0.1.0
  */
-final readonly class CampaignDetails {
+final readonly class Campaign {
 
 	/**
 	 * Constructor.

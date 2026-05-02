@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\Services;
 
-use Fundrik\Core\Components\Donations\Application\ReadModels\DonationDetails;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationDetailsById\FindDonationDetailsByIdException;
-use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationDetailsById\FindDonationDetailsByIdHandler;
+use Fundrik\Core\Components\Donations\Application\ReadModels\Donation;
+use Fundrik\Core\Components\Donations\Application\UseCases\ReadDonationById\ReadDonationByIdException;
+use Fundrik\Core\Components\Donations\Application\UseCases\ReadDonationById\ReadDonationByIdHandler;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 
@@ -22,29 +22,29 @@ final readonly class DonationQueryService {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param FindDonationDetailsByIdHandler $find_donation_details_by_id Retrieves donation details by ID.
+	 * @param ReadDonationByIdHandler $read_donation_by_id Retrieves donations by ID.
 	 */
 	public function __construct(
-		private FindDonationDetailsByIdHandler $find_donation_details_by_id,
+		private ReadDonationByIdHandler $read_donation_by_id,
 	) {}
 
 	/**
-	 * Retrieves donation details by its ID.
+	 * Retrieves a donation by its ID.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
-	 * @return DonationDetails|null Donation details if found, null otherwise.
+	 * @return Donation|null Donation read model if found, null otherwise.
 	 *
-	 * @throws FindDonationDetailsByIdException When donation details retrieval fails.
+	 * @throws ReadDonationByIdException When donation retrieval fails.
 	 */
-	public function find_by_id( int|string|EntityId $donation_id ): ?DonationDetails {
+	public function find_by_id( int|string|EntityId $donation_id ): ?Donation {
 
 		try {
-			return $this->find_donation_details_by_id->handle( EntityId::create( $donation_id ) );
+			return $this->read_donation_by_id->handle( EntityId::create( $donation_id ) );
 		} catch ( InvalidEntityIdException $e ) {
-			throw new FindDonationDetailsByIdException( $e->getMessage(), previous: $e );
+			throw new ReadDonationByIdException( $e->getMessage(), previous: $e );
 		}
 	}
 }
