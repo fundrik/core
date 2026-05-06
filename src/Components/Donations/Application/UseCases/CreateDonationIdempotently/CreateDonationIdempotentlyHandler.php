@@ -14,7 +14,7 @@ use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 
 /**
- * Handles idempotent donation creation.
+ * Handles idempotent donation creation and replays an existing donation for matching duplicate requests.
  *
  * @since 0.1.0
  */
@@ -34,7 +34,7 @@ final readonly class CreateDonationIdempotentlyHandler {
 	) {}
 
 	/**
-	 * Creates a donation with idempotent replay semantics.
+	 * Creates a donation and replays an existing matching donation on duplicate requests.
 	 *
 	 * @since 0.1.0
 	 *

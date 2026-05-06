@@ -123,7 +123,11 @@ abstract readonly class AbstractCampaignMutationHandler {
 	 *
 	 * @throws CampaignMutationException Always.
 	 */
-	protected function reject_mutation( EntityId $campaign_id, CampaignMutation $mutation, Throwable $previous ): never {
+	protected function reject_mutation(
+		EntityId $campaign_id,
+		CampaignMutation $mutation,
+		Throwable $previous,
+	): never {
 
 		throw $this->new_mutation_exception(
 			stage: UseCaseFailureStage::Precondition,

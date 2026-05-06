@@ -18,7 +18,7 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
 use Fundrik\Core\Components\Shared\Domain\Money;
 
 /**
- * Handles creating a new donation.
+ * Handles strict donation creation and fails when the donation ID already exists.
  *
  * @since 0.1.0
  */
@@ -43,7 +43,7 @@ final readonly class CreateDonationHandler {
 
 	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength, SlevomatCodingStandard.Complexity.Cognitive.ComplexityTooHigh
 	/**
-	 * Creates a new donation.
+	 * Creates a new donation and rejects duplicate donation IDs.
 	 *
 	 * @since 0.1.0
 	 *
@@ -53,6 +53,8 @@ final readonly class CreateDonationHandler {
 	 *
 	 * @throws CreateDonationAlreadyExistsException When the donation ID already exists.
 	 * @throws CreateDonationException When donation creation fails for another reason.
+	 *
+	 * @todo The campaign can be deleted or stop accepting donations between the campaign lookup and donation insert.
 	 */
 	public function handle( DonationCreationData $data ): Donation {
 

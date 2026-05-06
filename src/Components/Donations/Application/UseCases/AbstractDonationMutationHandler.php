@@ -123,7 +123,11 @@ abstract readonly class AbstractDonationMutationHandler {
 	 *
 	 * @throws DonationMutationException Always.
 	 */
-	protected function reject_mutation( EntityId $donation_id, DonationMutation $mutation, Throwable $previous ): never {
+	protected function reject_mutation(
+		EntityId $donation_id,
+		DonationMutation $mutation,
+		Throwable $previous,
+	): never {
 
 		throw $this->new_mutation_exception(
 			stage: UseCaseFailureStage::Precondition,

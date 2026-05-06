@@ -47,6 +47,8 @@ final readonly class DeleteCampaignHandler {
 	 *
 	 * @throws DeleteCampaignNotFoundException When the campaign does not exist.
 	 * @throws DeleteCampaignException When campaign deletion fails for another reason.
+	 *
+	 * @todo `exists_by_campaign_id()` -> `delete()` leaves a race window where a donation can appear in between.
 	 */
 	public function handle( EntityId $campaign_id ): void {
 
