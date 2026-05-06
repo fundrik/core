@@ -60,6 +60,8 @@ final class CampaignQueryServiceTest extends MockeryTestCase {
 		$this->assertSame( $campaign->accepts_donations(), $result->accepts_donations() );
 		$this->assertSame( $campaign->get_currency_code(), $result->get_currency_code() );
 		$this->assertSame( $campaign->get_target_amount(), $result->get_target_amount() );
+		$this->assertSame( $campaign->get_collected_amount(), $result->get_collected_amount() );
+		$this->assertSame( $campaign->get_donations_count(), $result->get_donations_count() );
 		$this->assertSame( $campaign->get_created_at(), $result->get_created_at() );
 		$this->assertSame( $campaign->get_updated_at(), $result->get_updated_at() );
 	}

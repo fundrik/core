@@ -29,6 +29,8 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 		bool $accepts_donations = true,
 		string $currency_code = 'RUB',
 		?int $target_amount = 100,
+		int $collected_amount = 0,
+		int $donations_count = 0,
 		?UtcDateTime $created_at = null,
 		?UtcDateTime $updated_at = null,
 	): CampaignReadModel {
@@ -39,6 +41,8 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 			accepts_donations: $accepts_donations,
 			currency_code: $currency_code,
 			target_amount: $target_amount,
+			collected_amount: $collected_amount,
+			donations_count: $donations_count,
 			created_at: $created_at ?? $this->make_utc_date_time( '2026-03-01T10:00:00+00:00' ),
 			updated_at: $updated_at,
 		);

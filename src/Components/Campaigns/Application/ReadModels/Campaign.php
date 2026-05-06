@@ -23,6 +23,8 @@ final readonly class Campaign {
 	 * @param bool $accepts_donations Whether the campaign accepts donations.
 	 * @param string $currency_code Campaign currency code.
 	 * @param int|null $target_amount Target amount, if configured.
+	 * @param int $collected_amount Collected amount.
+	 * @param int $donations_count Donations count.
 	 * @param UtcDateTime $created_at Creation timestamp.
 	 * @param UtcDateTime|null $updated_at Update timestamp, null otherwise.
 	 */
@@ -32,6 +34,8 @@ final readonly class Campaign {
 		private bool $accepts_donations,
 		private string $currency_code,
 		private ?int $target_amount,
+		private int $collected_amount,
+		private int $donations_count,
 		private UtcDateTime $created_at,
 		private ?UtcDateTime $updated_at = null,
 	) {}
@@ -106,6 +110,30 @@ final readonly class Campaign {
 	public function get_target_amount(): ?int {
 
 		return $this->target_amount;
+	}
+
+	/**
+	 * Returns the collected amount.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return int Collected amount.
+	 */
+	public function get_collected_amount(): int {
+
+		return $this->collected_amount;
+	}
+
+	/**
+	 * Returns the donations count.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return int Donations count.
+	 */
+	public function get_donations_count(): int {
+
+		return $this->donations_count;
 	}
 
 	/**
