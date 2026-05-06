@@ -57,6 +57,10 @@ interface CampaignRepositoryPort {
 	/**
 	 * Updates an existing campaign in storage.
 	 *
+	 * Uses the campaign version from the provided entity as the expected persisted version for optimistic locking.
+	 * Updates are applied only when storage still contains that version.
+	 * On success, increments the persisted version and returns the persisted campaign snapshot.
+	 *
 	 * @since 0.1.0
 	 *
 	 * @param Campaign $campaign Campaign to update.
@@ -64,7 +68,8 @@ interface CampaignRepositoryPort {
 	 * @return Campaign Persisted campaign snapshot.
 	 *
 	 * @throws CampaignNotFoundExceptionInterface When the campaign does not exist.
-	 * @throws CampaignRepositoryExceptionInterface When the update fails for another reason.
+	 * @throws CampaignRepositoryExceptionInterface When the expected version does not match
+	 *                                              or the update fails for another reason.
 	 */
 	public function update( Campaign $campaign ): Campaign;
 

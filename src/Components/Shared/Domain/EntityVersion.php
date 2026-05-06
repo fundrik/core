@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Shared\Domain;
 use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionException;
 
 /**
- * Represents the persisted version of an entity.
+ * Represents the version of an entity state in persistence, used for optimistic concurrency control.
  *
  * @since 0.1.0
  */
@@ -18,20 +18,20 @@ final readonly class EntityVersion {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $value Holds the validated entity version.
+	 * @param int $value Holds the validated persisted entity-state version.
 	 */
 	private function __construct(
 		private int $value,
 	) {}
 
 	/**
-	 * Creates a validated entity version value object.
+	 * Creates a validated persisted entity-state version value object.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int $value Accepts the input version.
+	 * @param int $value Accepts the input persisted version.
 	 *
-	 * @return self Provides the entity version value object.
+	 * @return self Provides the persisted entity-state version value object.
 	 *
 	 * @throws InvalidEntityVersionException When the version is not a positive integer.
 	 */
@@ -47,11 +47,11 @@ final readonly class EntityVersion {
 	}
 
 	/**
-	 * Creates the initial entity version.
+	 * Creates the initial persisted entity-state version.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self Provides the initial entity version.
+	 * @return self Provides the initial persisted entity-state version.
 	 */
 	public static function initial(): self {
 
@@ -59,11 +59,11 @@ final readonly class EntityVersion {
 	}
 
 	/**
-	 * Returns the persisted version value.
+	 * Returns the persisted entity-state version value.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int Provides the entity version.
+	 * @return int Provides the persisted entity-state version.
 	 */
 	public function get_value(): int {
 
@@ -85,11 +85,11 @@ final readonly class EntityVersion {
 	}
 
 	/**
-	 * Returns the next persisted entity version.
+	 * Returns the next persisted entity-state version.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return self Provides the incremented entity version.
+	 * @return self Provides the incremented persisted entity-state version.
 	 */
 	public function next(): self {
 

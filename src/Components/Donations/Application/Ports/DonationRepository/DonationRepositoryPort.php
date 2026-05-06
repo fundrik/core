@@ -70,6 +70,10 @@ interface DonationRepositoryPort {
 	/**
 	 * Updates an existing donation in storage.
 	 *
+	 * Uses the donation version from the provided entity as the expected persisted version for optimistic locking.
+	 * Updates are applied only when storage still contains that version.
+	 * On success, increments the persisted version and returns the persisted donation snapshot.
+	 *
 	 * @since 0.1.0
 	 *
 	 * @param Donation $donation Donation to update.
@@ -77,7 +81,8 @@ interface DonationRepositoryPort {
 	 * @return Donation Persisted donation snapshot.
 	 *
 	 * @throws DonationNotFoundExceptionInterface When the donation does not exist.
-	 * @throws DonationRepositoryExceptionInterface When the update fails for another reason.
+	 * @throws DonationRepositoryExceptionInterface When the expected version does not match
+	 *                                              or the update fails for another reason.
 	 */
 	public function update( Donation $donation ): Donation;
 }
