@@ -6,9 +6,12 @@ namespace Fundrik\Core\Tests\Components\Donations\Application\Services;
 
 use Fundrik\Core\Components\Donations\Application\Ports\DonationRead\DonationReadPort;
 use Fundrik\Core\Components\Donations\Application\ReadModels\Donation;
+use Fundrik\Core\Components\Donations\Application\ReadModels\PaginatedDonations;
 use Fundrik\Core\Components\Donations\Application\Services\DonationQueryService;
 use Fundrik\Core\Components\Donations\Application\UseCases\ReadDonationById\ReadDonationByIdException;
 use Fundrik\Core\Components\Donations\Application\UseCases\ReadDonationById\ReadDonationByIdHandler;
+use Fundrik\Core\Components\Donations\Application\UseCases\ReadPaginatedDonations\ReadPaginatedDonationsException;
+use Fundrik\Core\Components\Donations\Application\UseCases\ReadPaginatedDonations\ReadPaginatedDonationsHandler;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Tests\MockeryTestCase;
 use Mockery;
@@ -19,7 +22,9 @@ use PHPUnit\Framework\Attributes\UsesClass;
 
 #[CoversClass( DonationQueryService::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( PaginatedDonations::class )]
 #[UsesClass( ReadDonationByIdHandler::class )]
+#[UsesClass( ReadPaginatedDonationsHandler::class )]
 #[UsesClass( EntityId::class )]
 final class DonationQueryServiceTest extends MockeryTestCase {
 
@@ -34,6 +39,7 @@ final class DonationQueryServiceTest extends MockeryTestCase {
 		$this->donation_read = Mockery::mock( DonationReadPort::class );
 		$this->query = new DonationQueryService(
 			new ReadDonationByIdHandler( $this->donation_read ),
+			new ReadPaginatedDonationsHandler( $this->donation_read ),
 		);
 	}
 
@@ -75,5 +81,37 @@ final class DonationQueryServiceTest extends MockeryTestCase {
 		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: -1.' );
 
 		$this->query->find_by_id( -1 );
+	}
+
+	#[Test]
+	public function paginate_uses_injected_donation_read_port(): void {
+
+		$donation1 = $this->make_donation_read_model( id: 1 );
+		$donation2 = $this->make_donation_read_model( id: 2 );
+		$page = new PaginatedDonations(
+			items: [ $donation1, $donation2 ],
+			page: 2,
+			per_page: 25,
+			total: 51,
+		);
+
+		$this->donation_read
+			->shouldReceive( 'paginate' )
+			->once()
+			->with( 2, 25 )
+			->andReturn( $page );
+
+		$result = $this->query->paginate( 2, 25 );
+
+		$this->assertSame( $page, $result );
+	}
+
+	#[Test]
+	public function paginate_throws_when_page_is_invalid(): void {
+
+		$this->expectException( ReadPaginatedDonationsException::class );
+		$this->expectExceptionMessage( 'Page must be a positive integer. Given: 0.' );
+
+		$this->query->paginate( 0, 25 );
 	}
 }

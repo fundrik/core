@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Application\Ports\DonationRead;
 
 use Fundrik\Core\Components\Donations\Application\ReadModels\Donation;
+use Fundrik\Core\Components\Donations\Application\ReadModels\PaginatedDonations;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
@@ -26,4 +27,18 @@ interface DonationReadPort {
 	 * @throws DonationReadExceptionInterface When the lookup fails.
 	 */
 	public function find_by_id( EntityId $id ): ?Donation;
+
+	/**
+	 * Returns a paginated list of donations.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param int $page Page number.
+	 * @param int $per_page Donations per page.
+	 *
+	 * @return PaginatedDonations Paginated list of donation read models.
+	 *
+	 * @throws DonationReadExceptionInterface When the lookup fails.
+	 */
+	public function paginate( int $page, int $per_page ): PaginatedDonations;
 }
