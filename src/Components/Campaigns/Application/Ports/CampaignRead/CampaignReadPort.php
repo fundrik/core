@@ -26,4 +26,17 @@ interface CampaignReadPort {
 	 * @throws CampaignReadExceptionInterface When the lookup fails.
 	 */
 	public function find_by_id( EntityId $id ): ?Campaign;
+
+	/**
+	 * Retrieves campaigns by their IDs.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param list<int|string> $ids Campaign IDs to retrieve.
+	 *
+	 * @return array<int, Campaign> Campaigns keyed by ID.
+	 *
+	 * @throws CampaignReadExceptionInterface When the lookup fails.
+	 */
+	public function find_by_ids( array $ids ): array;
 }
