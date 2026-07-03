@@ -55,7 +55,21 @@ final readonly class DonationCommandService {
 	 */
 	public function create( CreateDonationCommand $command ): void {
 
-		$this->create_donation->handle( $this->create_donation_data( $command ) );
+		try {
+			$donation = new DonationCreationData(
+				donation_id: EntityId::create( $command->get_id() ),
+				campaign_id: EntityId::create( $command->get_campaign_id() ),
+				amount: Amount::create( $command->get_amount() ),
+			);
+		} catch ( InvalidEntityIdException | InvalidAmountException $e ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				message: $e->getMessage(),
+				previous: $e,
+			);
+		}
+
+		$this->create_donation->handle( $donation );
 	}
 
 	/**
@@ -128,33 +142,5 @@ final readonly class DonationCommandService {
 		}
 
 		$this->refund_donation->handle( $entity_id );
-	}
-
-	/**
-	 * Creates validated donation creation data from a public command.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param CreateDonationCommand $command Public donation creation input.
-	 *
-	 * @return DonationCreationData Validated donation creation data.
-	 *
-	 * @throws CreateDonationException When command normalization fails.
-	 */
-	private function create_donation_data( CreateDonationCommand $command ): DonationCreationData {
-
-		try {
-			return new DonationCreationData(
-				donation_id: EntityId::create( $command->get_id() ),
-				campaign_id: EntityId::create( $command->get_campaign_id() ),
-				amount: Amount::create( $command->get_amount() ),
-			);
-		} catch ( InvalidEntityIdException | InvalidAmountException $e ) {
-			throw new CreateDonationException(
-				stage: UseCaseFailureStage::Precondition,
-				message: $e->getMessage(),
-				previous: $e,
-			);
-		}
 	}
 }
