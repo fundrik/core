@@ -24,6 +24,11 @@ enum UseCaseFailureStage: string {
 	case Persistence = 'persistence';
 
 	/**
+	 * An external dependency failed after preconditions passed.
+	 */
+	case External = 'external';
+
+	/**
 	 * The requested state change was stored, but publishing the follow-up event failed.
 	 *
 	 * This stage reflects a publish failure reported by the event bus, not a delivery guarantee.
