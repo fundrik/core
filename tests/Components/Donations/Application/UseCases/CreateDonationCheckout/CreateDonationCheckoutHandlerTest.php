@@ -144,11 +144,13 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 
 		$result = $this->handler->handle( $data );
 
-		$this->assertSame( 5_001, $result->get_donation_id() );
-		$this->assertSame( 901, $result->get_campaign_id() );
+		$this->assertTrue( EntityId::create( 5_001 )->equals( $result->get_donation_id() ) );
+		$this->assertTrue( EntityId::create( 901 )->equals( $result->get_campaign_id() ) );
 		$this->assertSame( 1_000, $result->get_amount() );
 		$this->assertSame( 'RUB', $result->get_currency_code() );
-		$this->assertSame( 'https://gateway.test/checkout/5001', $result->get_redirect_url() );
+		$this->assertSame( 1_000, $result->get_money()->get_amount()->get_value() );
+		$this->assertSame( 'RUB', $result->get_money()->get_currency()->get_code() );
+		$this->assertSame( 'https://gateway.test/checkout/5001', $result->get_redirect_url()->get_value() );
 	}
 
 	#[Test]
@@ -187,7 +189,7 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 
 		$result = $this->handler->handle( $data );
 
-		$this->assertSame( 'https://gateway.test/checkout/5001', $result->get_redirect_url() );
+		$this->assertSame( 'https://gateway.test/checkout/5001', $result->get_redirect_url()->get_value() );
 	}
 
 	#[Test]

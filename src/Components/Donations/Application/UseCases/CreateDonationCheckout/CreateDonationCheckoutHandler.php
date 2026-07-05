@@ -12,7 +12,9 @@ use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\Create
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\DonationCreationData;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Shared\Application\Exceptions\InvalidUrlException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+use Fundrik\Core\Components\Shared\Application\Url;
 
 /**
  * Handles creating donation checkout workflows.
@@ -54,13 +56,13 @@ final readonly class CreateDonationCheckoutHandler {
 			$data->get_success_url()->get_value(),
 			$data->get_cancel_url()->get_value(),
 		);
+		$redirect_url = $this->create_redirect_url( $donation, $gateway_result );
 
 		return new CreateDonationCheckoutResult(
-			donation_id: $donation->get_id()->get_value(),
-			campaign_id: $donation->get_campaign_id()->get_value(),
-			amount: $donation->get_money()->get_amount()->get_value(),
-			currency_code: $donation->get_money()->get_currency()->get_code(),
-			redirect_url: $gateway_result->get_redirect_url(),
+			donation_id: $donation->get_id(),
+			campaign_id: $donation->get_campaign_id(),
+			money: $donation->get_money(),
+			redirect_url: $redirect_url,
 		);
 	}
 
@@ -122,6 +124,37 @@ final readonly class CreateDonationCheckoutHandler {
 		try {
 			return $this->gateway->create_checkout( $request );
 		} catch ( DonationGatewayExceptionInterface $e ) {
+			throw new CreateDonationCheckoutException(
+				stage: UseCaseFailureStage::External,
+				message: sprintf(
+					'Failed to create checkout for donation "%s".',
+					(string) $donation->get_id()->get_value(),
+				),
+				previous: $e,
+			);
+		}
+	}
+
+	/**
+	 * Creates the validated checkout redirect URL.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param Donation $donation Created or replayed donation.
+	 * @param DonationGatewayCheckoutResult $gateway_result Gateway checkout result.
+	 *
+	 * @return Url Checkout redirect URL.
+	 *
+	 * @throws CreateDonationCheckoutException When gateway checkout output is invalid.
+	 */
+	private function create_redirect_url(
+		Donation $donation,
+		DonationGatewayCheckoutResult $gateway_result,
+	): Url {
+
+		try {
+			return Url::create( $gateway_result->get_redirect_url() );
+		} catch ( InvalidUrlException $e ) {
 			throw new CreateDonationCheckoutException(
 				stage: UseCaseFailureStage::External,
 				message: sprintf(

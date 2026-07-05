@@ -37,7 +37,7 @@ final readonly class SucceedDonationHandler extends AbstractDonationMutationHand
 	): SucceedDonationException {
 
 		return new SucceedDonationNotFoundException(
-			(string) $donation_id->get_value(),
+			$donation_id,
 			$previous,
 		);
 	}

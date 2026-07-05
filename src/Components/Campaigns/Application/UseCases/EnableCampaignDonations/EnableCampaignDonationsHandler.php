@@ -37,7 +37,7 @@ final readonly class EnableCampaignDonationsHandler extends AbstractCampaignMuta
 	): EnableCampaignDonationsException {
 
 		return new EnableCampaignDonationsNotFoundException(
-			(string) $campaign_id->get_value(),
+			$campaign_id,
 			$previous,
 		);
 	}

@@ -38,7 +38,7 @@ final readonly class RenameCampaignHandler extends AbstractCampaignMutationHandl
 	): RenameCampaignException {
 
 		return new RenameCampaignNotFoundException(
-			(string) $campaign_id->get_value(),
+			$campaign_id,
 			$previous,
 		);
 	}

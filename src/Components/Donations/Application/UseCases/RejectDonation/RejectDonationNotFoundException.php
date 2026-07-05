@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation;
 
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Throwable;
 
 /**
@@ -19,16 +20,16 @@ final class RejectDonationNotFoundException extends RejectDonationException {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $donation_id Missing donation identifier.
+	 * @param EntityId $donation_id Missing donation identifier.
 	 * @param Throwable|null $previous Underlying repository exception.
 	 */
-	public function __construct( string $donation_id, ?Throwable $previous = null ) {
+	public function __construct( EntityId $donation_id, ?Throwable $previous = null ) {
 
 		parent::__construct(
 			stage: UseCaseFailureStage::Persistence,
 			message: sprintf(
 				'Cannot reject donation "%s": donation does not exist.',
-				$donation_id,
+				(string) $donation_id->get_value(),
 			),
 			previous: $previous,
 		);

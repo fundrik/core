@@ -52,7 +52,7 @@ final readonly class CreateCampaignHandler {
 			$created_campaign = $this->repository->insert( $campaign );
 		} catch ( CampaignAlreadyExistsExceptionInterface $e ) {
 			throw new CreateCampaignAlreadyExistsException(
-				(string) $campaign->get_id()->get_value(),
+				$campaign->get_id(),
 				$e,
 			);
 		} catch ( CampaignRepositoryExceptionInterface $e ) {

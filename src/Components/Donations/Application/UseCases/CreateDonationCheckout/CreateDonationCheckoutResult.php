@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationCheckout;
 
+use Fundrik\Core\Components\Shared\Application\Url;
+use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\Money;
+
 /**
  * Represents the result of creating a donation checkout.
  *
@@ -16,18 +20,16 @@ final readonly class CreateDonationCheckoutResult {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string $donation_id Donation identifier.
-	 * @param int|string $campaign_id Campaign identifier.
-	 * @param int $amount Donation amount.
-	 * @param string $currency_code Donation currency code.
-	 * @param string $redirect_url Checkout redirect URL.
+	 * @param EntityId $donation_id Donation identifier.
+	 * @param EntityId $campaign_id Campaign identifier.
+	 * @param Money $money Donation money.
+	 * @param Url $redirect_url Checkout redirect URL.
 	 */
 	public function __construct(
-		private int|string $donation_id,
-		private int|string $campaign_id,
-		private int $amount,
-		private string $currency_code,
-		private string $redirect_url,
+		private EntityId $donation_id,
+		private EntityId $campaign_id,
+		private Money $money,
+		private Url $redirect_url,
 	) {}
 
 	/**
@@ -35,9 +37,9 @@ final readonly class CreateDonationCheckoutResult {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int|string Donation identifier.
+	 * @return EntityId Donation identifier.
 	 */
-	public function get_donation_id(): int|string {
+	public function get_donation_id(): EntityId {
 
 		return $this->donation_id;
 	}
@@ -47,11 +49,35 @@ final readonly class CreateDonationCheckoutResult {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int|string Campaign identifier.
+	 * @return EntityId Campaign identifier.
 	 */
-	public function get_campaign_id(): int|string {
+	public function get_campaign_id(): EntityId {
 
 		return $this->campaign_id;
+	}
+
+	/**
+	 * Returns the donation amount.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return Money Donation money.
+	 */
+	public function get_money(): Money {
+
+		return $this->money;
+	}
+
+	/**
+	 * Returns the checkout redirect URL.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return Url Checkout redirect URL.
+	 */
+	public function get_redirect_url(): Url {
+
+		return $this->redirect_url;
 	}
 
 	/**
@@ -63,7 +89,7 @@ final readonly class CreateDonationCheckoutResult {
 	 */
 	public function get_amount(): int {
 
-		return $this->amount;
+		return $this->money->get_amount()->get_value();
 	}
 
 	/**
@@ -75,18 +101,6 @@ final readonly class CreateDonationCheckoutResult {
 	 */
 	public function get_currency_code(): string {
 
-		return $this->currency_code;
-	}
-
-	/**
-	 * Returns the checkout redirect URL.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string Checkout redirect URL.
-	 */
-	public function get_redirect_url(): string {
-
-		return $this->redirect_url;
+		return $this->money->get_currency()->get_code();
 	}
 }

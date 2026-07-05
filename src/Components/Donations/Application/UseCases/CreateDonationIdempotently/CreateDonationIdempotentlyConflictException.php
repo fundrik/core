@@ -21,32 +21,18 @@ final class CreateDonationIdempotentlyConflictException extends CreateDonationEx
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string|EntityId $donation_id Existing donation identifier.
+	 * @param EntityId $donation_id Existing donation identifier.
 	 * @param Throwable|null $previous Previous exception.
 	 */
-	public function __construct( int|string|EntityId $donation_id, ?Throwable $previous = null ) {
+	public function __construct( EntityId $donation_id, ?Throwable $previous = null ) {
 
 		parent::__construct(
 			stage: UseCaseFailureStage::Precondition,
 			message: sprintf(
 				'Cannot create donation "%s": request payload does not match existing donation.',
-				self::format_donation_id( $donation_id ),
+				(string) $donation_id->get_value(),
 			),
 			previous: $previous,
 		);
-	}
-
-	/**
-	 * Formats the donation ID for exception messages.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param int|string|EntityId $donation_id Donation identifier.
-	 *
-	 * @return string Donation identifier.
-	 */
-	private static function format_donation_id( int|string|EntityId $donation_id ): string {
-
-		return (string) ( $donation_id instanceof EntityId ? $donation_id->get_value() : $donation_id );
 	}
 }

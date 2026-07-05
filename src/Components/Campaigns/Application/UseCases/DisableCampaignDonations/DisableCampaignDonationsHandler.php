@@ -37,7 +37,7 @@ final readonly class DisableCampaignDonationsHandler extends AbstractCampaignMut
 	): DisableCampaignDonationsException {
 
 		return new DisableCampaignDonationsNotFoundException(
-			(string) $campaign_id->get_value(),
+			$campaign_id,
 			$previous,
 		);
 	}

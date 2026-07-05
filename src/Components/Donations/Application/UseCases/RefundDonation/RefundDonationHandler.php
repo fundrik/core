@@ -37,7 +37,7 @@ final readonly class RefundDonationHandler extends AbstractDonationMutationHandl
 	): RefundDonationException {
 
 		return new RefundDonationNotFoundException(
-			(string) $donation_id->get_value(),
+			$donation_id,
 			$previous,
 		);
 	}

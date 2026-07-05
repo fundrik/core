@@ -38,7 +38,7 @@ final readonly class ChangeCampaignTargetHandler extends AbstractCampaignMutatio
 	): ChangeCampaignTargetException {
 
 		return new ChangeCampaignTargetNotFoundException(
-			(string) $campaign_id->get_value(),
+			$campaign_id,
 			$previous,
 		);
 	}
