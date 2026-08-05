@@ -32,9 +32,11 @@ interface CampaignReadPort {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param list<int|string> $ids Campaign IDs to retrieve.
+	 * @param array<int, EntityId> $ids Campaign IDs to retrieve.
 	 *
-	 * @return array<int, Campaign> Campaigns keyed by ID.
+	 * @phpstan-param list<EntityId> $ids
+	 *
+	 * @return list<Campaign> Campaign read models.
 	 *
 	 * @throws CampaignReadExceptionInterface When the lookup fails.
 	 */

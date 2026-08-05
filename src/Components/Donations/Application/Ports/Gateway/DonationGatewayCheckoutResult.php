@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\Ports\Gateway;
 
+use Fundrik\Core\Components\Shared\Application\Url;
+
 /**
  * Represents normalized gateway checkout output.
  *
@@ -16,10 +18,10 @@ final readonly class DonationGatewayCheckoutResult {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $redirect_url Gateway checkout redirect URL.
+	 * @param Url $redirect_url Gateway checkout redirect URL.
 	 */
 	public function __construct(
-		private string $redirect_url,
+		private Url $redirect_url,
 	) {}
 
 	/**
@@ -27,9 +29,9 @@ final readonly class DonationGatewayCheckoutResult {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string Gateway checkout redirect URL.
+	 * @return Url Gateway checkout redirect URL.
 	 */
-	public function get_redirect_url(): string {
+	public function get_redirect_url(): Url {
 
 		return $this->redirect_url;
 	}

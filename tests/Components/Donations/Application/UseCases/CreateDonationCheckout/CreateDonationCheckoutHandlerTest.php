@@ -130,17 +130,16 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 			->withArgs(
 				function ( DonationGatewayCheckoutRequest $request ): bool {
 
-					$this->assertSame( 5_001, $request->get_donation_id() );
-					$this->assertSame( 901, $request->get_campaign_id() );
-					$this->assertSame( 1_000, $request->get_amount() );
-					$this->assertSame( 'RUB', $request->get_currency_code() );
-					$this->assertSame( 'https://fundrik.test/success', $request->get_success_url() );
-					$this->assertSame( 'https://fundrik.test/cancel', $request->get_cancel_url() );
+					$this->assertTrue( EntityId::create( 5_001 )->equals( $request->get_donation_id() ) );
+					$this->assertTrue( EntityId::create( 901 )->equals( $request->get_campaign_id() ) );
+					$this->assertTrue( Money::create( 1_000, 'RUB' )->equals( $request->get_money() ) );
+					$this->assertTrue( Url::create( 'https://fundrik.test/success' )->equals( $request->get_success_url() ) );
+					$this->assertTrue( Url::create( 'https://fundrik.test/cancel' )->equals( $request->get_cancel_url() ) );
 
 					return true;
 				},
 			)
-			->andReturn( new DonationGatewayCheckoutResult( 'https://gateway.test/checkout/5001' ) );
+			->andReturn( new DonationGatewayCheckoutResult( Url::create( 'https://gateway.test/checkout/5001' ) ) );
 
 		$result = $this->handler->handle( $data );
 
@@ -185,7 +184,7 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 		$this->gateway
 			->shouldReceive( 'create_checkout' )
 			->once()
-			->andReturn( new DonationGatewayCheckoutResult( 'https://gateway.test/checkout/5001' ) );
+			->andReturn( new DonationGatewayCheckoutResult( Url::create( 'https://gateway.test/checkout/5001' ) ) );
 
 		$result = $this->handler->handle( $data );
 

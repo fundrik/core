@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\Ports\Gateway;
 
+use Fundrik\Core\Components\Shared\Application\Url;
+use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Fundrik\Core\Components\Shared\Domain\Money;
+
 /**
  * Represents normalized input for creating gateway checkout.
  *
@@ -16,20 +20,18 @@ final readonly class DonationGatewayCheckoutRequest {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param int|string $donation_id Donation identifier.
-	 * @param int|string $campaign_id Campaign identifier.
-	 * @param int $amount Donation amount.
-	 * @param string $currency_code Donation currency code.
-	 * @param string $success_url Success callback URL.
-	 * @param string $cancel_url Cancellation callback URL.
+	 * @param EntityId $donation_id Donation identifier.
+	 * @param EntityId $campaign_id Campaign identifier.
+	 * @param Money $money Donation money.
+	 * @param Url $success_url Success callback URL.
+	 * @param Url $cancel_url Cancellation callback URL.
 	 */
 	public function __construct(
-		private int|string $donation_id,
-		private int|string $campaign_id,
-		private int $amount,
-		private string $currency_code,
-		private string $success_url,
-		private string $cancel_url,
+		private EntityId $donation_id,
+		private EntityId $campaign_id,
+		private Money $money,
+		private Url $success_url,
+		private Url $cancel_url,
 	) {}
 
 	/**
@@ -37,9 +39,9 @@ final readonly class DonationGatewayCheckoutRequest {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int|string Donation identifier.
+	 * @return EntityId Donation identifier.
 	 */
-	public function get_donation_id(): int|string {
+	public function get_donation_id(): EntityId {
 
 		return $this->donation_id;
 	}
@@ -49,35 +51,23 @@ final readonly class DonationGatewayCheckoutRequest {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int|string Campaign identifier.
+	 * @return EntityId Campaign identifier.
 	 */
-	public function get_campaign_id(): int|string {
+	public function get_campaign_id(): EntityId {
 
 		return $this->campaign_id;
 	}
 
 	/**
-	 * Returns the donation amount.
+	 * Returns the donation money.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int Donation amount.
+	 * @return Money Donation money.
 	 */
-	public function get_amount(): int {
+	public function get_money(): Money {
 
-		return $this->amount;
-	}
-
-	/**
-	 * Returns the donation currency code.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return string Donation currency code.
-	 */
-	public function get_currency_code(): string {
-
-		return $this->currency_code;
+		return $this->money;
 	}
 
 	/**
@@ -85,9 +75,9 @@ final readonly class DonationGatewayCheckoutRequest {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string Success callback URL.
+	 * @return Url Success callback URL.
 	 */
-	public function get_success_url(): string {
+	public function get_success_url(): Url {
 
 		return $this->success_url;
 	}
@@ -97,9 +87,9 @@ final readonly class DonationGatewayCheckoutRequest {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string Cancellation callback URL.
+	 * @return Url Cancellation callback URL.
 	 */
-	public function get_cancel_url(): string {
+	public function get_cancel_url(): Url {
 
 		return $this->cancel_url;
 	}
