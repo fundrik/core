@@ -6,6 +6,7 @@ namespace Fundrik\Core\Components\Campaigns\Application\Services;
 
 use Fundrik\Core\Components\Campaigns\Application\Commands\CreateCampaignCommand;
 use Fundrik\Core\Components\Campaigns\Application\Commands\SyncCampaignFromSnapshotCommand;
+use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetHandler;
 use Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException;
@@ -236,6 +237,8 @@ final readonly class CampaignCommandService {
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID input.
 	 * @param string $exception_class Exception class to throw on validation failure.
+	 *
+	 * @phpstan-param class-string<CampaignApplicationException> $exception_class
 	 *
 	 * @return EntityId Campaign ID.
 	 *
