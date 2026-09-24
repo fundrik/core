@@ -52,6 +52,7 @@ final readonly class CreateDonationCheckoutHandler {
 
 		$gateway_result = $this->create_gateway_checkout(
 			$donation,
+			$data->get_payment_description(),
 			$data->get_success_url(),
 			$data->get_cancel_url(),
 		);
@@ -97,6 +98,7 @@ final readonly class CreateDonationCheckoutHandler {
 	 * @since 0.1.0
 	 *
 	 * @param Donation $donation Created or replayed donation.
+	 * @param string $payment_description Payment description.
 	 * @param Url $success_url Success callback URL.
 	 * @param Url $cancel_url Cancellation callback URL.
 	 *
@@ -106,6 +108,7 @@ final readonly class CreateDonationCheckoutHandler {
 	 */
 	private function create_gateway_checkout(
 		Donation $donation,
+		string $payment_description,
 		Url $success_url,
 		Url $cancel_url,
 	): DonationGatewayCheckoutResult {
@@ -114,6 +117,7 @@ final readonly class CreateDonationCheckoutHandler {
 			donation_id: $donation->get_id(),
 			campaign_id: $donation->get_campaign_id(),
 			money: $donation->get_money(),
+			payment_description: $payment_description,
 			success_url: $success_url,
 			cancel_url: $cancel_url,
 		);
@@ -131,5 +135,4 @@ final readonly class CreateDonationCheckoutHandler {
 			);
 		}
 	}
-
 }

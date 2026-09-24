@@ -23,6 +23,7 @@ final readonly class DonationGatewayCheckoutRequest {
 	 * @param EntityId $donation_id Donation identifier.
 	 * @param EntityId $campaign_id Campaign identifier.
 	 * @param Money $money Donation money.
+	 * @param string $payment_description Payment description.
 	 * @param Url $success_url Success callback URL.
 	 * @param Url $cancel_url Cancellation callback URL.
 	 */
@@ -30,6 +31,7 @@ final readonly class DonationGatewayCheckoutRequest {
 		private EntityId $donation_id,
 		private EntityId $campaign_id,
 		private Money $money,
+		private string $payment_description,
 		private Url $success_url,
 		private Url $cancel_url,
 	) {}
@@ -92,5 +94,17 @@ final readonly class DonationGatewayCheckoutRequest {
 	public function get_cancel_url(): Url {
 
 		return $this->cancel_url;
+	}
+
+	/**
+	 * Returns the payment description.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string Payment description.
+	 */
+	public function get_payment_description(): string {
+
+		return $this->payment_description;
 	}
 }

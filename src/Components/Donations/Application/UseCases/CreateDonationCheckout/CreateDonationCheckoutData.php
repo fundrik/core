@@ -20,11 +20,13 @@ final readonly class CreateDonationCheckoutData {
 	 * @since 0.1.0
 	 *
 	 * @param DonationCreationData $donation_creation_data Donation creation data.
+	 * @param string $payment_description Payment description.
 	 * @param Url $success_url Success URL.
 	 * @param Url $cancel_url Cancellation URL.
 	 */
 	public function __construct(
 		private DonationCreationData $donation_creation_data,
+		private string $payment_description,
 		private Url $success_url,
 		private Url $cancel_url,
 	) {}
@@ -63,5 +65,17 @@ final readonly class CreateDonationCheckoutData {
 	public function get_cancel_url(): Url {
 
 		return $this->cancel_url;
+	}
+
+	/**
+	 * Returns the payment description.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return string Payment description.
+	 */
+	public function get_payment_description(): string {
+
+		return $this->payment_description;
 	}
 }

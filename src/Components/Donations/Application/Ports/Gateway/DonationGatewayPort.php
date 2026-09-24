@@ -21,6 +21,6 @@ interface DonationGatewayPort {
 	 * @return DonationGatewayCheckoutResult Normalized checkout output.
 	 *
 	 * @throws DonationGatewayExceptionInterface When checkout creation fails.
-	 */
+	*/
 	public function create_checkout( DonationGatewayCheckoutRequest $request ): DonationGatewayCheckoutResult;
 }

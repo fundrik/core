@@ -108,6 +108,7 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 			amount: 1_000,
 			success_url: 'https://fundrik.test/success',
 			cancel_url: 'https://fundrik.test/cancel',
+			payment_description: 'Donation for campaign 901',
 		);
 
 		$this->campaigns
@@ -135,6 +136,7 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 					$this->assertTrue( Money::create( 1_000, 'RUB' )->equals( $request->get_money() ) );
 					$this->assertTrue( Url::create( 'https://fundrik.test/success' )->equals( $request->get_success_url() ) );
 					$this->assertTrue( Url::create( 'https://fundrik.test/cancel' )->equals( $request->get_cancel_url() ) );
+					$this->assertSame( 'Donation for campaign 901', $request->get_payment_description() );
 
 					return true;
 				},
@@ -163,6 +165,7 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 			amount: 1_000,
 			success_url: 'https://fundrik.test/success',
 			cancel_url: 'https://fundrik.test/cancel',
+			payment_description: 'Donation for campaign 901',
 		);
 
 		$this->campaigns
@@ -201,6 +204,7 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 			amount: 1_000,
 			success_url: 'https://fundrik.test/success',
 			cancel_url: 'https://fundrik.test/cancel',
+			payment_description: 'Donation for campaign 901',
 		);
 
 		$this->campaigns
@@ -237,6 +241,7 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 		int $amount,
 		string $success_url,
 		string $cancel_url,
+		string $payment_description,
 	): CreateDonationCheckoutData {
 
 		return new CreateDonationCheckoutData(
@@ -247,6 +252,7 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 			),
 			success_url: Url::create( $success_url ),
 			cancel_url: Url::create( $cancel_url ),
+			payment_description: $payment_description,
 		);
 	}
 }
