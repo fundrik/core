@@ -57,7 +57,7 @@ final readonly class CreateDonationCheckoutResult {
 	}
 
 	/**
-	 * Returns the donation amount.
+	 * Returns the donation money.
 	 *
 	 * @since 1.0.0
 	 *
