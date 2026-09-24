@@ -12,7 +12,10 @@ namespace Fundrik\Core\Components\Donations\Application\Ports\Gateway;
 interface DonationGatewayPort {
 
 	/**
-	 * Creates a checkout for a normalized donation.
+	 * Creates or returns an idempotent checkout for a normalized donation.
+	 *
+	 * Repeated calls with the same donation ID must not create or charge a second payment.
+	 * The adapter uses the donation ID as a stable provider idempotency key or equivalent merchant payment key.
 	 *
 	 * @since 1.0.0
 	 *
@@ -21,6 +24,6 @@ interface DonationGatewayPort {
 	 * @return DonationGatewayCheckoutResult Normalized checkout output.
 	 *
 	 * @throws DonationGatewayExceptionInterface When checkout creation fails.
-	*/
+	 */
 	public function create_checkout( DonationGatewayCheckoutRequest $request ): DonationGatewayCheckoutResult;
 }

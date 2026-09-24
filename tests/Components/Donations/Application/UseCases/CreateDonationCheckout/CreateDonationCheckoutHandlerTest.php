@@ -25,6 +25,7 @@ use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempot
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Application\Url;
@@ -55,6 +56,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( CreateDonationIdempotentlyStatus::class )]
 #[UsesClass( FindDonationByIdHandler::class )]
 #[UsesClass( Donation::class )]
+#[UsesClass( DonationStatus::class )]
 #[UsesClass( DonationFactory::class )]
 #[UsesClass( Campaign::class )]
 #[UsesClass( CampaignTitle::class )]
@@ -192,6 +194,56 @@ final class CreateDonationCheckoutHandlerTest extends MockeryTestCase {
 		$result = $this->handler->handle( $data );
 
 		$this->assertSame( 'https://gateway.test/checkout/5001', $result->get_redirect_url()->get_value() );
+	}
+
+	#[Test]
+	public function handle_rejects_checkout_for_non_pending_donation(): void {
+
+		$campaign = $this->make_campaign( 901, 'Campaign 901', true, 'RUB', 10_000 );
+		$donations = [
+			$this->make_pending_donation( 5_001, 901, 1_000, 'RUB' )->succeed(),
+			$this->make_pending_donation( 5_001, 901, 1_000, 'RUB' )->reject(),
+			$this->make_pending_donation( 5_001, 901, 1_000, 'RUB' )->succeed()->refund(),
+		];
+		$data = $this->make_checkout_data(
+			donation_id: 5_001,
+			campaign_id: 901,
+			amount: 1_000,
+			success_url: 'https://fundrik.test/success',
+			cancel_url: 'https://fundrik.test/cancel',
+			payment_description: 'Donation for campaign 901',
+		);
+
+		$this->campaigns
+			->shouldReceive( 'find_by_id' )
+			->times( 3 )
+			->andReturn( $campaign );
+
+		$this->repository
+			->shouldReceive( 'insert' )
+			->times( 3 )
+			->andThrow( new FakeDonationAlreadyExistsException() );
+
+		$this->repository
+			->shouldReceive( 'find_by_id' )
+			->times( 3 )
+			->andReturnValues( $donations );
+
+		$this->event_bus->shouldNotReceive( 'publish' );
+		$this->gateway->shouldNotReceive( 'create_checkout' );
+
+		foreach ( $donations as $donation ) {
+			try {
+				$this->handler->handle( $data );
+				$this->fail( 'Expected CreateDonationCheckoutException to be thrown.' );
+			} catch ( CreateDonationCheckoutException $exception ) {
+				$this->assertSame( UseCaseFailureStage::Precondition, $exception->get_stage() );
+				$this->assertSame(
+					'Cannot create checkout for donation "5001": donation is not pending.',
+					$exception->getMessage(),
+				);
+			}
+		}
 	}
 
 	#[Test]

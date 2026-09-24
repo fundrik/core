@@ -12,6 +12,7 @@ use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\Create
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\DonationCreationData;
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Url;
 
@@ -48,7 +49,7 @@ final readonly class CreateDonationCheckoutHandler {
 	 */
 	public function handle( CreateDonationCheckoutData $data ): CreateDonationCheckoutResult {
 
-		$donation = $this->ensure_donation( $data->get_donation_creation_data() );
+		$donation = $this->ensure_pending_donation( $data->get_donation_creation_data() );
 
 		$gateway_result = $this->create_gateway_checkout(
 			$donation,
@@ -65,8 +66,9 @@ final readonly class CreateDonationCheckoutHandler {
 		);
 	}
 
+	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	/**
-	 * Ensures a donation exists for checkout.
+	 * Ensures that a pending donation exists for checkout.
 	 *
 	 * @since 1.0.0
 	 *
@@ -74,12 +76,12 @@ final readonly class CreateDonationCheckoutHandler {
 	 *
 	 * @return Donation Created or replayed donation.
 	 *
-	 * @throws CreateDonationCheckoutException When donation preparation fails.
+	 * @throws CreateDonationCheckoutException When donation preparation fails or the donation is not pending.
 	 */
-	private function ensure_donation( DonationCreationData $data ): Donation {
+	private function ensure_pending_donation( DonationCreationData $data ): Donation {
 
 		try {
-			return $this->create_donation->handle( $data )->get_donation();
+			$donation = $this->create_donation->handle( $data )->get_donation();
 		} catch ( CreateDonationException $e ) {
 			throw new CreateDonationCheckoutException(
 				stage: $e->get_stage(),
@@ -90,7 +92,20 @@ final readonly class CreateDonationCheckoutHandler {
 				previous: $e,
 			);
 		}
+
+		if ( $donation->get_status() !== DonationStatus::Pending ) {
+			throw new CreateDonationCheckoutException(
+				stage: UseCaseFailureStage::Precondition,
+				message: sprintf(
+					'Cannot create checkout for donation "%s": donation is not pending.',
+					(string) $donation->get_id()->get_value(),
+				),
+			);
+		}
+
+		return $donation;
 	}
+	// phpcs:enable
 
 	/**
 	 * Creates the gateway checkout from normalized donation data.
