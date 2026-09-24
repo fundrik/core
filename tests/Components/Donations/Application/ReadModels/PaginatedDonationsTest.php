@@ -7,6 +7,7 @@ namespace Fundrik\Core\Tests\Components\Donations\Application\ReadModels;
 use Fundrik\Core\Components\Donations\Application\ReadModels\Donation;
 use Fundrik\Core\Components\Donations\Application\ReadModels\PaginatedDonations;
 use Fundrik\Core\Tests\MockeryTestCase;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -44,5 +45,19 @@ final class PaginatedDonationsTest extends MockeryTestCase {
 		);
 
 		$this->assertSame( 0, $page->get_total_pages() );
+	}
+
+	#[Test]
+	public function constructor_throws_when_per_page_is_invalid(): void {
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Items per page must be a positive integer. Given: 0.' );
+
+		new PaginatedDonations(
+			items: [],
+			page: 1,
+			per_page: 0,
+			total: 1,
+		);
 	}
 }

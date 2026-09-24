@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\ReadModels;
 
+use InvalidArgumentException;
+
 /**
  * Represents a paginated list of donation read models.
  *
@@ -21,6 +23,8 @@ final readonly class PaginatedDonations {
 	 * @param int $per_page Donations per page.
 	 * @param int $total Total number of donations.
 	 *
+	 * @throws InvalidArgumentException When items per page is not positive.
+	 *
 	 * @phpstan-param list<Donation> $items Donation read models.
 	 */
 	public function __construct(
@@ -28,7 +32,14 @@ final readonly class PaginatedDonations {
 		private int $page,
 		private int $per_page,
 		private int $total,
-	) {}
+	) {
+
+		if ( $per_page <= 0 ) {
+			throw new InvalidArgumentException(
+				sprintf( 'Items per page must be a positive integer. Given: %d.', $per_page ),
+			);
+		}
+	}
 
 	/**
 	 * Returns the donation read models.

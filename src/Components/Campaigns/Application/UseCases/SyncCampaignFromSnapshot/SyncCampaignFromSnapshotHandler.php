@@ -214,11 +214,6 @@ final readonly class SyncCampaignFromSnapshotHandler {
 		?CampaignNotFoundExceptionInterface $previous = null,
 	): SyncCampaignFromSnapshotNotFoundException {
 
-		return new SyncCampaignFromSnapshotNotFoundException(
-			$campaign_id,
-			$stage,
-			$previous,
-			$reason,
-		);
+		return new SyncCampaignFromSnapshotNotFoundException( $campaign_id, $stage, $previous, $reason );
 	}
 }
