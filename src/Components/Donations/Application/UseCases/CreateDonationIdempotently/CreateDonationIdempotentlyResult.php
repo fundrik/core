@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Donations\Domain\Donation;
 /**
  * Represents the result of idempotent donation creation.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CreateDonationIdempotentlyResult {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Donation $donation Created or replayed donation.
 	 * @param CreateDonationIdempotentlyStatus $status Idempotent creation status.
@@ -29,7 +29,7 @@ final readonly class CreateDonationIdempotentlyResult {
 	/**
 	 * Returns the created or replayed donation.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Donation Created or replayed donation.
 	 */
@@ -41,7 +41,7 @@ final readonly class CreateDonationIdempotentlyResult {
 	/**
 	 * Returns the idempotent creation status.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return CreateDonationIdempotentlyStatus Idempotent creation status.
 	 */

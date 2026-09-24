@@ -10,14 +10,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Provides the outbound port for reading campaigns.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface CampaignReadPort {
 
 	/**
 	 * Retrieves a campaign by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Campaign ID to retrieve.
 	 *
@@ -30,7 +30,7 @@ interface CampaignReadPort {
 	/**
 	 * Retrieves campaigns by their IDs.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param array<int, EntityId> $ids Campaign IDs to retrieve.
 	 *

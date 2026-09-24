@@ -13,14 +13,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidCurrencyCodeExceptio
 /**
  * Represents campaign targeting in the campaign currency.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CampaignTarget {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Currency $currency Campaign currency.
 	 * @param Amount|null $amount Target amount, if configured.
@@ -33,7 +33,7 @@ final readonly class CampaignTarget {
 	/**
 	 * Creates a campaign target from primitive values.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $currency_code Campaign currency code.
 	 * @param int|null $target_amount Target amount, if configured.
@@ -56,7 +56,7 @@ final readonly class CampaignTarget {
 	/**
 	 * Returns the campaign currency.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Currency Campaign currency.
 	 */
@@ -68,7 +68,7 @@ final readonly class CampaignTarget {
 	/**
 	 * Returns whether the target amount is configured.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return bool True when the target amount is configured.
 	 */
@@ -80,7 +80,7 @@ final readonly class CampaignTarget {
 	/**
 	 * Returns the target amount.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Amount|null Target amount, if configured.
 	 */
@@ -92,7 +92,7 @@ final readonly class CampaignTarget {
 	/**
 	 * Returns a copy with the same currency and a new amount.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Amount|null $target_amount Target amount, or null to clear it.
 	 *
@@ -106,7 +106,7 @@ final readonly class CampaignTarget {
 	/**
 	 * Checks whether the target equals another target.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other Other campaign target.
 	 *
@@ -124,7 +124,7 @@ final readonly class CampaignTarget {
 	/**
 	 * Creates a validated campaign currency value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $currency_code Campaign currency code.
 	 *
@@ -150,7 +150,7 @@ final readonly class CampaignTarget {
 	/**
 	 * Creates a validated target amount value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $target_amount Target amount.
 	 *

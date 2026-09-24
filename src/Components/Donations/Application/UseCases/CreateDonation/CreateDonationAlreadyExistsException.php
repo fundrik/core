@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when create-donation is retried with an already persisted donation ID.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class CreateDonationAlreadyExistsException extends CreateDonationException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Existing donation identifier.
 	 * @param Throwable|null $previous Underlying repository exception.

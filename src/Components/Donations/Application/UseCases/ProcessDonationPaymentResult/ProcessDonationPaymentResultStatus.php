@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases\ProcessDonation
 /**
  * Specifies payment result processing outcomes.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 enum ProcessDonationPaymentResultStatus: string {
 

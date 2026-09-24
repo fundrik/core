@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Campaigns\Domain\Exceptions\InvalidCampaignTitleExce
 /**
  * Represents a non-empty fundraising campaign title.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CampaignTitle {
 
 	/**
 	 * Private constructor, use factory method.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $value Validated campaign title.
 	 */
@@ -27,7 +27,7 @@ final readonly class CampaignTitle {
 	/**
 	 * Creates a validated title value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $value Raw input title.
 	 *
@@ -47,7 +47,7 @@ final readonly class CampaignTitle {
 	/**
 	 * Returns the validated title string.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Campaign title.
 	 */
@@ -59,7 +59,7 @@ final readonly class CampaignTitle {
 	/**
 	 * Checks whether this title is equal to another.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other Title to compare with.
 	 *

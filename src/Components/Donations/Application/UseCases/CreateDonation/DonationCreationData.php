@@ -10,14 +10,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Represents validated input for creating a donation.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DonationCreationData {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param EntityId $campaign_id Campaign ID.
@@ -32,7 +32,7 @@ final readonly class DonationCreationData {
 	/**
 	 * Returns the donation ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Donation ID.
 	 */
@@ -44,7 +44,7 @@ final readonly class DonationCreationData {
 	/**
 	 * Returns the campaign ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Campaign ID.
 	 */
@@ -56,7 +56,7 @@ final readonly class DonationCreationData {
 	/**
 	 * Returns the donation amount.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Amount Donation amount.
 	 */

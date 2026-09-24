@@ -9,6 +9,6 @@ use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplication
 /**
  * Thrown when find-campaign-by-id operation fails.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class FindCampaignByIdException extends CampaignApplicationException {}

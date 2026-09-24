@@ -13,14 +13,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 /**
  * Provides the public entry point for campaign read operations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CampaignQueryService {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param ReadCampaignByIdHandler $read_campaign_by_id Retrieves campaigns by ID.
 	 */
@@ -31,7 +31,7 @@ final readonly class CampaignQueryService {
 	/**
 	 * Retrieves a campaign by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *

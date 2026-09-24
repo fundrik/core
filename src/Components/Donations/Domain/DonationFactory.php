@@ -17,14 +17,14 @@ use ValueError;
 /**
  * Creates Donation entities.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DonationFactory {
 
 	/**
 	 * Creates a donation in any valid state.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Donation ID.
 	 * @param EntityVersion $version Donation version.
@@ -48,7 +48,7 @@ final readonly class DonationFactory {
 	/**
 	 * Creates a donation from primitive values.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $id Donation ID.
 	 * @param int $version Donation version.
@@ -94,7 +94,7 @@ final readonly class DonationFactory {
 	/**
 	 * Creates a validated donation status.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $status Donation status value.
 	 *
@@ -117,7 +117,7 @@ final readonly class DonationFactory {
 	/**
 	 * Creates a new pending donation with initial version.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Donation ID.
 	 * @param EntityId $campaign_id Campaign ID.
@@ -139,7 +139,7 @@ final readonly class DonationFactory {
 	/**
 	 * Creates a new pending donation with initial version from primitive values.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $id Donation ID.
 	 * @param int|string|EntityId $campaign_id Campaign ID.

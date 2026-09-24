@@ -16,14 +16,14 @@ use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 /**
  * Handles idempotent donation creation and replays an existing donation for matching duplicate requests.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CreateDonationIdempotentlyHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CreateDonationHandler $create_donation Creates donations from validated input.
 	 * @param FindDonationByIdHandler $find_donation_by_id Retrieves donation entities for replay resolution.
@@ -36,7 +36,7 @@ final readonly class CreateDonationIdempotentlyHandler {
 	/**
 	 * Creates a donation and replays an existing matching donation on duplicate requests.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationCreationData $data Validated donation creation data.
 	 *
@@ -68,7 +68,7 @@ final readonly class CreateDonationIdempotentlyHandler {
 	/**
 	 * Resolves an idempotent duplicate-create request.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationCreationData $data Validated donation creation data.
 	 *
@@ -94,7 +94,7 @@ final readonly class CreateDonationIdempotentlyHandler {
 	/**
 	 * Returns the existing donation for duplicate-request resolution.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationCreationData $data Validated donation creation data.
 	 *
@@ -136,7 +136,7 @@ final readonly class CreateDonationIdempotentlyHandler {
 	/**
 	 * Returns whether the existing donation matches the idempotent request.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Donation $existing_donation Existing donation.
 	 * @param DonationCreationData $data Validated donation creation data.

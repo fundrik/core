@@ -11,14 +11,14 @@ use Fundrik\Core\Components\Shared\Domain\Money;
 /**
  * Represents normalized input for creating gateway checkout.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DonationGatewayCheckoutRequest {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation identifier.
 	 * @param EntityId $campaign_id Campaign identifier.
@@ -39,7 +39,7 @@ final readonly class DonationGatewayCheckoutRequest {
 	/**
 	 * Returns the donation identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Donation identifier.
 	 */
@@ -51,7 +51,7 @@ final readonly class DonationGatewayCheckoutRequest {
 	/**
 	 * Returns the campaign identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Campaign identifier.
 	 */
@@ -63,7 +63,7 @@ final readonly class DonationGatewayCheckoutRequest {
 	/**
 	 * Returns the donation money.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Money Donation money.
 	 */
@@ -75,7 +75,7 @@ final readonly class DonationGatewayCheckoutRequest {
 	/**
 	 * Returns the success callback URL.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Url Success callback URL.
 	 */
@@ -87,7 +87,7 @@ final readonly class DonationGatewayCheckoutRequest {
 	/**
 	 * Returns the cancellation callback URL.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Url Cancellation callback URL.
 	 */
@@ -99,7 +99,7 @@ final readonly class DonationGatewayCheckoutRequest {
 	/**
 	 * Returns the payment description.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Payment description.
 	 */

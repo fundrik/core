@@ -12,14 +12,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 /**
  * Represents a fundraising campaign.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class Campaign {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Campaign ID.
 	 * @param EntityVersion $version Campaign version.
@@ -38,7 +38,7 @@ final readonly class Campaign {
 	/**
 	 * Returns the campaign ID value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Campaign ID value object.
 	 */
@@ -50,7 +50,7 @@ final readonly class Campaign {
 	/**
 	 * Returns the campaign version value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityVersion Campaign version value object.
 	 */
@@ -62,7 +62,7 @@ final readonly class Campaign {
 	/**
 	 * Returns the campaign title.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Campaign title string.
 	 */
@@ -74,7 +74,7 @@ final readonly class Campaign {
 	/**
 	 * Returns whether the campaign accepts donations.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return bool True when the campaign accepts donations.
 	 */
@@ -86,7 +86,7 @@ final readonly class Campaign {
 	/**
 	 * Returns whether the campaign has a target.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return bool True when the campaign has a target.
 	 */
@@ -98,7 +98,7 @@ final readonly class Campaign {
 	/**
 	 * Returns the campaign target value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return CampaignTarget Campaign target value object.
 	 */
@@ -110,7 +110,7 @@ final readonly class Campaign {
 	/**
 	 * Changes the campaign title.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CampaignTitle $new_title New title.
 	 *
@@ -136,7 +136,7 @@ final readonly class Campaign {
 	/**
 	 * Enables accepting donations for the campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Campaign with donation acceptance enabled.
 	 *
@@ -154,7 +154,7 @@ final readonly class Campaign {
 	/**
 	 * Disables accepting donations for the campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Campaign with donation acceptance disabled.
 	 *
@@ -172,7 +172,7 @@ final readonly class Campaign {
 	/**
 	 * Changes the campaign target amount.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Amount|null $target_amount New campaign target amount.
 	 *

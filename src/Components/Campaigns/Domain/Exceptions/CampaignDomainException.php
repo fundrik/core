@@ -9,6 +9,6 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\FundrikDomainException;
 /**
  * Serves as the base exception for campaign domain errors.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 abstract class CampaignDomainException extends FundrikDomainException {}

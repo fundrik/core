@@ -18,14 +18,14 @@ use Throwable;
 /**
  * Provides shared workflow for campaign mutation use cases.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 abstract readonly class AbstractCampaignMutationHandler {
 
 	/**
 	 * Creates the concrete mutation exception exposed by the use case.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
@@ -44,7 +44,7 @@ abstract readonly class AbstractCampaignMutationHandler {
 	/**
 	 * Creates the concrete mutation exception used when the campaign disappears before persistence.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Throwable $previous Previous repository exception.
@@ -59,7 +59,7 @@ abstract readonly class AbstractCampaignMutationHandler {
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CampaignRepositoryPort $campaigns Persists changed campaigns.
 	 * @param ApplicationEventBusPort $event_bus Publishes campaign events.
@@ -73,7 +73,7 @@ abstract readonly class AbstractCampaignMutationHandler {
 	/**
 	 * Loads an existing campaign for the requested mutation.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param CampaignMutation $mutation Campaign mutation descriptor.
@@ -115,7 +115,7 @@ abstract readonly class AbstractCampaignMutationHandler {
 	/**
 	 * Wraps domain-level campaign mutation rejection.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param CampaignMutation $mutation Campaign mutation descriptor.
@@ -146,7 +146,7 @@ abstract readonly class AbstractCampaignMutationHandler {
 	/**
 	 * Persists the changed campaign and publishes the resulting mutation event.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Campaign $campaign Changed campaign.
 	 * @param CampaignMutation $mutation Campaign mutation descriptor.

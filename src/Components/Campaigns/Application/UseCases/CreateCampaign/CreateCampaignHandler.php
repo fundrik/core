@@ -16,14 +16,14 @@ use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBu
 /**
  * Handles creating a new campaign.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CreateCampaignHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CampaignRepositoryPort $repository Adds campaigns to storage.
 	 * @param ApplicationEventBusPort $event_bus Publishes campaign events.
@@ -37,7 +37,7 @@ final readonly class CreateCampaignHandler {
 	/**
 	 * Creates a new campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Campaign $campaign Campaign to create.
 	 *

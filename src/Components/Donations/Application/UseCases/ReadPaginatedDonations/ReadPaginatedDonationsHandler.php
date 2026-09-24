@@ -11,14 +11,14 @@ use Fundrik\Core\Components\Donations\Application\ReadModels\PaginatedDonations;
 /**
  * Handles retrieving paginated donations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class ReadPaginatedDonationsHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationReadPort $donation_read Retrieves paginated donations from storage.
 	 */
@@ -29,7 +29,7 @@ final readonly class ReadPaginatedDonationsHandler {
 	/**
 	 * Returns a paginated list of donations.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $page Page number.
 	 * @param int $per_page Donations per page.

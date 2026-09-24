@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Application\Url;
 /**
  * Represents normalized gateway checkout output.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DonationGatewayCheckoutResult {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Url $redirect_url Gateway checkout redirect URL.
 	 */
@@ -27,7 +27,7 @@ final readonly class DonationGatewayCheckoutResult {
 	/**
 	 * Returns the gateway checkout redirect URL.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Url Gateway checkout redirect URL.
 	 */

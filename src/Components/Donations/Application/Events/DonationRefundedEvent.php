@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Signals that a donation has been refunded.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DonationRefundedEvent implements DonationApplicationEventInterface {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 */
@@ -27,7 +27,7 @@ final readonly class DonationRefundedEvent implements DonationApplicationEventIn
 	/**
 	 * Returns the donation ID associated with this event.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Donation ID.
 	 */

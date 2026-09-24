@@ -12,14 +12,14 @@ use Throwable;
 /**
  * Thrown when idempotent donation creation conflicts with an existing donation.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class CreateDonationIdempotentlyConflictException extends CreateDonationException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Existing donation identifier.
 	 * @param Throwable|null $previous Previous exception.

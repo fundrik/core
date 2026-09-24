@@ -16,14 +16,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 /**
  * Provides the public entry point for donation read operations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DonationQueryService {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param ReadDonationByIdHandler $read_donation_by_id Retrieves donations by ID.
 	 * @param ReadPaginatedDonationsHandler $read_donations_page Retrieves paginated donations.
@@ -36,7 +36,7 @@ final readonly class DonationQueryService {
 	/**
 	 * Retrieves a donation by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
@@ -56,7 +56,7 @@ final readonly class DonationQueryService {
 	/**
 	 * Returns a paginated list of donations.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $page Page number.
 	 * @param int $per_page Donations per page.

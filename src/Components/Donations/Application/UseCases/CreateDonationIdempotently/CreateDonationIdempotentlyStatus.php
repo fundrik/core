@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationI
 /**
  * Specifies the outcome of idempotent donation creation.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 enum CreateDonationIdempotentlyStatus: string {
 

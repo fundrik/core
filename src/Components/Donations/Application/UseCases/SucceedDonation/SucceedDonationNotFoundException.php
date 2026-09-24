@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when a donation to succeed cannot be found.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class SucceedDonationNotFoundException extends SucceedDonationException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Missing donation identifier.
 	 * @param Throwable|null $previous Underlying repository exception.

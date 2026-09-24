@@ -34,7 +34,7 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 /**
  * Provides the public entry point for campaign write operations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CampaignCommandService {
 
@@ -42,7 +42,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CreateCampaignHandler $create_campaign Creates new campaigns.
 	 * @param CampaignFactory $campaign_factory Creates campaigns from public input.
@@ -68,7 +68,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Creates a new campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CreateCampaignCommand $command Public campaign creation input.
 	 *
@@ -98,7 +98,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Synchronizes a campaign from an authoritative snapshot.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param SyncCampaignFromSnapshotCommand $command Public campaign synchronization input.
 	 *
@@ -130,7 +130,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Renames an existing campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 * @param string $new_title New campaign title.
@@ -157,7 +157,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Enables accepting donations for an existing campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
@@ -173,7 +173,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Disables accepting donations for an existing campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 *
@@ -189,7 +189,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Changes the target amount for an existing campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID.
 	 * @param int|null $target_amount Desired target amount, or null to clear it.
@@ -216,7 +216,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Deletes a campaign by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID to delete.
 	 *
@@ -232,7 +232,7 @@ final readonly class CampaignCommandService {
 	/**
 	 * Creates a validated campaign ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $campaign_id Campaign ID input.
 	 * @param string $exception_class Exception class to throw on validation failure.

@@ -10,14 +10,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidCurrencyCodeExceptio
 /**
  * Represents money with amount and currency.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class Money {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Amount $amount Positive amount.
 	 * @param Currency $currency Currency.
@@ -30,7 +30,7 @@ final readonly class Money {
 	/**
 	 * Creates a validated money value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $amount Amount value.
 	 * @param string $currency_code Currency code.
@@ -51,7 +51,7 @@ final readonly class Money {
 	/**
 	 * Returns the money amount value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Amount Money amount.
 	 */
@@ -63,7 +63,7 @@ final readonly class Money {
 	/**
 	 * Returns the money currency value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Currency Money currency.
 	 */
@@ -75,7 +75,7 @@ final readonly class Money {
 	/**
 	 * Checks whether this money value equals another.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other Money value to compare with.
 	 *

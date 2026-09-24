@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFro
 /**
  * Specifies why sync-campaign-from-snapshot precondition validation failed.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 enum SyncCampaignFromSnapshotPreconditionReason: string {
 

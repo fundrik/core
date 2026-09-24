@@ -9,6 +9,6 @@ use RuntimeException;
 /**
  * Serves as the base exception for application errors.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 abstract class FundrikApplicationException extends RuntimeException implements FundrikApplicationExceptionInterface {}

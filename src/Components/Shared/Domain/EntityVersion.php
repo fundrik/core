@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionExcepti
 /**
  * Represents the version of an entity state in persistence, used for optimistic concurrency control.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class EntityVersion {
 
 	/**
 	 * Private constructor, use factory methods.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $value Holds the validated persisted entity-state version.
 	 */
@@ -27,7 +27,7 @@ final readonly class EntityVersion {
 	/**
 	 * Creates a validated persisted entity-state version value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $value Accepts the input persisted version.
 	 *
@@ -49,7 +49,7 @@ final readonly class EntityVersion {
 	/**
 	 * Creates the initial persisted entity-state version.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Provides the initial persisted entity-state version.
 	 */
@@ -61,7 +61,7 @@ final readonly class EntityVersion {
 	/**
 	 * Returns the persisted entity-state version value.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Provides the persisted entity-state version.
 	 */
@@ -73,7 +73,7 @@ final readonly class EntityVersion {
 	/**
 	 * Checks whether this version is equal to another.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other Provides the version to compare with.
 	 *
@@ -87,7 +87,7 @@ final readonly class EntityVersion {
 	/**
 	 * Returns the next persisted entity-state version.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Provides the incremented persisted entity-state version.
 	 */

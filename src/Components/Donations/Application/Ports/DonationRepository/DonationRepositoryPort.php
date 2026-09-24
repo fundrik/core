@@ -10,14 +10,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Provides the outbound port for persisting and retrieving donations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface DonationRepositoryPort {
 
 	/**
 	 * Retrieves a donation by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Donation ID to retrieve.
 	 *
@@ -30,7 +30,7 @@ interface DonationRepositoryPort {
 	/**
 	 * Returns whether any donations exist for the specified campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID to check.
 	 *
@@ -43,7 +43,7 @@ interface DonationRepositoryPort {
 	/**
 	 * Returns whether a donation exists in storage by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Donation ID to check.
 	 *
@@ -56,7 +56,7 @@ interface DonationRepositoryPort {
 	/**
 	 * Inserts a new donation into storage.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Donation $donation Donation to insert.
 	 *
@@ -74,7 +74,7 @@ interface DonationRepositoryPort {
 	 * Updates are applied only when storage still contains that version.
 	 * On success, increments the persisted version and returns the persisted donation snapshot.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Donation $donation Donation to update.
 	 *

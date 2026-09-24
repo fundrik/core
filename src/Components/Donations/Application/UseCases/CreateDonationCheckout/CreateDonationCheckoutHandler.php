@@ -18,14 +18,14 @@ use Fundrik\Core\Components\Shared\Application\Url;
 /**
  * Handles creating donation checkout workflows.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CreateDonationCheckoutHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CreateDonationIdempotentlyHandler $create_donation Creates or replays donations.
 	 * @param DonationGatewayPort $gateway Creates gateway checkouts.
@@ -38,7 +38,7 @@ final readonly class CreateDonationCheckoutHandler {
 	/**
 	 * Creates a donation checkout through the selected gateway.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CreateDonationCheckoutData $data Checkout creation input.
 	 *
@@ -68,7 +68,7 @@ final readonly class CreateDonationCheckoutHandler {
 	/**
 	 * Ensures a donation exists for checkout.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationCreationData $data Validated donation creation data.
 	 *
@@ -95,7 +95,7 @@ final readonly class CreateDonationCheckoutHandler {
 	/**
 	 * Creates the gateway checkout from normalized donation data.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Donation $donation Created or replayed donation.
 	 * @param string $payment_description Payment description.

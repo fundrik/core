@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidAmountException;
 /**
  * Represents a positive integer amount.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class Amount {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $value Positive integer amount.
 	 */
@@ -27,7 +27,7 @@ final readonly class Amount {
 	/**
 	 * Creates a validated amount value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $value Amount value.
 	 *
@@ -49,7 +49,7 @@ final readonly class Amount {
 	/**
 	 * Returns the amount value.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Amount value.
 	 */
@@ -61,7 +61,7 @@ final readonly class Amount {
 	/**
 	 * Checks whether the amount equals another amount.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other Other amount.
 	 *

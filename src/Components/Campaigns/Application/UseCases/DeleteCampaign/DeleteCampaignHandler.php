@@ -18,14 +18,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Handles deleting a campaign by its ID.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DeleteCampaignHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CampaignRepositoryPort $repository Removes campaigns from storage.
 	 * @param DonationRepositoryPort $donations Retrieves donations for deletion guard checks.
@@ -41,7 +41,7 @@ final readonly class DeleteCampaignHandler {
 	/**
 	 * Deletes a campaign by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID to delete.
 	 *

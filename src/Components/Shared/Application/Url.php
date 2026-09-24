@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Application\Exceptions\InvalidUrlException;
 /**
  * Represents a valid URL.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class Url {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $value Validated URL.
 	 */
@@ -27,7 +27,7 @@ final readonly class Url {
 	/**
 	 * Creates a validated URL.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $value URL input.
 	 *
@@ -49,7 +49,7 @@ final readonly class Url {
 	/**
 	 * Returns the URL string.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string URL string.
 	 */
@@ -61,7 +61,7 @@ final readonly class Url {
 	/**
 	 * Checks whether this URL equals another.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other URL to compare with.
 	 *

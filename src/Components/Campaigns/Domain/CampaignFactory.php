@@ -15,14 +15,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityVersionExcepti
 /**
  * Creates Campaign entities.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CampaignFactory {
 
 	/**
 	 * Creates a Campaign from value objects.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Campaign ID.
 	 * @param EntityVersion $version Campaign version.
@@ -46,7 +46,7 @@ final readonly class CampaignFactory {
 	/**
 	 * Creates a campaign from primitive values.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $id Campaign ID.
 	 * @param int $version Campaign version.
@@ -92,7 +92,7 @@ final readonly class CampaignFactory {
 	/**
 	 * Creates a new campaign with the initial version.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Campaign ID.
 	 * @param CampaignTitle $title Campaign title.
@@ -114,7 +114,7 @@ final readonly class CampaignFactory {
 	/**
 	 * Creates a new campaign with initial version from primitive values.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $id Campaign ID.
 	 * @param string $title Campaign title.

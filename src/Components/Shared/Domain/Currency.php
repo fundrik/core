@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidCurrencyCodeExceptio
 /**
  * Represents an ISO 4217 currency code.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class Currency {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $code Uppercase ISO 4217 currency code.
 	 */
@@ -27,7 +27,7 @@ final readonly class Currency {
 	/**
 	 * Creates a validated currency code value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $code Currency code.
 	 *
@@ -51,7 +51,7 @@ final readonly class Currency {
 	/**
 	 * Returns the currency code.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Currency code.
 	 */
@@ -63,7 +63,7 @@ final readonly class Currency {
 	/**
 	 * Checks whether the currency equals another currency.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other Other currency.
 	 *

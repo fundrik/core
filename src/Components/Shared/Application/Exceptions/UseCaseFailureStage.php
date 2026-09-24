@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Shared\Application\Exceptions;
 /**
  * Specifies where use-case processing failed.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 enum UseCaseFailureStage: string {
 

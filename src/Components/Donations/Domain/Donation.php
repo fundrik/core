@@ -12,14 +12,14 @@ use Fundrik\Core\Components\Shared\Domain\Money;
 /**
  * Represents a fundraising donation.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class Donation {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Donation ID.
 	 * @param EntityVersion $version Donation version.
@@ -38,7 +38,7 @@ final readonly class Donation {
 	/**
 	 * Returns donation ID value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Donation ID value object.
 	 */
@@ -50,7 +50,7 @@ final readonly class Donation {
 	/**
 	 * Returns donation version value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityVersion Donation version value object.
 	 */
@@ -62,7 +62,7 @@ final readonly class Donation {
 	/**
 	 * Returns campaign ID value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Campaign ID value object.
 	 */
@@ -74,7 +74,7 @@ final readonly class Donation {
 	/**
 	 * Returns donation money value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Money Donation money.
 	 */
@@ -86,7 +86,7 @@ final readonly class Donation {
 	/**
 	 * Returns donation status.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return DonationStatus Donation status.
 	 */
@@ -100,7 +100,7 @@ final readonly class Donation {
 	 *
 	 * Allowed transition: pending -> succeeded.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Donation in succeeded status.
 	 *
@@ -116,7 +116,7 @@ final readonly class Donation {
 	 *
 	 * Allowed transition: pending -> rejected.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Donation in rejected status.
 	 *
@@ -132,7 +132,7 @@ final readonly class Donation {
 	 *
 	 * Allowed transition: succeeded -> refunded.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Donation in refunded status.
 	 *
@@ -146,7 +146,7 @@ final readonly class Donation {
 	/**
 	 * Creates a new immutable donation with a different status.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationStatus $status New donation status.
 	 *

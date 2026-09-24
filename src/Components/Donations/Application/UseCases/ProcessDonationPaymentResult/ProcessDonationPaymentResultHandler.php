@@ -18,14 +18,14 @@ use ValueError;
 /**
  * Handles processing donation payment results.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class ProcessDonationPaymentResultHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param ReadDonationByIdHandler $read_donation_by_id Reads donation state for idempotent result processing.
 	 * @param ProcessDonationPaymentResultPolicy $policy Decides how payment results affect donation state.
@@ -44,7 +44,7 @@ final readonly class ProcessDonationPaymentResultHandler {
 	/**
 	 * Processes a donation payment result idempotently.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationPaymentResult $result Normalized payment result.
 	 *
@@ -71,7 +71,7 @@ final readonly class ProcessDonationPaymentResultHandler {
 	/**
 	 * Returns the current donation status required for payment result processing.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 *
@@ -119,7 +119,7 @@ final readonly class ProcessDonationPaymentResultHandler {
 	/**
 	 * Applies a donation payment result through donation mutation services.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param DonationPaymentResultType $result_type Normalized payment result type.
@@ -149,7 +149,7 @@ final readonly class ProcessDonationPaymentResultHandler {
 	/**
 	 * Creates a donation payment result processing result.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param DonationPaymentResultType $result_type Normalized payment result type.

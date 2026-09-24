@@ -9,6 +9,6 @@ use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationExce
 /**
  * Marks all exceptions that occur while reading donations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface DonationReadExceptionInterface extends FundrikApplicationExceptionInterface {}

@@ -10,14 +10,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Provides the outbound port for persisting and retrieving campaigns.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface CampaignRepositoryPort {
 
 	/**
 	 * Retrieves a campaign by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Campaign ID to retrieve.
 	 *
@@ -30,7 +30,7 @@ interface CampaignRepositoryPort {
 	/**
 	 * Returns whether a campaign exists in storage by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Campaign ID to check.
 	 *
@@ -43,7 +43,7 @@ interface CampaignRepositoryPort {
 	/**
 	 * Inserts a new campaign into storage.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Campaign $campaign Campaign to insert.
 	 *
@@ -61,7 +61,7 @@ interface CampaignRepositoryPort {
 	 * Updates are applied only when storage still contains that version.
 	 * On success, increments the persisted version and returns the persisted campaign snapshot.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Campaign $campaign Campaign to update.
 	 *
@@ -76,7 +76,7 @@ interface CampaignRepositoryPort {
 	/**
 	 * Removes a campaign from storage by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Campaign ID to delete.
 	 *

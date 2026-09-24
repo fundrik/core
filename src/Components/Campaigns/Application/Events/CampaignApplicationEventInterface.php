@@ -10,14 +10,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Marks campaign-related application-level events.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface CampaignApplicationEventInterface extends ApplicationEventInterface {
 
 	/**
 	 * Returns the campaign ID associated with the event.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Campaign ID.
 	 */

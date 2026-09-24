@@ -7,6 +7,6 @@ namespace Fundrik\Core\Components\Campaigns\Domain\Exceptions;
 /**
  * Thrown when a campaign cannot be created from primitives.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class CampaignFactoryException extends CampaignDomainException {}

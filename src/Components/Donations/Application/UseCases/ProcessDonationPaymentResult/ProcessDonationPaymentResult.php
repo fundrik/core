@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Represents the result of normalized payment result processing.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
  final readonly class ProcessDonationPaymentResult {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param DonationPaymentResultType $result_type Normalized payment result type.
@@ -31,7 +31,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 	/**
 	 * Returns the donation ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Donation ID.
 	 */
@@ -43,7 +43,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 	/**
 	 * Returns the normalized payment result type.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return DonationPaymentResultType Normalized payment result type.
 	 */
@@ -55,7 +55,7 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 	/**
 	 * Returns the processing outcome.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return ProcessDonationPaymentResultStatus Processing outcome.
 	 */

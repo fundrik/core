@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when create-campaign is retried with an already persisted campaign ID.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class CreateCampaignAlreadyExistsException extends CreateCampaignException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Existing campaign identifier.
 	 * @param Throwable|null $previous Underlying repository exception.

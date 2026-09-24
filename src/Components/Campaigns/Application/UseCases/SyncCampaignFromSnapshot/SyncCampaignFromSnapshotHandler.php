@@ -17,14 +17,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Handles synchronizing a campaign from an authoritative snapshot.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class SyncCampaignFromSnapshotHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CampaignRepositoryPort $campaigns Persists synchronized campaigns.
 	 * @param ApplicationEventBusPort $event_bus Publishes campaign events.
@@ -37,7 +37,7 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	/**
 	 * Synchronizes a campaign from a validated snapshot.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Campaign $snapshot Authoritative campaign snapshot.
 	 *
@@ -61,7 +61,7 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	/**
 	 * Returns the existing campaign required for synchronization.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 *
@@ -96,7 +96,7 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	/**
 	 * Checks whether the persisted campaign already matches the snapshot state.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Campaign $persisted Persisted campaign snapshot.
 	 * @param Campaign $snapshot Authoritative campaign snapshot.
@@ -113,7 +113,7 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	/**
 	 * Ensures that synchronization does not attempt to change campaign currency.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Campaign $persisted Persisted campaign snapshot.
 	 * @param Campaign $snapshot Authoritative campaign snapshot.
@@ -139,7 +139,7 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	/**
 	 * Persists the synchronized campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Campaign $snapshot Authoritative campaign snapshot.
 	 *
@@ -173,7 +173,7 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	/**
 	 * Publishes the campaign synchronized event.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 *
@@ -198,7 +198,7 @@ final readonly class SyncCampaignFromSnapshotHandler {
 	/**
 	 * Creates the campaign-not-found synchronization exception.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param UseCaseFailureStage $stage Failure stage.

@@ -10,14 +10,14 @@ use Fundrik\Core\Components\Shared\Application\Url;
 /**
  * Represents input for creating a donation checkout.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CreateDonationCheckoutData {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationCreationData $donation_creation_data Donation creation data.
 	 * @param string $payment_description Payment description.
@@ -34,7 +34,7 @@ final readonly class CreateDonationCheckoutData {
 	/**
 	 * Returns the donation creation data.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return DonationCreationData Donation creation data.
 	 */
@@ -46,7 +46,7 @@ final readonly class CreateDonationCheckoutData {
 	/**
 	 * Returns the success URL.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Url Success URL.
 	 */
@@ -58,7 +58,7 @@ final readonly class CreateDonationCheckoutData {
 	/**
 	 * Returns the cancellation URL.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return Url Cancellation URL.
 	 */
@@ -70,7 +70,7 @@ final readonly class CreateDonationCheckoutData {
 	/**
 	 * Returns the payment description.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Payment description.
 	 */

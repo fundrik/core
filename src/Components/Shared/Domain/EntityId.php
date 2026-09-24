@@ -11,14 +11,14 @@ use Ramsey\Uuid\Uuid;
 /**
  * Represents a domain entity identifier as a positive integer or valid UUID.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class EntityId {
 
 	/**
 	 * Private constructor, use factory method.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string $value Validated ID.
 	 */
@@ -29,7 +29,7 @@ final readonly class EntityId {
 	/**
 	 * Creates an EntityId from a raw ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|self $value ID to validate.
 	 *
@@ -64,7 +64,7 @@ final readonly class EntityId {
 	/**
 	 * Generates a UUIDv4 entity identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self A valid UUIDv4 entity identifier.
 	 */
@@ -76,7 +76,7 @@ final readonly class EntityId {
 	/**
 	 * Generates a UUIDv7 entity identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self A valid UUIDv7 entity identifier.
 	 */
@@ -88,7 +88,7 @@ final readonly class EntityId {
 	/**
 	 * Returns the raw entity identifier value.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int|string Raw identifier value.
 	 */
@@ -100,7 +100,7 @@ final readonly class EntityId {
 	/**
 	 * Returns the value as an integer.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Positive integer ID value.
 	 *
@@ -118,7 +118,7 @@ final readonly class EntityId {
 	/**
 	 * Returns the value as a UUID string.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Canonical UUID string.
 	 *
@@ -136,7 +136,7 @@ final readonly class EntityId {
 	/**
 	 * Checks whether this EntityId is equal to another.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other EntityId to compare with.
 	 *
@@ -150,7 +150,7 @@ final readonly class EntityId {
 	/**
 	 * Creates an EntityId from a positive integer.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $value Positive integer ID.
 	 *
@@ -172,7 +172,7 @@ final readonly class EntityId {
 	/**
 	 * Creates an EntityId from a UUID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $uuid Valid UUID.
 	 *

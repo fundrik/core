@@ -9,6 +9,6 @@ use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationExce
 /**
  * Marks all exceptions that occur in campaign repository operations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface CampaignRepositoryExceptionInterface extends FundrikApplicationExceptionInterface {}

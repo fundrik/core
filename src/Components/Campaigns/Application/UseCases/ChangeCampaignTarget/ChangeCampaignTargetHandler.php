@@ -18,14 +18,14 @@ use Throwable;
 /**
  * Handles changing a campaign target.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class ChangeCampaignTargetHandler extends AbstractCampaignMutationHandler {
 
 	/**
 	 * Creates the change-target exception used when the campaign disappears before persistence.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Throwable $previous Previous repository exception.
@@ -46,7 +46,7 @@ final readonly class ChangeCampaignTargetHandler extends AbstractCampaignMutatio
 	/**
 	 * Creates the change-target exception exposed by this use case.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
@@ -68,7 +68,7 @@ final readonly class ChangeCampaignTargetHandler extends AbstractCampaignMutatio
 	/**
 	 * Changes the target for an existing campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Amount|null $target_amount Desired campaign target amount.

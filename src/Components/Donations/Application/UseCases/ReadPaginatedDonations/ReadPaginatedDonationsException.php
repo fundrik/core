@@ -9,6 +9,6 @@ use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplication
 /**
  * Thrown when reading paginated donations fails.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class ReadPaginatedDonationsException extends DonationApplicationException {}

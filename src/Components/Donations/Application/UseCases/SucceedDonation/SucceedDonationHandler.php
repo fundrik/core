@@ -17,14 +17,14 @@ use Throwable;
 /**
  * Handles succeeding an existing donation.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class SucceedDonationHandler extends AbstractDonationMutationHandler {
 
 	/**
 	 * Creates the succeed-donation exception used when the donation disappears before persistence.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param Throwable $previous Previous repository exception.
@@ -45,7 +45,7 @@ final readonly class SucceedDonationHandler extends AbstractDonationMutationHand
 	/**
 	 * Creates the succeed-donation exception exposed by this use case.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
@@ -67,7 +67,7 @@ final readonly class SucceedDonationHandler extends AbstractDonationMutationHand
 	/**
 	 * Succeeds an existing donation.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 *

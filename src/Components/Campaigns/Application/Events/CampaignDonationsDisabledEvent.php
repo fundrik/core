@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Signals that campaign donations have been disabled.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CampaignDonationsDisabledEvent implements CampaignChangedEventInterface {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 */
@@ -27,7 +27,7 @@ final readonly class CampaignDonationsDisabledEvent implements CampaignChangedEv
 	/**
 	 * Returns the campaign ID associated with this event.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Campaign ID.
 	 */

@@ -23,14 +23,14 @@ use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidEntityIdException;
 /**
  * Provides the public entry point for donation write operations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DonationCommandService {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CreateDonationHandler $create_donation Creates new donations.
 	 * @param SucceedDonationHandler $succeed_donation Marks donations as succeeded.
@@ -47,7 +47,7 @@ final readonly class DonationCommandService {
 	/**
 	 * Creates a new donation.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CreateDonationCommand $command Public donation creation input.
 	 *
@@ -75,7 +75,7 @@ final readonly class DonationCommandService {
 	/**
 	 * Marks an existing donation as succeeded.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
@@ -99,7 +99,7 @@ final readonly class DonationCommandService {
 	/**
 	 * Marks an existing donation as rejected.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *
@@ -123,7 +123,7 @@ final readonly class DonationCommandService {
 	/**
 	 * Refunds an existing donation.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $donation_id Donation ID.
 	 *

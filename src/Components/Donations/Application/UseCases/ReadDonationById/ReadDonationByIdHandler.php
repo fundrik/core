@@ -12,14 +12,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Handles retrieving a donation read model by its ID.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class ReadDonationByIdHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationReadPort $donation_read Retrieves donations from storage.
 	 */
@@ -30,7 +30,7 @@ final readonly class ReadDonationByIdHandler {
 	/**
 	 * Retrieves a donation by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID to retrieve.
 	 *

@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Signals that a campaign has been deleted.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CampaignDeletedEvent implements CampaignApplicationEventInterface {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 */
@@ -27,7 +27,7 @@ final readonly class CampaignDeletedEvent implements CampaignApplicationEventInt
 	/**
 	 * Returns the campaign ID associated with this event.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Campaign ID.
 	 */

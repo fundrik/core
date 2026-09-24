@@ -9,7 +9,7 @@ use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
 /**
  * Represents the internal donation status.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 enum DonationStatus: string {
 
@@ -23,7 +23,7 @@ enum DonationStatus: string {
 	 *
 	 * Allowed transition: pending -> succeeded.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Succeeded donation status.
 	 *
@@ -41,7 +41,7 @@ enum DonationStatus: string {
 	 *
 	 * Allowed transition: pending -> rejected.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Rejected donation status.
 	 *
@@ -59,7 +59,7 @@ enum DonationStatus: string {
 	 *
 	 * Allowed transition: succeeded -> refunded.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Refunded donation status.
 	 *
@@ -75,7 +75,7 @@ enum DonationStatus: string {
 	/**
 	 * Ensures transition from current status is allowed.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param array<self> $allowed_statuses Allowed source statuses.
 	 * @param string $action Action verb for exception message.

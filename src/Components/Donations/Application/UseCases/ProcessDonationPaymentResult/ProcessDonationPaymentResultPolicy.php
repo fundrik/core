@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 /**
  * Determines whether a donation payment result should be applied, replayed, or ignored.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class ProcessDonationPaymentResultPolicy {
 
 	/**
 	 * Returns the processing outcome for a donation payment result.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationStatus $current_status Current donation status.
 	 * @param DonationPaymentResultType $result_type Payment result type.
@@ -42,7 +42,7 @@ final readonly class ProcessDonationPaymentResultPolicy {
 	/**
 	 * Returns the donation status produced by a payment result.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationPaymentResultType $result_type Payment result type.
 	 *
@@ -60,7 +60,7 @@ final readonly class ProcessDonationPaymentResultPolicy {
 	/**
 	 * Returns the donation status required by a payment result.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationPaymentResultType $result_type Payment result type.
 	 *

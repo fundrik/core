@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when disable-campaign-donations targets a campaign that no longer exists.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class DisableCampaignDonationsNotFoundException extends DisableCampaignDonationsException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Missing campaign identifier.
 	 * @param Throwable|null $previous Underlying repository exception.

@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when change-campaign-target targets a campaign that no longer exists.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class ChangeCampaignTargetNotFoundException extends ChangeCampaignTargetException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Missing campaign identifier.
 	 * @param Throwable|null $previous Underlying repository exception.

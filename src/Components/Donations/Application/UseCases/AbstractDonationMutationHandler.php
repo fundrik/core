@@ -18,14 +18,14 @@ use Throwable;
 /**
  * Provides shared workflow for donation mutation use cases.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 abstract readonly class AbstractDonationMutationHandler {
 
 	/**
 	 * Creates the concrete mutation exception exposed by the use case.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
@@ -44,7 +44,7 @@ abstract readonly class AbstractDonationMutationHandler {
 	/**
 	 * Creates the concrete mutation exception used when the donation disappears before persistence.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param Throwable $previous Previous repository exception.
@@ -59,7 +59,7 @@ abstract readonly class AbstractDonationMutationHandler {
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationRepositoryPort $donations Persists changed donations.
 	 * @param ApplicationEventBusPort $event_bus Publishes donation events.
@@ -73,7 +73,7 @@ abstract readonly class AbstractDonationMutationHandler {
 	/**
 	 * Loads an existing donation for the requested mutation.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param DonationMutation $mutation Donation mutation descriptor.
@@ -115,7 +115,7 @@ abstract readonly class AbstractDonationMutationHandler {
 	/**
 	 * Wraps domain-level donation mutation rejection.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param DonationMutation $mutation Donation mutation descriptor.
@@ -146,7 +146,7 @@ abstract readonly class AbstractDonationMutationHandler {
 	/**
 	 * Persists the changed donation and publishes the resulting mutation event.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param Donation $donation Changed donation.
 	 * @param DonationMutation $mutation Donation mutation descriptor.

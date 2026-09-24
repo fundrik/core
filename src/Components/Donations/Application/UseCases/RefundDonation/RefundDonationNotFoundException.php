@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when refund-donation targets a donation that no longer exists.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class RefundDonationNotFoundException extends RefundDonationException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Missing donation identifier.
 	 * @param Throwable|null $previous Underlying repository exception.

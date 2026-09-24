@@ -12,14 +12,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Handles retrieving a campaign read model by its ID.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class ReadCampaignByIdHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CampaignReadPort $campaign_read Retrieves campaigns from storage.
 	 */
@@ -30,7 +30,7 @@ final readonly class ReadCampaignByIdHandler {
 	/**
 	 * Retrieves a campaign by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID to retrieve.
 	 *

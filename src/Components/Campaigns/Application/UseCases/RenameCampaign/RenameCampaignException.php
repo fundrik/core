@@ -9,6 +9,6 @@ use Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationExcep
 /**
  * Thrown when rename-campaign operation fails.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 class RenameCampaignException extends CampaignMutationException {}

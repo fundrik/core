@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases\ProcessDonation
 /**
  * Specifies normalized donation payment result types.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 enum DonationPaymentResultType: string {
 

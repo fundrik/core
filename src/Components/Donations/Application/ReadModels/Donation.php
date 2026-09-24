@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\UtcDateTime;
 /**
  * Represents a donation exposed by the public read API.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class Donation {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string $id Donation identifier.
 	 * @param int|string $campaign_id Campaign identifier.
@@ -39,7 +39,7 @@ final readonly class Donation {
 	/**
 	 * Returns the donation identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int|string Donation identifier.
 	 */
@@ -51,7 +51,7 @@ final readonly class Donation {
 	/**
 	 * Returns the campaign identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int|string Campaign identifier.
 	 */
@@ -63,7 +63,7 @@ final readonly class Donation {
 	/**
 	 * Returns the donation amount.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Donation amount.
 	 */
@@ -75,7 +75,7 @@ final readonly class Donation {
 	/**
 	 * Returns the donation currency code.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Donation currency code.
 	 */
@@ -87,7 +87,7 @@ final readonly class Donation {
 	/**
 	 * Returns the donation status.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Donation status.
 	 */
@@ -99,7 +99,7 @@ final readonly class Donation {
 	/**
 	 * Returns the creation timestamp.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return UtcDateTime Creation timestamp.
 	 */
@@ -111,7 +111,7 @@ final readonly class Donation {
 	/**
 	 * Returns the last update timestamp.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return UtcDateTime|null Update timestamp, null otherwise.
 	 */

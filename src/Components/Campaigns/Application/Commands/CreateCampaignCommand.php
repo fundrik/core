@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Represents the public command for creating a campaign.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CreateCampaignCommand {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $id Campaign identifier.
 	 * @param string $title Campaign title.
@@ -35,7 +35,7 @@ final readonly class CreateCampaignCommand {
 	/**
 	 * Returns the campaign identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int|string|EntityId Campaign identifier.
 	 */
@@ -47,7 +47,7 @@ final readonly class CreateCampaignCommand {
 	/**
 	 * Returns the campaign title.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Campaign title.
 	 */
@@ -59,7 +59,7 @@ final readonly class CreateCampaignCommand {
 	/**
 	 * Returns whether the campaign accepts donations.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return bool True when the campaign accepts donations.
 	 */
@@ -71,7 +71,7 @@ final readonly class CreateCampaignCommand {
 	/**
 	 * Returns the campaign currency code.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Campaign currency code.
 	 */
@@ -83,7 +83,7 @@ final readonly class CreateCampaignCommand {
 	/**
 	 * Returns the target amount.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int|null Target amount, if configured.
 	 */

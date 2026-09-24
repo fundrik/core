@@ -12,21 +12,21 @@ use ValueError;
 /**
  * Represents a timestamp normalized to UTC timezone.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class UtcDateTime {
 
 	/**
 	 * UTC timezone name.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 */
 	private const string UTC_TIMEZONE = 'UTC';
 
 	/**
 	 * Private constructor, use factory methods.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DateTimeImmutable $value UTC timestamp.
 	 */
@@ -37,7 +37,7 @@ final readonly class UtcDateTime {
 	/**
 	 * Creates a UTC timestamp value object.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DateTimeImmutable $value Timestamp to validate.
 	 *
@@ -62,7 +62,7 @@ final readonly class UtcDateTime {
 	/**
 	 * Creates a UTC timestamp value object from a formatted string.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $value Formatted timestamp string.
 	 * @param string $format DateTime format string.
@@ -95,7 +95,7 @@ final readonly class UtcDateTime {
 	/**
 	 * Returns current UTC timestamp.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return self Current UTC timestamp.
 	 */
@@ -107,7 +107,7 @@ final readonly class UtcDateTime {
 	/**
 	 * Returns UTC timestamp value.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return DateTimeImmutable UTC timestamp.
 	 */
@@ -119,7 +119,7 @@ final readonly class UtcDateTime {
 	/**
 	 * Formats UTC timestamp using DateTime format.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param string $format DateTime format string.
 	 *
@@ -133,7 +133,7 @@ final readonly class UtcDateTime {
 	/**
 	 * Checks whether this UTC timestamp equals another.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param self $other UTC timestamp to compare with.
 	 *

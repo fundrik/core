@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when creating a donation checkout fails.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class CreateDonationCheckoutException extends DonationApplicationException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
@@ -36,7 +36,7 @@ final class CreateDonationCheckoutException extends DonationApplicationException
 	/**
 	 * Returns processing stage where failure happened.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return UseCaseFailureStage Failure stage.
 	 */

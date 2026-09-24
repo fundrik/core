@@ -10,14 +10,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Marks donation-related application-level events.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface DonationApplicationEventInterface extends ApplicationEventInterface {
 
 	/**
 	 * Returns the donation ID associated with the event.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Donation ID.
 	 */

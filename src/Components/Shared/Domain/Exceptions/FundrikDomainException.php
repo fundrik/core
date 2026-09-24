@@ -9,6 +9,6 @@ use DomainException;
 /**
  * Serves as the base exception for domain errors.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 abstract class FundrikDomainException extends DomainException {}

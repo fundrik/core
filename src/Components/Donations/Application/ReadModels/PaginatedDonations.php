@@ -7,14 +7,14 @@ namespace Fundrik\Core\Components\Donations\Application\ReadModels;
 /**
  * Represents a paginated list of donation read models.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class PaginatedDonations {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param array $items Donation read models.
 	 * @param int $page Page number.
@@ -33,7 +33,7 @@ final readonly class PaginatedDonations {
 	/**
 	 * Returns the donation read models.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return list<Donation> Donation read models.
 	 */
@@ -45,7 +45,7 @@ final readonly class PaginatedDonations {
 	/**
 	 * Returns the page number.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Page number.
 	 */
@@ -57,7 +57,7 @@ final readonly class PaginatedDonations {
 	/**
 	 * Returns the donations per page.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Donations per page.
 	 */
@@ -69,7 +69,7 @@ final readonly class PaginatedDonations {
 	/**
 	 * Returns the total number of donations.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Total number of donations.
 	 */
@@ -81,7 +81,7 @@ final readonly class PaginatedDonations {
 	/**
 	 * Returns the total number of pages.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Total number of pages.
 	 */

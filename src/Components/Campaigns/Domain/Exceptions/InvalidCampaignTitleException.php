@@ -7,6 +7,6 @@ namespace Fundrik\Core\Components\Campaigns\Domain\Exceptions;
 /**
  * Thrown when the campaign title is empty or consists solely of whitespace.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class InvalidCampaignTitleException extends CampaignDomainException {}

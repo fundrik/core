@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when sync-campaign-from-snapshot targets a campaign that no longer exists.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class SyncCampaignFromSnapshotNotFoundException extends SyncCampaignFromSnapshotException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Missing campaign identifier.
 	 * @param UseCaseFailureStage $stage Failure stage.

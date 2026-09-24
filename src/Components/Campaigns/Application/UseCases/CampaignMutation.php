@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Campaigns\Application\UseCases;
 /**
  * Describes the supported campaign mutations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 enum CampaignMutation: string {
 
@@ -34,7 +34,7 @@ enum CampaignMutation: string {
 	/**
 	 * Returns the infinitive phrase used in failure messages.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Mutation infinitive phrase.
 	 */
@@ -51,7 +51,7 @@ enum CampaignMutation: string {
 	/**
 	 * Returns the event label used in event-publish failures.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Mutation event label.
 	 */
@@ -68,7 +68,7 @@ enum CampaignMutation: string {
 	/**
 	 * Returns the past participle used in event-publish failures.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return string Mutation past participle.
 	 */

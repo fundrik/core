@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Represents the public command for creating a donation.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CreateDonationCommand {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int|string|EntityId $id Donation identifier.
 	 * @param int|string|EntityId $campaign_id Campaign identifier.
@@ -31,7 +31,7 @@ final readonly class CreateDonationCommand {
 	/**
 	 * Returns the donation identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int|string|EntityId Donation identifier.
 	 */
@@ -43,7 +43,7 @@ final readonly class CreateDonationCommand {
 	/**
 	 * Returns the campaign identifier.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int|string|EntityId Campaign identifier.
 	 */
@@ -55,7 +55,7 @@ final readonly class CreateDonationCommand {
 	/**
 	 * Returns the donation amount.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return int Donation amount.
 	 */

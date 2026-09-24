@@ -11,14 +11,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Provides the outbound port for reading donations.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface DonationReadPort {
 
 	/**
 	 * Retrieves a donation by its ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $id Donation ID to retrieve.
 	 *
@@ -31,7 +31,7 @@ interface DonationReadPort {
 	/**
 	 * Returns a paginated list of donations.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param int $page Page number.
 	 * @param int $per_page Donations per page.

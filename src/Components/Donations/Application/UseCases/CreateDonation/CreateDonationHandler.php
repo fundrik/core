@@ -20,14 +20,14 @@ use Fundrik\Core\Components\Shared\Domain\Money;
 /**
  * Handles strict donation creation and fails when the donation ID already exists.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class CreateDonationHandler {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param CampaignRepositoryPort $campaigns Retrieves campaigns for donation precondition checks.
 	 * @param DonationFactory $donation_factory Creates donations from validated input.
@@ -45,7 +45,7 @@ final readonly class CreateDonationHandler {
 	/**
 	 * Creates a new donation and rejects duplicate donation IDs.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param DonationCreationData $data Validated donation creation data.
 	 *

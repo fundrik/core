@@ -7,7 +7,7 @@ namespace Fundrik\Core\Components\Donations\Application\UseCases;
 /**
  * Specifies why donation mutation precondition validation failed.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 enum DonationMutationPreconditionReason: string {
 

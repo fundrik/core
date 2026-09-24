@@ -11,14 +11,14 @@ use Throwable;
 /**
  * Thrown when a donation mutation use case fails.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 class DonationMutationException extends DonationApplicationException {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
@@ -38,7 +38,7 @@ class DonationMutationException extends DonationApplicationException {
 	/**
 	 * Returns processing stage where failure happened.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return UseCaseFailureStage Failure stage.
 	 */
@@ -50,7 +50,7 @@ class DonationMutationException extends DonationApplicationException {
 	/**
 	 * Returns precondition failure reason, when available.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return DonationMutationPreconditionReason|null Precondition reason.
 	 */

@@ -9,6 +9,6 @@ use Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationExcep
 /**
  * Thrown when refund-donation operation fails.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 class RefundDonationException extends DonationMutationException {}

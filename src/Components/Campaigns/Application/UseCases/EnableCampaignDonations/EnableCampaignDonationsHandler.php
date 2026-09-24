@@ -17,14 +17,14 @@ use Throwable;
 /**
  * Handles enabling donation acceptance for an existing campaign.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class EnableCampaignDonationsHandler extends AbstractCampaignMutationHandler {
 
 	/**
 	 * Creates the enable-donations exception used when the campaign disappears before persistence.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 * @param Throwable $previous Previous repository exception.
@@ -45,7 +45,7 @@ final readonly class EnableCampaignDonationsHandler extends AbstractCampaignMuta
 	/**
 	 * Creates the enable-donations exception exposed by this use case.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
@@ -67,7 +67,7 @@ final readonly class EnableCampaignDonationsHandler extends AbstractCampaignMuta
 	/**
 	 * Enables accepting donations for an existing campaign.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $campaign_id Campaign ID.
 	 *

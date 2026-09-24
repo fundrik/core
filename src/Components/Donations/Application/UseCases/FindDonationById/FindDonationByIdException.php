@@ -9,6 +9,6 @@ use Fundrik\Core\Components\Donations\Application\Exceptions\DonationApplication
 /**
  * Thrown when find-donation-by-id operation fails.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class FindDonationByIdException extends DonationApplicationException {}

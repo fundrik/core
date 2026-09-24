@@ -7,6 +7,6 @@ namespace Fundrik\Core\Components\Donations\Domain\Exceptions;
 /**
  * Thrown when a donation cannot be changed, for example due to an invalid status transition.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final class DonationChangeException extends DonationDomainException {}

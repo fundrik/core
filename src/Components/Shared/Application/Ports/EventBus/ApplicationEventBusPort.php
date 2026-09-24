@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Application\Events\ApplicationEventInterface;
 /**
  * Provides the outbound port for publishing application events.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 interface ApplicationEventBusPort {
 
 	/**
 	 * Publishes the given event to all subscribers.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param ApplicationEventInterface $event Event to publish.
 	 *

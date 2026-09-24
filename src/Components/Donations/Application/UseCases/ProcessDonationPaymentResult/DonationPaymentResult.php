@@ -9,14 +9,14 @@ use Fundrik\Core\Components\Shared\Domain\EntityId;
 /**
  * Represents a normalized donation payment result.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
 final readonly class DonationPaymentResult {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param DonationPaymentResultType $type Normalized payment result type.
@@ -29,7 +29,7 @@ final readonly class DonationPaymentResult {
 	/**
 	 * Returns the donation ID.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return EntityId Donation ID.
 	 */
@@ -41,7 +41,7 @@ final readonly class DonationPaymentResult {
 	/**
 	 * Returns the normalized payment result type.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 *
 	 * @return DonationPaymentResultType Normalized payment result type.
 	 */
