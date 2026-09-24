@@ -34,6 +34,8 @@ final readonly class Currency {
 	 * @return self Currency code value object.
 	 *
 	 * @throws InvalidCurrencyCodeException When code is not a valid ISO 4217 code.
+	 *
+	 * @todo Validate membership in ISO 4217, not only the three-letter format.
 	 */
 	public static function create( string $code ): self {
 

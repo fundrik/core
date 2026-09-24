@@ -77,10 +77,7 @@ final readonly class DeleteCampaignHandler {
 		try {
 			$this->repository->delete( $campaign_id );
 		} catch ( CampaignNotFoundExceptionInterface $e ) {
-			throw new DeleteCampaignNotFoundException(
-				$campaign_id,
-				$e,
-			);
+			throw new DeleteCampaignNotFoundException( $campaign_id, $e );
 		} catch ( CampaignRepositoryExceptionInterface $e ) {
 			throw new DeleteCampaignException(
 				stage: UseCaseFailureStage::Persistence,
