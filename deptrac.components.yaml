@@ -1,0 +1,69 @@
+deptrac:
+  cache_file: .tmp/deptrac-components.cache
+
+  paths:
+    - ./src
+
+  layers:
+
+    - name: RamseyUuid
+      collectors:
+        - type: classLike
+          value: ^Ramsey\\Uuid\\.*
+
+    - name: Shared
+      collectors:
+        - type: classLike
+          value: ^Fundrik\\Core\\Components\\Shared\\.*
+
+    - name: Campaigns
+      collectors:
+        - type: bool
+          must:
+            - type: classLike
+              value: ^Fundrik\\Core\\Components\\Campaigns\\.*
+          must_not:
+            - type: layer
+              value: CampaignPorts
+
+    - name: CampaignPorts
+      collectors:
+        - type: classLike
+          value: ^Fundrik\\Core\\Components\\Campaigns\\Application\\Ports\\.*
+
+    - name: Donations
+      collectors:
+        - type: bool
+          must:
+            - type: classLike
+              value: ^Fundrik\\Core\\Components\\Donations\\.*
+          must_not:
+            - type: layer
+              value: DonationPorts
+
+    - name: DonationPorts
+      collectors:
+        - type: classLike
+          value: ^Fundrik\\Core\\Components\\Donations\\Application\\Ports\\.*
+
+  ruleset:
+    Shared:
+      - RamseyUuid
+
+    CampaignPorts:
+      - Campaigns
+      - Shared
+
+    DonationPorts:
+      - Donations
+      - Shared
+
+    Campaigns:
+      - CampaignPorts
+      - DonationPorts
+      - Shared
+
+    Donations:
+      - CampaignPorts
+      - DonationPorts
+      - Shared

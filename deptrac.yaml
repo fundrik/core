@@ -1,0 +1,70 @@
+deptrac:
+  cache_file: .tmp/deptrac.cache
+
+  paths:
+    - ./src
+
+  layers:
+
+    - name: RamseyUuid
+      collectors:
+        - type: classLike
+          value: ^Ramsey\\Uuid\\.*
+
+    - name: Domain
+      collectors:
+        - type: classLike
+          value: ^Fundrik\\Core\\Components\\[^\\]+\\Domain\\.+
+
+    - name: ApplicationReadModels
+      collectors:
+        - type: classLike
+          value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\ReadModels\\.+
+
+    - name: ApplicationShared
+      collectors:
+        - type: bool
+          must:
+            - type: classLike
+              value: ^Fundrik\\Core\\Components\\Shared\\Application\\.+
+          must_not:
+            - type: layer
+              value: ApplicationPorts
+
+    - name: ApplicationPorts
+      collectors:
+        - type: classLike
+          value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\Ports\\.+
+
+    - name: Application
+      collectors:
+        - type: bool
+          must:
+            - type: classLike
+              value: ^Fundrik\\Core\\Components\\[^\\]+\\Application\\.+
+          must_not:
+            - type: layer
+              value: ApplicationPorts
+            - type: layer
+              value: ApplicationReadModels
+            - type: layer
+              value: ApplicationShared
+
+  ruleset:
+    Domain:
+      - RamseyUuid
+
+    Application:
+      - ApplicationPorts
+      - ApplicationReadModels
+      - ApplicationShared
+      - Domain
+
+    ApplicationReadModels:
+      - ApplicationShared
+      - Domain
+
+    ApplicationPorts:
+      - ApplicationReadModels
+      - ApplicationShared
+      - Domain

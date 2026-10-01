@@ -1,0 +1,78 @@
+{
+	"name": "fundrik/core",
+	"description": "Core library for the Fundrik fundraising solution",
+	"keywords": [
+		"php",
+		"fundraising",
+		"crowdfunding",
+		"donations",
+		"nonprofit",
+		"charity",
+		"payment",
+		"fundrik"
+	],
+	"homepage": "https://fundrik.ru",
+	"type": "library",
+	"license": "MIT",
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"authors": [
+		{
+			"name": "Denis Yanchevskiy",
+			"email": "denis@denisco.pro"
+		}
+	],
+	"support": {
+		"email": "denis@denisco.pro",
+		"issues": "https://github.com/fundrik/core/issues",
+		"source": "https://github.com/fundrik/core"
+	},
+	"require": {
+		"php": "^8.3",
+		"ramsey/uuid": "^4.9"
+	},
+	"require-dev": {
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+		"fundrik/coding-standard": "^0.2.0",
+		"phpunit/phpunit": "^12.5",
+		"mockery/mockery": "^1.6",
+		"phpstan/phpstan": "^2.2",
+		"phpstan/extension-installer": "^1.4",
+		"phpstan/phpstan-strict-rules": "^2.0",
+		"phpstan/phpstan-deprecation-rules": "^2.0",
+		"deptrac/deptrac": "^4.7",
+		"infection/infection": "^0.35",
+		"rector/rector": "^2.6"
+	},
+	"autoload": {
+		"psr-4": {
+			"Fundrik\\Core\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Fundrik\\Core\\Tests\\": "tests/",
+			"Fundrik\\Core\\Examples\\": "examples/"
+		}
+	},
+	"scripts": {
+		"lint": "vendor/bin/phpcs .",
+		"lint:fix": "vendor/bin/phpcbf .",
+		"test": "vendor/bin/phpunit",
+		"test:coverage": "php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html=.tmp/phpunit/report-coverage",
+		"phpstan": "vendor/bin/phpstan analyze --memory-limit=2048M",
+		"deptrac": [
+			"vendor/bin/deptrac analyze --report-uncovered",
+			"vendor/bin/deptrac analyze --config-file=deptrac.components.yaml --report-uncovered"
+		],
+		"infection": "php -d auto_prepend_file= vendor/bin/infection --show-mutations",
+		"rector": "vendor/bin/rector process"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"phpstan/extension-installer": true,
+			"infection/extension-installer": true
+		}
+	}
+}

@@ -1,0 +1,38 @@
+name: Release checks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: pcov
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
+      - run: composer validate --strict
+      - run: composer audit --locked
+      - run: composer install --prefer-dist --no-interaction --no-progress
+      - run: composer dump-autoload --optimize --strict-psr --dry-run
+      - run: composer run lint
+      - run: composer run rector -- --dry-run
+      - run: composer run phpstan
+      - run: composer run deptrac
+      - run: composer run test -- --order-by=random --coverage-text
+      - run: composer run --timeout=900 infection

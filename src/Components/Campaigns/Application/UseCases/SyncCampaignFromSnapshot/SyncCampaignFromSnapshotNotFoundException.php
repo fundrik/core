@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot;
+
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+use Fundrik\Core\Components\Shared\Domain\EntityId;
+use Throwable;
+
+/**
+ * Thrown when sync-campaign-from-snapshot targets a campaign that no longer exists.
+ *
+ * @since 1.0.0
+ */
+final class SyncCampaignFromSnapshotNotFoundException extends SyncCampaignFromSnapshotException {
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param EntityId $campaign_id Missing campaign identifier.
+	 * @param UseCaseFailureStage $stage Failure stage.
+	 * @param Throwable|null $previous Underlying repository exception.
+	 * @param SyncCampaignFromSnapshotPreconditionReason|null $reason Failure reason, if available.
+	 */
+	public function __construct(
+		EntityId $campaign_id,
+		UseCaseFailureStage $stage,
+		?Throwable $previous = null,
+		?SyncCampaignFromSnapshotPreconditionReason $reason = null,
+	) {
+
+		parent::__construct(
+			stage: $stage,
+			message: sprintf(
+				'Cannot sync campaign "%s": campaign does not exist.',
+				$campaign_id->get_value(),
+			),
+			previous: $previous,
+			reason: $reason,
+		);
+	}
+}

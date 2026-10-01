@@ -1,0 +1,47 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign;
+
+use Fundrik\Core\Components\Campaigns\Application\Exceptions\CampaignApplicationException;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+use Throwable;
+
+/**
+ * Thrown when create-campaign operation fails.
+ *
+ * @since 1.0.0
+ */
+class CreateCampaignException extends CampaignApplicationException {
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
+	 * @param string $message Exception message.
+	 * @param Throwable|null $previous Previous exception.
+	 */
+	public function __construct(
+		private readonly UseCaseFailureStage $stage,
+		string $message = '',
+		?Throwable $previous = null,
+	) {
+
+		parent::__construct( $message, 0, $previous );
+	}
+
+	/**
+	 * Returns processing stage where failure happened.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return UseCaseFailureStage Failure stage.
+	 */
+	public function get_stage(): UseCaseFailureStage {
+
+		return $this->stage;
+	}
+}

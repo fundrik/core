@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fundrik\Core\Components\Shared\Application\Ports\EventBus;
+
+use Fundrik\Core\Components\Shared\Application\Events\ApplicationEventInterface;
+
+/**
+ * Provides the outbound port for publishing application events.
+ *
+ * @since 1.0.0
+ */
+interface ApplicationEventBusPort {
+
+	/**
+	 * Publishes the given event to all subscribers.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param ApplicationEventInterface $event Event to publish.
+	 *
+	 * @throws ApplicationEventBusExceptionInterface When publishing the event fails.
+	 */
+	public function publish( ApplicationEventInterface $event ): void;
+}

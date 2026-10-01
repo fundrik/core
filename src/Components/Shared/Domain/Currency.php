@@ -1,0 +1,78 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fundrik\Core\Components\Shared\Domain;
+
+use Fundrik\Core\Components\Shared\Domain\Exceptions\InvalidCurrencyCodeException;
+
+/**
+ * Represents a normalized three-letter currency code.
+ *
+ * @since 1.0.0
+ *
+ * @todo Validate membership in ISO 4217, not only the three-letter format.
+ */
+final readonly class Currency {
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $code Uppercase three-letter currency code.
+	 */
+	private function __construct(
+		private string $code,
+	) {}
+
+	/**
+	 * Creates a validated currency code value object.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $code Currency code.
+	 *
+	 * @return self Currency code value object.
+	 *
+	 * @throws InvalidCurrencyCodeException When code does not contain exactly three Latin letters.
+	 */
+	public static function create( string $code ): self {
+
+		$code = strtoupper( trim( $code ) );
+
+		if ( preg_match( '/^[A-Z]{3}$/', $code ) !== 1 ) {
+			throw new InvalidCurrencyCodeException(
+				sprintf( 'Currency code must contain exactly three Latin letters. Given: "%s".', $code ),
+			);
+		}
+
+		return new self( $code );
+	}
+
+	/**
+	 * Returns the currency code.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string Currency code.
+	 */
+	public function get_code(): string {
+
+		return $this->code;
+	}
+
+	/**
+	 * Checks whether the currency equals another currency.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param self $other Other currency.
+	 *
+	 * @return bool True when currency codes are equal.
+	 */
+	public function equals( self $other ): bool {
+
+		return $this->code === $other->code;
+	}
+}

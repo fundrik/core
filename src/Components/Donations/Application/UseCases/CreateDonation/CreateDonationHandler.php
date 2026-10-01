@@ -1,0 +1,144 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation;
+
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryExceptionInterface;
+use Fundrik\Core\Components\Campaigns\Application\Ports\CampaignRepository\CampaignRepositoryPort;
+use Fundrik\Core\Components\Donations\Application\Events\DonationCreatedEvent;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationAlreadyExistsExceptionInterface;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryExceptionInterface;
+use Fundrik\Core\Components\Donations\Application\Ports\DonationRepository\DonationRepositoryPort;
+use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusExceptionInterface;
+use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
+use Fundrik\Core\Components\Shared\Domain\Money;
+
+/**
+ * Handles strict donation creation and fails when the donation ID already exists.
+ *
+ * @since 1.0.0
+ */
+final readonly class CreateDonationHandler {
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param CampaignRepositoryPort $campaigns Retrieves campaigns for donation precondition checks.
+	 * @param DonationFactory $donation_factory Creates donations from validated input.
+	 * @param DonationRepositoryPort $repository Adds donations to storage.
+	 * @param ApplicationEventBusPort $event_bus Publishes donation events.
+	 */
+	public function __construct(
+		private CampaignRepositoryPort $campaigns,
+		private DonationFactory $donation_factory,
+		private DonationRepositoryPort $repository,
+		private ApplicationEventBusPort $event_bus,
+	) {}
+
+	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength, SlevomatCodingStandard.Complexity.Cognitive.ComplexityTooHigh
+	/**
+	 * Creates a new donation and rejects duplicate donation IDs.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param DonationCreationData $data Validated donation creation data.
+	 *
+	 * @return Donation Persisted donation snapshot.
+	 *
+	 * @throws CreateDonationAlreadyExistsException When the donation ID already exists.
+	 * @throws CreateDonationException When donation creation fails for another reason.
+	 *
+	 * @todo The campaign can be deleted or stop accepting donations between the campaign lookup and donation insert.
+	 */
+	public function handle( DonationCreationData $data ): Donation {
+
+		$donation_id = $data->get_donation_id();
+		$campaign_id = $data->get_campaign_id();
+
+		try {
+			$campaign = $this->campaigns->find_by_id( $campaign_id );
+		} catch ( CampaignRepositoryExceptionInterface $e ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: CreateDonationPreconditionReason::CampaignLookupFailed,
+				message: sprintf(
+					'Failed to retrieve campaign "%s".',
+					$campaign_id->get_value(),
+				),
+				previous: $e,
+			);
+		}
+
+		if ( $campaign === null ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: CreateDonationPreconditionReason::CampaignNotFound,
+				message: sprintf(
+					'Cannot create donation "%s": campaign "%s" does not exist.',
+					$donation_id->get_value(),
+					$campaign_id->get_value(),
+				),
+			);
+		}
+
+		if ( ! $campaign->accepts_donations() ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Precondition,
+				reason: CreateDonationPreconditionReason::CampaignDoesNotAcceptDonations,
+				message: sprintf(
+					'Cannot create donation "%s": campaign "%s" does not accept donations.',
+					$donation_id->get_value(),
+					$campaign_id->get_value(),
+				),
+			);
+		}
+
+		$donation = $this->donation_factory->create_pending(
+			$donation_id,
+			$campaign_id,
+			Money::create(
+				$data->get_amount()->get_value(),
+				$campaign->get_target()->get_currency()->get_code(),
+			),
+		);
+
+		try {
+			$created_donation = $this->repository->insert( $donation );
+		} catch ( DonationAlreadyExistsExceptionInterface $e ) {
+			throw new CreateDonationAlreadyExistsException( $donation_id, $e );
+		} catch ( DonationRepositoryExceptionInterface $e ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::Persistence,
+				message: sprintf(
+					'Failed to create donation "%s".',
+					$donation->get_id()->get_value(),
+				),
+				previous: $e,
+			);
+		}
+
+		try {
+			$this->event_bus->publish(
+				new DonationCreatedEvent( $created_donation->get_id() ),
+			);
+		} catch ( ApplicationEventBusExceptionInterface $e ) {
+			throw new CreateDonationException(
+				stage: UseCaseFailureStage::EventPublish,
+				message: sprintf(
+					'Donation "%s" was created, but publishing the created event failed.',
+					$created_donation->get_id()->get_value(),
+				),
+				previous: $e,
+			);
+		}
+
+		return $created_donation;
+	}
+	// phpcs:enable
+}

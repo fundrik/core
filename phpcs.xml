@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Fundrik Core" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
+	<exclude-pattern>.tmp/</exclude-pattern>
+	<exclude-pattern>vendor/</exclude-pattern>
+
+	<arg value="sp"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
+	<arg name="parallel" value="8"/>
+
+	<config name="testVersion" value="8.3-"/>
+
+	<rule ref="FundrikStandard"/>
+
+	<rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
+		<properties>
+			<property name="rootNamespaces" type="array">
+				<element key="src" value="Fundrik\Core"/>
+				<element key="tests" value="Fundrik\Core\Tests"/>
+				<element key="examples" value="Fundrik\Core\Examples"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="FundrikStandard.Classes.FinalClassMustBeReadonly">
+		<properties>
+			<property name="excludedParentClasses" type="array">
+				<element value="Throwable"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="FundrikStandard.Classes.AbstractClassMustBeReadonly">
+		<properties>
+			<property name="excludedParentClasses" type="array">
+				<element value="Throwable"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="FundrikStandard.Classes.RequireAbstractOrFinal">
+		<properties>
+			<property name="excludedClasses" type="array">
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CampaignMutationException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\ChangeCampaignTarget\ChangeCampaignTargetException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\CreateCampaign\CreateCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\DeleteCampaign\DeleteCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\DisableCampaignDonations\DisableCampaignDonationsException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\EnableCampaignDonations\EnableCampaignDonationsException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\RenameCampaign\RenameCampaignException"/>
+				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationException"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="fundrik"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.MultipleEmptyLinesAfterOpeningBrace">
+		<exclude-pattern>*Exception.php</exclude-pattern>
+		<exclude-pattern>*ExceptionInterface.php</exclude-pattern>
+		<exclude-pattern>*Interface.php</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.Classes.EmptyLinesAroundClassBraces.IncorrectEmptyLinesBeforeClosingBrace">
+		<exclude-pattern>*Exception.php</exclude-pattern>
+		<exclude-pattern>*ExceptionInterface.php</exclude-pattern>
+		<exclude-pattern>*Interface.php</exclude-pattern>
+	</rule>
+
+	<rule ref="FundrikStandard.Classes.AbstractClassMustBeReadonly">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting.ClassComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting.VariableComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Squiz.Commenting.FunctionComment">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="FundrikStandard.Classes.FinalClassMustBeReadonly">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="FundrikStandard.Commenting.SinceTagRequired">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.Complexity.Cognitive.ComplexityTooHigh">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.Functions.FunctionLength.FunctionLength">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.Files.FileLength.FileTooLong">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	
+	<rule ref="SlevomatCodingStandard.Classes.ClassLength.ClassTooLong">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingTraversableTypeHintSpecification">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingAnyTypeHint">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.Files.LineLength.LineTooLong">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+</ruleset>

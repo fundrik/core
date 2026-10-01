@@ -1,0 +1,153 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationCheckout;
+
+use Fundrik\Core\Components\Donations\Application\Ports\Gateway\DonationGatewayCheckoutRequest;
+use Fundrik\Core\Components\Donations\Application\Ports\Gateway\DonationGatewayCheckoutResult;
+use Fundrik\Core\Components\Donations\Application\Ports\Gateway\DonationGatewayExceptionInterface;
+use Fundrik\Core\Components\Donations\Application\Ports\Gateway\DonationGatewayPort;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\DonationCreationData;
+use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationIdempotently\CreateDonationIdempotentlyHandler;
+use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
+use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
+use Fundrik\Core\Components\Shared\Application\Url;
+
+/**
+ * Handles creating donation checkout workflows.
+ *
+ * @since 1.0.0
+ */
+final readonly class CreateDonationCheckoutHandler {
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param CreateDonationIdempotentlyHandler $create_donation Creates or replays donations.
+	 * @param DonationGatewayPort $gateway Creates gateway checkouts.
+	 */
+	public function __construct(
+		private CreateDonationIdempotentlyHandler $create_donation,
+		private DonationGatewayPort $gateway,
+	) {}
+
+	/**
+	 * Creates a donation checkout through the selected gateway.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param CreateDonationCheckoutData $data Checkout creation input.
+	 *
+	 * @return CreateDonationCheckoutResult Checkout creation result.
+	 *
+	 * @throws CreateDonationCheckoutException When checkout creation fails.
+	 */
+	public function handle( CreateDonationCheckoutData $data ): CreateDonationCheckoutResult {
+
+		$donation = $this->ensure_pending_donation( $data->get_donation_creation_data() );
+
+		$gateway_result = $this->create_gateway_checkout(
+			$donation,
+			$data->get_payment_description(),
+			$data->get_success_url(),
+			$data->get_cancel_url(),
+		);
+
+		return new CreateDonationCheckoutResult(
+			donation_id: $donation->get_id(),
+			campaign_id: $donation->get_campaign_id(),
+			money: $donation->get_money(),
+			redirect_url: $gateway_result->get_redirect_url(),
+		);
+	}
+
+	// phpcs:disable SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
+	/**
+	 * Ensures that a pending donation exists for checkout.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param DonationCreationData $data Validated donation creation data.
+	 *
+	 * @return Donation Created or replayed donation.
+	 *
+	 * @throws CreateDonationCheckoutException When donation preparation fails or the donation is not pending.
+	 */
+	private function ensure_pending_donation( DonationCreationData $data ): Donation {
+
+		try {
+			$donation = $this->create_donation->handle( $data )->get_donation();
+		} catch ( CreateDonationException $e ) {
+			throw new CreateDonationCheckoutException(
+				stage: $e->get_stage(),
+				message: sprintf(
+					'Cannot create checkout for donation "%s": donation could not be prepared.',
+					$data->get_donation_id()->get_value(),
+				),
+				previous: $e,
+			);
+		}
+
+		if ( $donation->get_status() !== DonationStatus::Pending ) {
+			throw new CreateDonationCheckoutException(
+				stage: UseCaseFailureStage::Precondition,
+				message: sprintf(
+					'Cannot create checkout for donation "%s": donation is not pending.',
+					$donation->get_id()->get_value(),
+				),
+			);
+		}
+
+		return $donation;
+	}
+	// phpcs:enable
+
+	/**
+	 * Creates the gateway checkout from normalized donation data.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Donation $donation Created or replayed donation.
+	 * @param string $payment_description Payment description.
+	 * @param Url $success_url Success callback URL.
+	 * @param Url $cancel_url Cancellation callback URL.
+	 *
+	 * @return DonationGatewayCheckoutResult Gateway checkout result.
+	 *
+	 * @throws CreateDonationCheckoutException When gateway checkout creation fails.
+	 */
+	private function create_gateway_checkout(
+		Donation $donation,
+		string $payment_description,
+		Url $success_url,
+		Url $cancel_url,
+	): DonationGatewayCheckoutResult {
+
+		$request = new DonationGatewayCheckoutRequest(
+			donation_id: $donation->get_id(),
+			campaign_id: $donation->get_campaign_id(),
+			money: $donation->get_money(),
+			payment_description: $payment_description,
+			success_url: $success_url,
+			cancel_url: $cancel_url,
+		);
+
+		try {
+			return $this->gateway->create_checkout( $request );
+		} catch ( DonationGatewayExceptionInterface $e ) {
+			throw new CreateDonationCheckoutException(
+				stage: UseCaseFailureStage::External,
+				message: sprintf(
+					'Failed to create checkout for donation "%s".',
+					$donation->get_id()->get_value(),
+				),
+				previous: $e,
+			);
+		}
+	}
+}

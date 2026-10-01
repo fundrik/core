@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Fundrik\Core\Components\Campaigns\Application\Events;
+
+use Fundrik\Core\Components\Shared\Domain\EntityId;
+
+/**
+ * Signals that a campaign target has changed.
+ *
+ * @since 1.0.0
+ */
+final readonly class CampaignTargetChangedEvent implements CampaignChangedEventInterface {
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param EntityId $campaign_id Campaign ID.
+	 */
+	public function __construct(
+		private EntityId $campaign_id,
+	) {}
+
+	/**
+	 * Returns the campaign ID associated with this event.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return EntityId Campaign ID.
+	 */
+	public function get_campaign_id(): EntityId {
+
+		return $this->campaign_id;
+	}
+}
