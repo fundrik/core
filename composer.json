@@ -33,7 +33,7 @@
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.2",
-		"fundrik/coding-standard": "^0.2.0",
+		"fundrik/coding-standard": "^0.9.0",
 		"phpunit/phpunit": "^12.5",
 		"mockery/mockery": "^1.6",
 		"phpstan/phpstan": "^2.2",
