@@ -56,11 +56,6 @@
 		}
 	},
 	"scripts": {
-		"composer-checks": [
-			"@composer validate --strict",
-			"@composer audit --locked",
-			"@composer dump-autoload --optimize --strict-psr --dry-run"
-		],
 		"checks": [
 			"@composer-checks",
 			"@lint",
@@ -77,6 +72,11 @@
 			"@deptrac",
 			"@test --order-by=random --coverage-text",
 			"@composer run --timeout=900 infection"
+		],
+		"composer-checks": [
+			"@composer validate --strict",
+			"@composer audit --locked",
+			"@composer dump-autoload --optimize --strict-psr --dry-run"
 		],
 		"lint": "vendor/bin/phpcs .",
 		"lint:fix": "vendor/bin/phpcbf .",

@@ -26,13 +26,5 @@ jobs:
           restore-keys: |
             composer-${{ runner.os }}-
 
-      - run: composer validate --strict
-      - run: composer audit --locked
       - run: composer install --prefer-dist --no-interaction --no-progress
-      - run: composer dump-autoload --optimize --strict-psr --dry-run
-      - run: composer run lint
-      - run: composer run rector -- --dry-run
-      - run: composer run phpstan
-      - run: composer run deptrac
-      - run: composer run test -- --order-by=random --coverage-text
-      - run: composer run --timeout=900 infection
+      - run: composer run release-checks
