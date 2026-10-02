@@ -56,6 +56,28 @@
 		}
 	},
 	"scripts": {
+		"composer-checks": [
+			"@composer validate --strict",
+			"@composer audit --locked",
+			"@composer dump-autoload --optimize --strict-psr --dry-run"
+		],
+		"checks": [
+			"@composer-checks",
+			"@lint",
+			"@rector --dry-run",
+			"@phpstan",
+			"@deptrac",
+			"@test"
+		],
+		"release-checks": [
+			"@composer-checks",
+			"@lint",
+			"@rector --dry-run",
+			"@phpstan",
+			"@deptrac",
+			"@test --order-by=random --coverage-text",
+			"@composer run --timeout=900 infection"
+		],
 		"lint": "vendor/bin/phpcs .",
 		"lint:fix": "vendor/bin/phpcbf .",
 		"test": "vendor/bin/phpunit",
