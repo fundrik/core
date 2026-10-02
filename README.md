@@ -3,7 +3,7 @@
 *Domain-driven PHP library for building transparent fundraising systems.*
 
 [![Checks](https://github.com/fundrik/core/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/fundrik/core/actions/workflows/checks.yml?query=branch%3Amain)
-![License](https://img.shields.io/github/license/Fundrik/core)
+![License](https://img.shields.io/github/license/fundrik/core)
 ![Packagist](https://img.shields.io/packagist/v/fundrik/core)
 ![PHP Version](https://img.shields.io/badge/PHP-8.3+-blue)
 ![CodeStyle](https://img.shields.io/badge/Code%20Style-FundrikStandard-blueviolet)
