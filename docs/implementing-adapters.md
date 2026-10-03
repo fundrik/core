@@ -17,7 +17,7 @@ Repository methods work with domain entities, not read models. Implementations s
 - translate expected infrastructure failures into the declared exception interfaces;
 - retain the original infrastructure exception as `previous` where possible.
 
-`DonationRepositoryPort` implementations must also preserve nullable provider payment IDs and enforce uniqueness for non-null values.
+`DonationRepositoryPort` implementations must persist nullable provider payment IDs, enforce uniqueness for non-null values, and support lookup by payment ID.
 
 An optimistic-lock conflict is reported through the general repository exception interface. The core does not currently define a dedicated conflict exception.
 

@@ -71,6 +71,8 @@ The policy accepts the normalized result types `Succeeded`, `Rejected`, and `Ref
 
 A missing payment association or mismatched payment ID fails with the `Precondition` stage and a typed `ProcessDonationPaymentResultPreconditionReason`.
 
+`FindDonationByPaymentIdHandler` returns the authoritative donation entity or `null` from a provider payment ID. Integrations that receive only a payment ID can use its donation ID when constructing `DonationPaymentResult`.
+
 ## Low-level handlers
 
 Handlers under `Application/UseCases` remain supported for integrations that need precise control or domain-level results. They generally accept `EntityId`, `Amount`, component domain entities, or use-case DTOs.

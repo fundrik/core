@@ -6,6 +6,7 @@
 
 - Validation that incoming payment results belong to the payment associated with the donation.
 - A `DonationPendingEvent` when a donation first enters the payment-waiting state.
+- `DonationRepositoryPort::find_by_payment_id()` and `FindDonationByPaymentIdHandler` for authoritative donation lookup by provider payment ID.
 
 ### Changed
 

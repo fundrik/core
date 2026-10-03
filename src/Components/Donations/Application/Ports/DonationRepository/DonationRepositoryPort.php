@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fundrik\Core\Components\Donations\Application\Ports\DonationRepository;
 
 use Fundrik\Core\Components\Donations\Domain\Donation;
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
@@ -26,6 +27,19 @@ interface DonationRepositoryPort {
 	 * @throws DonationRepositoryExceptionInterface When the lookup fails.
 	 */
 	public function find_by_id( EntityId $id ): ?Donation;
+
+	/**
+	 * Retrieves a donation by its provider payment ID.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param PaymentId $payment_id Provider payment ID to retrieve.
+	 *
+	 * @return Donation|null Donation if found, null otherwise.
+	 *
+	 * @throws DonationRepositoryExceptionInterface When the lookup fails.
+	 */
+	public function find_by_payment_id( PaymentId $payment_id ): ?Donation;
 
 	/**
 	 * Returns whether any donations exist for the specified campaign.

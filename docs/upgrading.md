@@ -10,6 +10,8 @@ Add a nullable `payment_id` string column to donation storage and add `created` 
 
 Repository adapters must hydrate the new field through `DonationFactory::create()` or `DonationFactory::create_from_primitives()` and preserve it on every update. Read adapters must pass it to the donation read model.
 
+Repository adapters must also implement `DonationRepositoryPort::find_by_payment_id()`. Return the donation with the matching provider payment ID, or `null` when no payment is attached under that ID. Report lookup failures through `DonationRepositoryExceptionInterface`.
+
 ### Gateway adapters
 
 `DonationGatewayCheckoutResult` now requires both values:
@@ -53,6 +55,8 @@ $result = new DonationPaymentResult(
 ```
 
 `ProcessDonationPaymentResultHandler` now receives `FindDonationByIdHandler` as its first dependency instead of `ReadDonationByIdHandler`. It checks the payment ID against authoritative donation state before applying, replaying, or ignoring a status transition.
+
+When a webhook provides only a payment ID, use `FindDonationByPaymentIdHandler` to resolve the donation ID before constructing `DonationPaymentResult`. The processing handler still verifies the payment association against current repository state.
 
 Precondition failures expose `ProcessDonationPaymentResultPreconditionReason` with `DonationNotFound`, `PaymentNotAttached`, or `PaymentIdMismatch`. Do not branch on exception messages.
 
