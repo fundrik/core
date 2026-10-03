@@ -25,6 +25,7 @@ use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\Succe
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
@@ -65,6 +66,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
+#[UsesClass( PaymentId::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Amount::class )]
@@ -444,7 +446,9 @@ final class DonationMutationHandlersTest extends MockeryTestCase {
 
 	private static function build_pending_donation(): Donation {
 
-		return ( new DonationFactory() )->create_pending_from_primitives( 5_001, 901, 1_000, 'RUB' );
+		return ( new DonationFactory() )
+			->create_created_from_primitives( 5_001, 901, 1_000, 'RUB' )
+			->await_payment( PaymentId::create( 'pay_5001' ) );
 	}
 
 	private static function build_succeeded_donation(): Donation {

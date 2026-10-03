@@ -19,15 +19,18 @@ final class ProcessDonationPaymentResultException extends DonationApplicationExc
 	 * Constructor.
 	 *
 	 * @since 1.0.0
+	 * @since 1.1.0 Added the `$reason` parameter.
 	 *
 	 * @param UseCaseFailureStage $stage Processing stage where failure happened.
 	 * @param string $message Exception message.
 	 * @param Throwable|null $previous Previous exception.
+	 * @param ProcessDonationPaymentResultPreconditionReason|null $reason Optional precondition failure reason.
 	 */
 	public function __construct(
 		private readonly UseCaseFailureStage $stage,
 		string $message = '',
 		?Throwable $previous = null,
+		private readonly ?ProcessDonationPaymentResultPreconditionReason $reason = null,
 	) {
 
 		parent::__construct( $message, 0, $previous );
@@ -43,5 +46,17 @@ final class ProcessDonationPaymentResultException extends DonationApplicationExc
 	public function get_stage(): UseCaseFailureStage {
 
 		return $this->stage;
+	}
+
+	/**
+	 * Returns precondition failure reason, when available.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return ProcessDonationPaymentResultPreconditionReason|null Precondition reason.
+	 */
+	public function get_reason(): ?ProcessDonationPaymentResultPreconditionReason {
+
+		return $this->reason;
 	}
 }

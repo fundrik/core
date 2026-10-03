@@ -17,12 +17,14 @@ final readonly class Donation {
 	 * Constructor.
 	 *
 	 * @since 1.0.0
+	 * @since 1.1.0 Added the `$payment_id` parameter.
 	 *
 	 * @param int|string $id Donation identifier.
 	 * @param int|string $campaign_id Campaign identifier.
 	 * @param int $amount Donation amount in minor units.
 	 * @param string $currency_code Donation currency code.
 	 * @param string $status Donation status.
+	 * @param string|null $payment_id Provider payment ID, if attached.
 	 * @param UtcDateTime $created_at Creation timestamp.
 	 * @param UtcDateTime|null $updated_at Update timestamp, null otherwise.
 	 */
@@ -32,6 +34,7 @@ final readonly class Donation {
 		private int $amount,
 		private string $currency_code,
 		private string $status,
+		private ?string $payment_id,
 		private UtcDateTime $created_at,
 		private ?UtcDateTime $updated_at = null,
 	) {}
@@ -94,6 +97,18 @@ final readonly class Donation {
 	public function get_status(): string {
 
 		return $this->status;
+	}
+
+	/**
+	 * Returns the provider payment ID.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return string|null Provider payment ID, if attached.
+	 */
+	public function get_payment_id(): ?string {
+
+		return $this->payment_id;
 	}
 
 	/**

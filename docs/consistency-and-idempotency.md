@@ -20,6 +20,10 @@ Strict donation creation raises `CreateDonationAlreadyExistsException` for a dup
 
 The adapter must return the existing checkout or another equivalent safe result rather than create or charge a second payment.
 
+The gateway result includes the provider payment ID. A new donation remains `created` until the checkout handler attaches that ID with an optimistic repository update. Attachment atomically changes the donation to `pending`, meaning that the provider payment exists and is awaiting a result. Reattaching the same payment ID to an already pending donation is an idempotent replay; a different payment ID for the same donation is rejected.
+
+If the gateway succeeds but payment-ID persistence fails, the caller may retry. The gateway's donation-ID idempotency key must resolve that retry to the same provider payment and allow the association to be persisted safely.
+
 ## Payment result idempotency
 
 `ProcessDonationPaymentResultHandler` compares the normalized provider result with the current donation status:
@@ -28,7 +32,9 @@ The adapter must return the existing checkout or another equivalent safe result 
 - a result whose target state already exists is `Replayed`;
 - a result that is not valid from the current state is `Ignored`.
 
-The allowed state transitions are `pending -> succeeded`, `pending -> rejected`, and `succeeded -> refunded`.
+The payment-backed state transitions are `created -> pending` when a payment is attached, `pending -> succeeded`, `pending -> rejected`, and `succeeded -> refunded`.
+
+Before evaluating a transition, the handler loads authoritative donation state and requires the normalized provider payment ID to match the attached payment. A missing association or mismatch is a precondition failure.
 
 Concurrent webhook processing can still produce optimistic-lock conflicts. The consumer may reload and invoke the handler again to resolve the final result as replayed or ignored.
 

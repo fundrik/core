@@ -10,6 +10,8 @@ use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\Find
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Domain\Amount;
 use Fundrik\Core\Components\Shared\Domain\Currency;
@@ -30,6 +32,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( FundrikApplicationException::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
+#[UsesClass( DonationStatus::class )]
+#[UsesClass( PaymentId::class )]
 #[UsesClass( Amount::class )]
 #[UsesClass( Currency::class )]
 #[UsesClass( EntityId::class )]

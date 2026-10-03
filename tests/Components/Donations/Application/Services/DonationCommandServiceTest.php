@@ -29,6 +29,7 @@ use Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\Succe
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
 use Fundrik\Core\Components\Shared\Domain\Amount;
@@ -64,6 +65,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
 #[UsesClass( DonationStatus::class )]
+#[UsesClass( PaymentId::class )]
 #[UsesClass( Amount::class )]
 #[UsesClass( Currency::class )]
 #[UsesClass( Campaign::class )]
@@ -127,6 +129,8 @@ final class DonationCommandServiceTest extends MockeryTestCase {
 					$this->assertSame( 901, $donation->get_campaign_id()->get_value() );
 					$this->assertSame( 1_000, $donation->get_money()->get_amount()->get_value() );
 					$this->assertSame( 'RUB', $donation->get_money()->get_currency()->get_code() );
+					$this->assertSame( DonationStatus::Created, $donation->get_status() );
+					$this->assertNull( $donation->get_payment_id() );
 
 					return true;
 				},

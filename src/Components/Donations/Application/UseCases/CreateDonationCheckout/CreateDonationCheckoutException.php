@@ -12,8 +12,9 @@ use Throwable;
  * Thrown when creating a donation checkout fails.
  *
  * @since 1.0.0
+ * @since 1.1.0 Made extensible for specialized checkout exceptions.
  */
-final class CreateDonationCheckoutException extends DonationApplicationException {
+class CreateDonationCheckoutException extends DonationApplicationException {
 
 	/**
 	 * Constructor.

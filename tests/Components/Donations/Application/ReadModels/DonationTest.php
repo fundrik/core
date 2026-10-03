@@ -26,6 +26,7 @@ final class DonationTest extends FundrikTestCase {
 			amount: 1_000,
 			currency_code: 'RUB',
 			status: 'succeeded',
+			payment_id: 'pay_5001',
 			created_at: $created_at,
 			updated_at: $updated_at,
 		);
@@ -35,6 +36,7 @@ final class DonationTest extends FundrikTestCase {
 		$this->assertSame( 1_000, $donation->get_amount() );
 		$this->assertSame( 'RUB', $donation->get_currency_code() );
 		$this->assertSame( 'succeeded', $donation->get_status() );
+		$this->assertSame( 'pay_5001', $donation->get_payment_id() );
 		$this->assertSame( $created_at, $donation->get_created_at() );
 		$this->assertSame( $updated_at, $donation->get_updated_at() );
 	}
@@ -45,5 +47,6 @@ final class DonationTest extends FundrikTestCase {
 		$donation = $this->make_donation_read_model( updated_at: null );
 
 		$this->assertNull( $donation->get_updated_at() );
+		$this->assertNull( $donation->get_payment_id() );
 	}
 }

@@ -25,7 +25,7 @@ Always inspect the exception type and its stage before deciding whether to retry
 
 ## Failure reasons
 
-Some exceptions expose a nullable typed `reason` when their precondition stage has multiple outcomes that consumers may need to distinguish. Reasons are scoped to their use case, for example `DeleteCampaignPreconditionReason` and `CreateDonationPreconditionReason`.
+Some exceptions expose a nullable typed `reason` when their precondition stage has multiple outcomes that consumers may need to distinguish. Reasons are scoped to their use case, for example `DeleteCampaignPreconditionReason`, `CreateDonationPreconditionReason`, and `ProcessDonationPaymentResultPreconditionReason`.
 
 A `null` reason is expected for stages or operations without a more specific reason contract.
 

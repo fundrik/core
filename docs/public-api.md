@@ -30,7 +30,7 @@ Campaign IDs accept an integer, a UUID string, or `EntityId`. Target amounts use
 
 | Method | Purpose |
 | --- | --- |
-| `create(CreateDonationCommand $command)` | Creates a pending donation. |
+| `create(CreateDonationCommand $command)` | Creates a donation without an initialized provider payment. |
 | `succeed($donation_id)` | Changes a pending donation to succeeded. |
 | `reject($donation_id)` | Changes a pending donation to rejected. |
 | `refund($donation_id)` | Changes a succeeded donation to refunded. |
@@ -53,19 +53,23 @@ The result status is either `Created` or `Replayed`.
 
 ### Checkout creation
 
-`CreateDonationCheckoutHandler` combines idempotent donation creation with `DonationGatewayPort`. It requires the donation to be pending and returns the normalized donation details and redirect URL.
+`CreateDonationCheckoutHandler` combines idempotent donation creation with `DonationGatewayPort`. A new donation starts in `created`. Persisting the provider payment association changes it to `pending`, meaning that the payment is ready and awaiting a result. Replaying checkout for an already pending donation is allowed when the gateway returns the same payment ID.
+
+The payment-backed lifecycle is `created -> pending -> succeeded|rejected`, with `succeeded -> refunded`. A successful or rejected payment result cannot be applied directly to a created donation.
 
 The gateway adapter must make repeated checkout calls for the same donation ID safe. See [Consistency and idempotency](consistency-and-idempotency.md).
 
 ### Payment result processing
 
-`ProcessDonationPaymentResultHandler` converts a normalized gateway result into a donation state transition. Its result status is:
+`ProcessDonationPaymentResultHandler` validates the normalized donation and provider payment IDs, then converts the gateway result into a donation state transition. Its result status is:
 
 - `Applied` when a state transition was performed;
 - `Replayed` when the same result had already been applied;
 - `Ignored` when the result is not applicable to the current state.
 
 The policy accepts the normalized result types `Succeeded`, `Rejected`, and `Refunded`.
+
+A missing payment association or mismatched payment ID fails with the `Precondition` stage and a typed `ProcessDonationPaymentResultPreconditionReason`.
 
 ## Low-level handlers
 

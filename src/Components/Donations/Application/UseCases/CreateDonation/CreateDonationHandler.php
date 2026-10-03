@@ -46,6 +46,7 @@ final readonly class CreateDonationHandler {
 	 * Creates a new donation and rejects duplicate donation IDs.
 	 *
 	 * @since 1.0.0
+	 * @since 1.1.0 Creates donations in created status.
 	 *
 	 * @param DonationCreationData $data Validated donation creation data.
 	 *
@@ -99,7 +100,7 @@ final readonly class CreateDonationHandler {
 			);
 		}
 
-		$donation = $this->donation_factory->create_pending(
+		$donation = $this->donation_factory->create_created(
 			$donation_id,
 			$campaign_id,
 			Money::create(

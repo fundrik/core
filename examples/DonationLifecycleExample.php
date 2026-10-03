@@ -31,7 +31,7 @@ final readonly class DonationLifecycleExample {
 	) {}
 
 	/**
-	 * Creates a pending donation for an existing campaign.
+	 * Creates a donation before payment initialization.
 	 *
 	 * @since 1.0.0
 	 *
@@ -55,7 +55,7 @@ final readonly class DonationLifecycleExample {
 	}
 
 	/**
-	 * Marks a pending donation as succeeded and then refunds it.
+	 * Marks a payment-backed pending donation as succeeded and then refunds it.
 	 *
 	 * @since 1.0.0
 	 *

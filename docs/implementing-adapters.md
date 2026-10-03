@@ -17,6 +17,8 @@ Repository methods work with domain entities, not read models. Implementations s
 - translate expected infrastructure failures into the declared exception interfaces;
 - retain the original infrastructure exception as `previous` where possible.
 
+`DonationRepositoryPort` implementations must also preserve nullable provider payment IDs and enforce uniqueness for non-null values.
+
 An optimistic-lock conflict is reported through the general repository exception interface. The core does not currently define a dedicated conflict exception.
 
 Campaign deletion must report a missing campaign through `CampaignNotFoundExceptionInterface`. Donation and campaign inserts must report duplicate IDs through their respective `AlreadyExistsExceptionInterface` contracts.
@@ -48,18 +50,19 @@ The port describes publication to the bus, not end-to-end delivery. At-most-once
 
 ## Payment gateway adapter
 
-Implement `DonationGatewayPort::create_checkout()` to translate a normalized checkout request into provider-specific input and return a `DonationGatewayCheckoutResult` containing the redirect URL.
+Implement `DonationGatewayPort::create_checkout()` to translate a normalized checkout request into provider-specific input and return a `DonationGatewayCheckoutResult` containing the provider payment ID and redirect URL.
 
 The adapter must:
 
 - use the donation ID as a stable provider idempotency key or equivalent merchant payment key;
 - avoid creating or charging a second payment when the same donation ID is replayed;
+- return the same provider payment ID when a checkout is replayed;
 - preserve the supplied amount and currency;
 - preserve success and cancellation URLs;
 - throw an exception implementing `DonationGatewayExceptionInterface` on provider or transport failure;
 - avoid leaking provider-specific objects through the port.
 
-Inbound webhooks are normalized by the consuming application into `DonationPaymentResult` before calling `ProcessDonationPaymentResultHandler`.
+Inbound webhooks are normalized with both the trusted donation ID and provider payment ID before calling `ProcessDonationPaymentResultHandler`. The handler rejects results whose payment ID does not match the persisted association.
 
 ## Wiring
 
@@ -76,7 +79,7 @@ An adapter test suite should cover:
 - insertion and duplicate-ID handling;
 - missing-entity handling;
 - optimistic update success and conflict behavior;
-- exact persistence of IDs, versions, money, statuses, and UTC timestamps;
+- exact persistence of IDs, provider payment IDs, versions, money, statuses, and UTC timestamps;
 - read-model mapping and pagination totals;
 - low-level exception translation with `previous` preserved;
 - gateway idempotency under repeated calls;

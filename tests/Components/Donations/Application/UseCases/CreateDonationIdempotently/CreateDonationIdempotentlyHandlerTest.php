@@ -23,6 +23,8 @@ use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\Find
 use Fundrik\Core\Components\Donations\Application\UseCases\FindDonationById\FindDonationByIdHandler;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
@@ -60,6 +62,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Currency::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
+#[UsesClass( DonationStatus::class )]
+#[UsesClass( PaymentId::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Amount::class )]
 #[UsesClass( EntityVersion::class )]
@@ -120,6 +124,7 @@ final class CreateDonationIdempotentlyHandlerTest extends MockeryTestCase {
 
 		$this->assertSame( CreateDonationIdempotentlyStatus::Created, $result->get_status() );
 		$this->assertSame( $data->get_donation_id(), $result->get_donation()->get_id() );
+		$this->assertSame( DonationStatus::Created, $result->get_donation()->get_status() );
 	}
 
 	#[Test]

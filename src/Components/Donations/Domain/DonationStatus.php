@@ -13,10 +13,29 @@ use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationChangeException;
  */
 enum DonationStatus: string {
 
+	case Created = 'created';
 	case Pending = 'pending';
 	case Succeeded = 'succeeded';
 	case Rejected = 'rejected';
 	case Refunded = 'refunded';
+
+	/**
+	 * Marks donation status as awaiting payment.
+	 *
+	 * Allowed transition: created -> pending.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return self Pending donation status.
+	 *
+	 * @throws DonationChangeException When transition is not allowed.
+	 */
+	public function await_payment(): self {
+
+		$this->assert_transition_allowed( [ self::Created ], 'await payment for' );
+
+		return self::Pending;
+	}
 
 	/**
 	 * Marks donation status as succeeded.

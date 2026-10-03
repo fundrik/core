@@ -18,6 +18,7 @@ use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\Create
 use Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\DonationCreationData;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
 use Fundrik\Core\Components\Shared\Application\Exceptions\FundrikApplicationException;
 use Fundrik\Core\Components\Shared\Application\Exceptions\UseCaseFailureStage;
 use Fundrik\Core\Components\Shared\Application\Ports\EventBus\ApplicationEventBusPort;
@@ -52,6 +53,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Currency::class )]
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationFactory::class )]
+#[UsesClass( DonationStatus::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( Amount::class )]
 #[UsesClass( EntityVersion::class )]
@@ -106,6 +108,8 @@ final class CreateDonationHandlerTest extends MockeryTestCase {
 					// phpcs:ignore SlevomatCodingStandard.Functions.RequireMultiLineCall.RequiredMultiLineCall
 					$this->assertSame( $data->get_amount()->get_value(), $donation->get_money()->get_amount()->get_value() );
 					$this->assertSame( 'RUB', $donation->get_money()->get_currency()->get_code() );
+					$this->assertSame( DonationStatus::Created, $donation->get_status() );
+					$this->assertNull( $donation->get_payment_id() );
 
 					return true;
 				},

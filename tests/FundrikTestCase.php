@@ -12,6 +12,8 @@ use Fundrik\Core\Components\Campaigns\Domain\CampaignTitle;
 use Fundrik\Core\Components\Donations\Application\ReadModels\Donation as DonationReadModel;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
+use Fundrik\Core\Components\Donations\Domain\DonationStatus;
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\EntityVersion;
 use Fundrik\Core\Components\Shared\Domain\Money;
@@ -56,7 +58,8 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 		int|string $campaign_id = 901,
 		int $amount = 1_000,
 		string $currency_code = 'RUB',
-		string $status = 'pending',
+		string $status = 'created',
+		?string $payment_id = null,
 		?UtcDateTime $created_at = null,
 		?UtcDateTime $updated_at = null,
 	): DonationReadModel {
@@ -67,6 +70,7 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 			amount: $amount,
 			currency_code: $currency_code,
 			status: $status,
+			payment_id: $payment_id,
 			created_at: $created_at ?? $this->make_utc_date_time( '2026-03-01T10:00:00+00:00' ),
 			updated_at: $updated_at,
 		);
@@ -101,9 +105,9 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 	}
 
 	/**
-	 * Returns a valid pending donation for tests with optional field overrides.
+	 * Returns a valid created donation for tests with optional field overrides.
 	 */
-	protected function make_pending_donation(
+	protected function make_created_donation(
 		int|string $id = 5_001,
 		int|string|EntityId $campaign_id = 901,
 		int $amount = 1_000,
@@ -112,10 +116,31 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 
 		$factory = new DonationFactory();
 
-		return $factory->create_pending(
+		return $factory->create_created(
 			id: EntityId::create( $id ),
 			campaign_id: $campaign_id instanceof EntityId ? $campaign_id : EntityId::create( $campaign_id ),
 			money: Money::create( $amount, $currency ),
+		);
+	}
+
+	/**
+	 * Returns a valid pending donation for tests with optional field overrides.
+	 */
+	protected function make_pending_donation(
+		int|string $id = 5_001,
+		int|string|EntityId $campaign_id = 901,
+		int $amount = 1_000,
+		string $currency = 'RUB',
+		string $payment_id = 'pay_5001',
+	): Donation {
+
+		return new Donation(
+			id: EntityId::create( $id ),
+			version: EntityVersion::initial(),
+			campaign_id: $campaign_id instanceof EntityId ? $campaign_id : EntityId::create( $campaign_id ),
+			money: Money::create( $amount, $currency ),
+			status: DonationStatus::Pending,
+			payment_id: PaymentId::create( $payment_id ),
 		);
 	}
 
@@ -127,13 +152,16 @@ abstract class FundrikTestCase extends PHPUnitTestCase {
 		int|string|EntityId $campaign_id = 901,
 		int $amount = 1_000,
 		string $currency = 'RUB',
+		string $payment_id = 'pay_5001',
 	): Donation {
 
-		return $this->make_pending_donation(
-			id: $id,
-			campaign_id: $campaign_id,
-			amount: $amount,
-			currency: $currency,
-		)->succeed();
+		return new Donation(
+			id: EntityId::create( $id ),
+			version: EntityVersion::initial(),
+			campaign_id: $campaign_id instanceof EntityId ? $campaign_id : EntityId::create( $campaign_id ),
+			money: Money::create( $amount, $currency ),
+			status: DonationStatus::Succeeded,
+			payment_id: PaymentId::create( $payment_id ),
+		);
 	}
 }

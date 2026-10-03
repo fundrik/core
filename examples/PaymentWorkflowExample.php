@@ -12,6 +12,7 @@ use Fundrik\Core\Components\Donations\Application\UseCases\ProcessDonationPaymen
 use Fundrik\Core\Components\Donations\Application\UseCases\ProcessDonationPaymentResult\DonationPaymentResultType;
 use Fundrik\Core\Components\Donations\Application\UseCases\ProcessDonationPaymentResult\ProcessDonationPaymentResult;
 use Fundrik\Core\Components\Donations\Application\UseCases\ProcessDonationPaymentResult\ProcessDonationPaymentResultHandler;
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Application\Url;
 use Fundrik\Core\Components\Shared\Domain\Amount;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -69,14 +70,16 @@ final readonly class PaymentWorkflowExample {
 	 * @since 1.0.0
 	 *
 	 * @param EntityId $donation_id Donation ID from trusted callback metadata.
+	 * @param PaymentId $payment_id Payment ID from the provider callback.
 	 *
 	 * @return ProcessDonationPaymentResult Processing result.
 	 */
-	public function process_success( EntityId $donation_id ): ProcessDonationPaymentResult {
+	public function process_success( EntityId $donation_id, PaymentId $payment_id ): ProcessDonationPaymentResult {
 
 		return $this->process_result->handle(
 			new DonationPaymentResult(
 				donation_id: $donation_id,
+				payment_id: $payment_id,
 				type: DonationPaymentResultType::Succeeded,
 			),
 		);

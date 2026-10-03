@@ -52,6 +52,7 @@
 				<element value="Fundrik\Core\Components\Campaigns\Application\UseCases\SyncCampaignFromSnapshot\SyncCampaignFromSnapshotException"/>
 				<element value="Fundrik\Core\Components\Donations\Application\UseCases\DonationMutationException"/>
 				<element value="Fundrik\Core\Components\Donations\Application\UseCases\CreateDonation\CreateDonationException"/>
+				<element value="Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationCheckout\CreateDonationCheckoutException"/>
 				<element value="Fundrik\Core\Components\Donations\Application\UseCases\RefundDonation\RefundDonationException"/>
 				<element value="Fundrik\Core\Components\Donations\Application\UseCases\RejectDonation\RejectDonationException"/>
 				<element value="Fundrik\Core\Components\Donations\Application\UseCases\SucceedDonation\SucceedDonationException"/>

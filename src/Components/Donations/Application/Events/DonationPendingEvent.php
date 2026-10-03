@@ -2,38 +2,35 @@
 
 declare(strict_types=1);
 
-namespace Fundrik\Core\Components\Donations\Application\UseCases\ProcessDonationPaymentResult;
+namespace Fundrik\Core\Components\Donations\Application\Events;
 
 use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 
 /**
- * Represents a normalized donation payment result.
+ * Represents a donation that is pending payment.
  *
- * @since 1.0.0
+ * @since 1.1.0
  */
-final readonly class DonationPaymentResult {
+final readonly class DonationPendingEvent implements DonationApplicationEventInterface {
 
 	/**
 	 * Constructor.
 	 *
-	 * @since 1.0.0
-	 * @since 1.1.0 Added the `$payment_id` parameter.
+	 * @since 1.1.0
 	 *
 	 * @param EntityId $donation_id Donation ID.
 	 * @param PaymentId $payment_id Provider payment ID.
-	 * @param DonationPaymentResultType $type Normalized payment result type.
 	 */
 	public function __construct(
 		private EntityId $donation_id,
 		private PaymentId $payment_id,
-		private DonationPaymentResultType $type,
 	) {}
 
 	/**
-	 * Returns the donation ID.
+	 * Returns donation ID.
 	 *
-	 * @since 1.0.0
+	 * @since 1.1.0
 	 *
 	 * @return EntityId Donation ID.
 	 */
@@ -52,17 +49,5 @@ final readonly class DonationPaymentResult {
 	public function get_payment_id(): PaymentId {
 
 		return $this->payment_id;
-	}
-
-	/**
-	 * Returns the normalized payment result type.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return DonationPaymentResultType Normalized payment result type.
-	 */
-	public function get_type(): DonationPaymentResultType {
-
-		return $this->type;
 	}
 }

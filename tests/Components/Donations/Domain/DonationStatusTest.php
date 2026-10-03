@@ -19,6 +19,7 @@ final class DonationStatusTest extends FundrikTestCase {
 	#[Test]
 	public function exposes_expected_values(): void {
 
+		$this->assertSame( 'created', DonationStatus::Created->value );
 		$this->assertSame( 'pending', DonationStatus::Pending->value );
 		$this->assertSame( 'succeeded', DonationStatus::Succeeded->value );
 		$this->assertSame( 'rejected', DonationStatus::Rejected->value );
@@ -41,7 +42,9 @@ final class DonationStatusTest extends FundrikTestCase {
 	public function rejects_invalid_transitions( DonationStatus $status, string $action, ): void {
 
 		$this->expectException( DonationChangeException::class );
-		$this->expectExceptionMessage( sprintf( 'Cannot %s donation from status "%s".', $action, $status->value ) );
+		$action_label = $action === 'await_payment' ? 'await payment for' : $action;
+
+		$this->expectExceptionMessage( sprintf( 'Cannot %s donation from status "%s".', $action_label, $status->value ) );
 
 		$status->{$action}();
 	}
@@ -49,6 +52,7 @@ final class DonationStatusTest extends FundrikTestCase {
 	public static function allowed_transition_provider(): array {
 
 		return [
+			'await payment for created donation' => [ DonationStatus::Created, 'await_payment', DonationStatus::Pending ],
 			'succeed pending donation' => [ DonationStatus::Pending, 'succeed', DonationStatus::Succeeded ],
 			'reject pending donation' => [ DonationStatus::Pending, 'reject', DonationStatus::Rejected ],
 			'refund succeeded donation' => [ DonationStatus::Succeeded, 'refund', DonationStatus::Refunded ],
@@ -58,12 +62,19 @@ final class DonationStatusTest extends FundrikTestCase {
 	public static function invalid_transition_provider(): array {
 
 		return [
+			'await payment for pending donation' => [ DonationStatus::Pending, 'await_payment' ],
+			'await payment for succeeded donation' => [ DonationStatus::Succeeded, 'await_payment' ],
+			'await payment for rejected donation' => [ DonationStatus::Rejected, 'await_payment' ],
+			'await payment for refunded donation' => [ DonationStatus::Refunded, 'await_payment' ],
+			'succeed created donation' => [ DonationStatus::Created, 'succeed' ],
 			'succeed succeeded donation' => [ DonationStatus::Succeeded, 'succeed' ],
 			'succeed rejected donation' => [ DonationStatus::Rejected, 'succeed' ],
 			'succeed refunded donation' => [ DonationStatus::Refunded, 'succeed' ],
+			'reject created donation' => [ DonationStatus::Created, 'reject' ],
 			'reject succeeded donation' => [ DonationStatus::Succeeded, 'reject' ],
 			'reject rejected donation' => [ DonationStatus::Rejected, 'reject' ],
 			'reject refunded donation' => [ DonationStatus::Refunded, 'reject' ],
+			'refund created donation' => [ DonationStatus::Created, 'refund' ],
 			'refund pending donation' => [ DonationStatus::Pending, 'refund' ],
 			'refund rejected donation' => [ DonationStatus::Rejected, 'refund' ],
 			'refund refunded donation' => [ DonationStatus::Refunded, 'refund' ],

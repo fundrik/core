@@ -29,7 +29,7 @@ composer require fundrik/core
 ## Capabilities
 
 - Create, synchronize, rename, enable, disable, retarget, and delete campaigns.
-- Create donations and manage their `pending`, `succeeded`, `rejected`, and `refunded` lifecycle.
+- Create donations and manage their `created`, `pending`, `succeeded`, `rejected`, and `refunded` lifecycle.
 - Create idempotent donation checkouts through a payment gateway port.
 - Process normalized payment results idempotently.
 - Publish application events after successful state changes.
@@ -109,6 +109,7 @@ The core intentionally does not provide a transaction manager or prescribe a sto
 - [Implementing adapters](docs/implementing-adapters.md)
 - [Failure handling](docs/failure-handling.md)
 - [Consistency and idempotency](docs/consistency-and-idempotency.md)
+- [Upgrading](docs/upgrading.md)
 - [Examples](examples/README.md)
 - [Changelog](CHANGELOG.md)
 

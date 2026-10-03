@@ -7,7 +7,9 @@ namespace Fundrik\Core\Tests\Components\Donations\Domain;
 use Fundrik\Core\Components\Donations\Domain\Donation;
 use Fundrik\Core\Components\Donations\Domain\DonationFactory;
 use Fundrik\Core\Components\Donations\Domain\DonationStatus;
+use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationConstructionException;
 use Fundrik\Core\Components\Donations\Domain\Exceptions\DonationFactoryException;
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Domain\Amount;
 use Fundrik\Core\Components\Shared\Domain\Currency;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
@@ -24,11 +26,13 @@ use PHPUnit\Framework\Attributes\UsesClass;
 #[UsesClass( Donation::class )]
 #[UsesClass( DonationStatus::class )]
 #[UsesClass( DonationFactoryException::class )]
+#[UsesClass( DonationConstructionException::class )]
 #[UsesClass( Amount::class )]
 #[UsesClass( Currency::class )]
 #[UsesClass( EntityId::class )]
 #[UsesClass( EntityVersion::class )]
 #[UsesClass( Money::class )]
+#[UsesClass( PaymentId::class )]
 final class DonationFactoryTest extends FundrikTestCase {
 
 	private DonationFactory $factory;
@@ -49,6 +53,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 			campaign_id: EntityId::create( 901 ),
 			money: Money::create( 1_500, 'RUB' ),
 			status: DonationStatus::Succeeded,
+			payment_id: PaymentId::create( 'pay_101' ),
 		);
 
 		$this->assertSame( 101, $donation->get_id()->get_value() );
@@ -57,19 +62,21 @@ final class DonationFactoryTest extends FundrikTestCase {
 		$this->assertSame( 1_500, $donation->get_money()->get_amount()->get_value() );
 		$this->assertSame( 'RUB', $donation->get_money()->get_currency()->get_code() );
 		$this->assertSame( DonationStatus::Succeeded, $donation->get_status() );
+		$this->assertSame( 'pay_101', $donation->get_payment_id()?->get_value() );
 	}
 
 	#[Test]
-	public function create_pending_builds_valid_pending_donation(): void {
+	public function create_created_builds_valid_created_donation(): void {
 
-		$donation = $this->factory->create_pending(
+		$donation = $this->factory->create_created(
 			id: EntityId::create( 101 ),
 			campaign_id: EntityId::create( 901 ),
 			money: Money::create( 1_500, 'RUB' ),
 		);
 
 		$this->assertSame( 1, $donation->get_version()->get_value() );
-		$this->assertSame( DonationStatus::Pending, $donation->get_status() );
+		$this->assertSame( DonationStatus::Created, $donation->get_status() );
+		$this->assertNull( $donation->get_payment_id() );
 	}
 
 	#[Test]
@@ -83,6 +90,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 			amount: 3_000,
 			currency_code: 'EUR',
 			status: $status->value,
+			payment_id: $status === DonationStatus::Created ? null : 'pay_11',
 		);
 
 		$this->assertSame( 11, $donation->get_id()->get_value() );
@@ -91,12 +99,16 @@ final class DonationFactoryTest extends FundrikTestCase {
 		$this->assertSame( 3_000, $donation->get_money()->get_amount()->get_value() );
 		$this->assertSame( 'EUR', $donation->get_money()->get_currency()->get_code() );
 		$this->assertSame( $status, $donation->get_status() );
+		$this->assertSame(
+			$status === DonationStatus::Created ? null : 'pay_11',
+			$donation->get_payment_id()?->get_value(),
+		);
 	}
 
 	#[Test]
-	public function create_pending_from_primitives_builds_pending_donation_with_initial_version(): void {
+	public function create_created_from_primitives_builds_created_donation_with_initial_version(): void {
 
-		$donation = $this->factory->create_pending_from_primitives(
+		$donation = $this->factory->create_created_from_primitives(
 			id: 11,
 			campaign_id: 22,
 			amount: 3_000,
@@ -106,12 +118,13 @@ final class DonationFactoryTest extends FundrikTestCase {
 		$this->assertSame( 11, $donation->get_id()->get_value() );
 		$this->assertSame( 22, $donation->get_campaign_id()->get_value() );
 		$this->assertSame( 1, $donation->get_version()->get_value() );
-		$this->assertSame( DonationStatus::Pending, $donation->get_status() );
+		$this->assertSame( DonationStatus::Created, $donation->get_status() );
 	}
 
 	public static function donation_status_provider(): array {
 
 		return [
+			'created' => [ DonationStatus::Created ],
 			'pending' => [ DonationStatus::Pending ],
 			'succeeded' => [ DonationStatus::Succeeded ],
 			'rejected' => [ DonationStatus::Rejected ],
@@ -120,10 +133,10 @@ final class DonationFactoryTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function create_pending_from_primitives_wraps_exceptions_into_factory_exception(): void {
+	public function create_created_from_primitives_wraps_exceptions_into_factory_exception(): void {
 
 		try {
-			$this->factory->create_pending_from_primitives( id: 11, campaign_id: 22, amount: 0, currency_code: 'EUR' );
+			$this->factory->create_created_from_primitives( id: 11, campaign_id: 22, amount: 0, currency_code: 'EUR' );
 			$this->fail( 'Expected DonationFactoryException to be thrown.' );
 		} catch ( DonationFactoryException $exception ) {
 			$this->assertSame( 'Amount must be a positive integer. Given: 0.', $exception->getMessage() );
@@ -132,30 +145,30 @@ final class DonationFactoryTest extends FundrikTestCase {
 	}
 
 	#[Test]
-	public function create_pending_from_primitives_wraps_invalid_entity_id_exception(): void {
+	public function create_created_from_primitives_wraps_invalid_entity_id_exception(): void {
 
 		$this->expectException( DonationFactoryException::class );
 		$this->expectExceptionMessage( 'ID must be a positive integer or a valid UUID. Given: "-11".' );
 
-		$this->factory->create_pending_from_primitives( id: -11, campaign_id: 22, amount: 100, currency_code: 'EUR' );
+		$this->factory->create_created_from_primitives( id: -11, campaign_id: 22, amount: 100, currency_code: 'EUR' );
 	}
 
 	#[Test]
-	public function create_pending_from_primitives_wraps_invalid_money_amount_exception(): void {
+	public function create_created_from_primitives_wraps_invalid_money_amount_exception(): void {
 
 		$this->expectException( DonationFactoryException::class );
 		$this->expectExceptionMessage( 'Amount must be a positive integer. Given: -1.' );
 
-		$this->factory->create_pending_from_primitives( id: 11, campaign_id: 22, amount: -1, currency_code: 'EUR' );
+		$this->factory->create_created_from_primitives( id: 11, campaign_id: 22, amount: -1, currency_code: 'EUR' );
 	}
 
 	#[Test]
-	public function create_pending_from_primitives_wraps_invalid_money_currency_exception(): void {
+	public function create_created_from_primitives_wraps_invalid_money_currency_exception(): void {
 
 		$this->expectException( DonationFactoryException::class );
 		$this->expectExceptionMessage( 'Currency code must contain exactly three Latin letters. Given: "EURO".' );
 
-		$this->factory->create_pending_from_primitives( id: 11, campaign_id: 22, amount: 100, currency_code: 'EURO' );
+		$this->factory->create_created_from_primitives( id: 11, campaign_id: 22, amount: 100, currency_code: 'EURO' );
 	}
 
 	#[Test]
@@ -169,6 +182,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 				amount: 100,
 				currency_code: 'EUR',
 				status: 'invalid-status',
+				payment_id: null,
 			);
 			$this->fail( 'Expected DonationFactoryException to be thrown.' );
 		} catch ( DonationFactoryException $exception ) {
@@ -190,6 +204,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 			amount: 100,
 			currency_code: 'EUR',
 			status: DonationStatus::Pending->value,
+			payment_id: null,
 		);
 	}
 
@@ -206,6 +221,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 			amount: 100,
 			currency_code: 'EUR',
 			status: DonationStatus::Pending->value,
+			payment_id: null,
 		);
 	}
 
@@ -222,6 +238,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 			amount: -1,
 			currency_code: 'EUR',
 			status: DonationStatus::Pending->value,
+			payment_id: null,
 		);
 	}
 
@@ -238,6 +255,7 @@ final class DonationFactoryTest extends FundrikTestCase {
 			amount: 100,
 			currency_code: 'EURO',
 			status: DonationStatus::Pending->value,
+			payment_id: null,
 		);
 	}
 
@@ -254,6 +272,47 @@ final class DonationFactoryTest extends FundrikTestCase {
 			amount: 0,
 			currency_code: 'EUR',
 			status: DonationStatus::Pending->value,
+			payment_id: null,
 		);
+	}
+
+	#[Test]
+	public function create_from_primitives_wraps_invalid_payment_id_exception(): void {
+
+		$this->expectException( DonationFactoryException::class );
+		$this->expectExceptionMessage( 'Payment ID must be a non-empty string. Given: "".' );
+
+		$this->factory->create_from_primitives(
+			id: 11,
+			version: 1,
+			campaign_id: 22,
+			amount: 100,
+			currency_code: 'EUR',
+			status: DonationStatus::Pending->value,
+			payment_id: '',
+		);
+	}
+
+	#[Test]
+	public function create_from_primitives_wraps_inconsistent_state_exception(): void {
+
+		try {
+			$this->factory->create_from_primitives(
+				id: 11,
+				version: 1,
+				campaign_id: 22,
+				amount: 100,
+				currency_code: 'EUR',
+				status: DonationStatus::Pending->value,
+				payment_id: null,
+			);
+			$this->fail( 'Expected DonationFactoryException to be thrown.' );
+		} catch ( DonationFactoryException $exception ) {
+			$this->assertSame(
+				'Cannot create donation "11": status "pending" and payment ID are inconsistent.',
+				$exception->getMessage(),
+			);
+			$this->assertInstanceOf( DonationConstructionException::class, $exception->getPrevious() );
+		}
 	}
 }

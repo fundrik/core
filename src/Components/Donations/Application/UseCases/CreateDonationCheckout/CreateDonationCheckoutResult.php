@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fundrik\Core\Components\Donations\Application\UseCases\CreateDonationCheckout;
 
+use Fundrik\Core\Components\Donations\Domain\PaymentId;
 use Fundrik\Core\Components\Shared\Application\Url;
 use Fundrik\Core\Components\Shared\Domain\EntityId;
 use Fundrik\Core\Components\Shared\Domain\Money;
@@ -19,16 +20,19 @@ final readonly class CreateDonationCheckoutResult {
 	 * Constructor.
 	 *
 	 * @since 1.0.0
+	 * @since 1.1.0 Added the `$payment_id` parameter.
 	 *
 	 * @param EntityId $donation_id Donation identifier.
 	 * @param EntityId $campaign_id Campaign identifier.
 	 * @param Money $money Donation money.
+	 * @param PaymentId $payment_id Provider payment ID.
 	 * @param Url $redirect_url Checkout redirect URL.
 	 */
 	public function __construct(
 		private EntityId $donation_id,
 		private EntityId $campaign_id,
 		private Money $money,
+		private PaymentId $payment_id,
 		private Url $redirect_url,
 	) {}
 
@@ -66,6 +70,18 @@ final readonly class CreateDonationCheckoutResult {
 	public function get_money(): Money {
 
 		return $this->money;
+	}
+
+	/**
+	 * Returns the provider payment ID.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return PaymentId Provider payment ID.
+	 */
+	public function get_payment_id(): PaymentId {
+
+		return $this->payment_id;
 	}
 
 	/**
